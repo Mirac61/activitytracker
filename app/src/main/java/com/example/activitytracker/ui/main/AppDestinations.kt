@@ -1,0 +1,12 @@
+package com.example.activitytracker.ui.main
+
+import com.example.activitytracker.R
+
+enum class AppDestinations(
+    val label: String,
+    val icon: Int
+) {
+    FRIENDS("Freunde", R.drawable.ic_friends),
+    HOME("Home", R.drawable.ic_home),
+    TRACKING("Tracking", R.drawable.ic_add)
+}
