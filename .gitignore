@@ -5,3 +5,18 @@
 /.idea/ss26-aktivitatstracker.iml
 /.idea/vcs.xml
 /.idea/workspace.xml
+
+# Android / Gradle
+**/build/
+.gradle/
+local.properties
+
+# IDE Einstellungen
+.idea/
+*.iml
+
+# Mac Systemdateien
+.DS_Store
+
+# Temporäre Patches/Sicherungen
+*.patch
