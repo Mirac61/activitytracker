@@ -13,3 +13,10 @@
 .externalNativeBuild
 .cxx
 local.properties
+/.idea/caches/deviceStreaming.xml
+/.idea/markdown.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/ss26-aktivitatstracker.iml
+/.idea/vcs.xml
+/.idea/workspace.xml
