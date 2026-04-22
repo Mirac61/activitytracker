@@ -5,18 +5,26 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
+import com.example.activitytracker.R
 import com.example.activitytracker.ui.main.AppDestinations
 
 @Composable
 fun MainNavBar(
     currentDestination: AppDestinations,
-    onNavigate: (AppDestinations) -> Unit
+    onNavigate: (AppDestinations) -> Unit,
+    onPlusClicked: () -> Unit
 ) {
     NavigationBar {
         AppDestinations.entries.forEach { destination ->
             NavigationBarItem(
                 selected = destination == currentDestination,
-                onClick = { onNavigate(destination) },
+                onClick = {
+                    if(destination == AppDestinations.TRACKING){
+                        onPlusClicked()
+                    } else {
+                        onNavigate(destination)
+                    }
+                   },
                 icon = {
                     Icon(
                         painter = painterResource(destination.icon),
