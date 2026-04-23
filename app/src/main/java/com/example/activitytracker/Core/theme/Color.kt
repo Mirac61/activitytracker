@@ -9,3 +9,19 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+
+// Primärfarben
+val PrimaryAccent = Color(0xFF2A4F2A)
+val SecondaryAccent = Color(0xFF426740)
+val TertiaryAccent = Color(0xFF8DB688)
+
+// Weitere Farben
+val InputField = Color(0xFFFFFFFF)
+val AlertError = Color(0xFFD62828)
+val TextStroke = Color(0xFF000000)
+val TextDescription = Color(0xFFAEAEAE)
+val Background = Color(0xFFF8F9FA)
+
+// Misc, bzw Streaks
+val Outline = Color(0xFFEE5943)
+val StreakFill = Color(0xFFFFCB50)
