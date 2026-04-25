@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.activitytracker.data.local.entity.ActivityEntry
 
+// Inspiration from https://developer.android.com/training/data-storage/room?hl=de
 @Dao
 interface ActivityDao {
     @Query("SELECT * FROM activity_entries")

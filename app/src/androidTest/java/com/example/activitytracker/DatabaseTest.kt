@@ -11,123 +11,120 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-class DatabaseTest {
+// Inspiration from https://developer.android.com/training/data-storage/room/testing-db?hl=de
 
-    @RunWith(AndroidJUnit4::class)
-    class SimpleEntityReadWriteTest {
-        private lateinit var activityDao: ActivityDao
-        private lateinit var db: AppDatabase
+@RunWith(AndroidJUnit4::class)
+class SimpleEntityReadWriteTest {
+    private lateinit var activityDao: ActivityDao
+    private lateinit var db: AppDatabase
 
-        @Before
-        fun createDb() {
-            val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-            db = Room.inMemoryDatabaseBuilder(
-                context, AppDatabase::class.java).build()
-            activityDao = db.activityDao()
-        }
+    @Before
+    fun createDb() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        db = Room.inMemoryDatabaseBuilder(
+            context, AppDatabase::class.java).build()
+        activityDao = db.activityDao()
+    }
 
-        @After
-        fun closeDb() {
-            db.close()
-        }
+    @After
+    fun closeDb() {
+        db.close()
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun getAllReturnsEmptyWhenEmpty(){
-            val result = activityDao.getAll()
-            assert(result.isEmpty())
-        }
+    @Test
+    @Throws(Exception::class)
+    fun getAllReturnsEmptyWhenEmpty(){
+        val result = activityDao.getAll()
+        assert(result.isEmpty())
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun insertAndReadActivity() {
-            val activity = ActivityEntry(
-                name = "Jogging",
-                createdAt = System.currentTimeMillis(),
-                userId = "mock_user_1"
-            )
+    @Test
+    @Throws(Exception::class)
+    fun insertAndReadActivity() {
+        val activity = ActivityEntry(
+            name = "Jogging",
+            createdAt = System.currentTimeMillis(),
+            userId = "mock_user_1"
+        )
 
-            activityDao.insertAll(activity)
-            val allActivities = activityDao.getAll()
+        activityDao.insertAll(activity)
+        val allActivities = activityDao.getAll()
 
-            assert(allActivities.isNotEmpty())
-            assert(allActivities[0].name == "Jogging")
-            assert(allActivities[0].userId == "mock_user_1")
-        }
+        assert(allActivities.isNotEmpty())
+        assert(allActivities[0].name == "Jogging")
+        assert(allActivities[0].userId == "mock_user_1")
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun findByIdReturnsCorrectActivity() {
+    @Test
+    @Throws(Exception::class)
+    fun findByIdReturnsCorrectActivity() {
 
-            val firstActivity = ActivityEntry(
-                name = "Jogging",
-                createdAt = 10000,
-                userId = "mock_user_1"
-            )
-            val secondActivity = ActivityEntry(
-                name = "Rad fahren",
-                createdAt = 20000,
-                userId = "mock_user_2"
-            )
+        val firstActivity = ActivityEntry(
+            name = "Jogging",
+            createdAt = 10000,
+            userId = "mock_user_1"
+        )
+        val secondActivity = ActivityEntry(
+            name = "Rad fahren",
+            createdAt = 20000,
+            userId = "mock_user_2"
+        )
 
-            activityDao.insertAll(firstActivity, secondActivity)
+        activityDao.insertAll(firstActivity, secondActivity)
 
-            val allActivities = activityDao.getAll()
-            val secondId = allActivities[1].id
-            val found = activityDao.findById(secondId)
+        val allActivities = activityDao.getAll()
+        val secondId = allActivities[1].id
+        val found = activityDao.findById(secondId)
 
-            assert(found != null)
-            assert(found?.name == "Rad fahren")
-        }
+        assert(found != null)
+        assert(found?.name == "Rad fahren")
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun findByIdReturnsNullWhenMissing(){
-            val result = activityDao.getAll()
-            assert(result.isEmpty())
+    @Test
+    @Throws(Exception::class)
+    fun findByIdReturnsNullWhenMissing(){
+        val result = activityDao.getAll()
+        assert(result.isEmpty())
 
-            val found = activityDao.findById(99)
-            assert(found == null)
-        }
+        val found = activityDao.findById(99)
+        assert(found == null)
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun deleteInsertedActivity() {
-            val activity = ActivityEntry(
-                name = "Jogging",
-                createdAt = 10000,
-                userId = "mock_user_1"
-            )
+    @Test
+    @Throws(Exception::class)
+    fun deleteInsertedActivity() {
+        val activity = ActivityEntry(
+            name = "Jogging",
+            createdAt = 10000,
+            userId = "mock_user_1"
+        )
 
-            activityDao.insertAll(activity)
+        activityDao.insertAll(activity)
 
-            val allActivities = activityDao.getAll()
-            val id = allActivities[0].id
-            val found = activityDao.findById(id)
+        val allActivities = activityDao.getAll()
+        val id = allActivities[0].id
+        val found = activityDao.findById(id)
 
-            activityDao.delete(found!!)
+        activityDao.delete(found!!)
 
-            assert(activityDao.getAll().isEmpty())
-        }
+        assert(activityDao.getAll().isEmpty())
+    }
 
-        @Test
-        @Throws(Exception::class)
-        fun deleteNonExistentDoesNotCrash() {
+    @Test
+    @Throws(Exception::class)
+    fun deleteNonExistentDoesNotCrash() {
 
-            val fakeActivity = ActivityEntry(
-                id=999,
-                name = "Jogging",
-                createdAt = 10000,
-                userId = "mock_user_1"
-            )
+        val fakeActivity = ActivityEntry(
+            id=999,
+            name = "Jogging",
+            createdAt = 10000,
+            userId = "mock_user_1"
+        )
 
-            activityDao.delete(fakeActivity)
+        activityDao.delete(fakeActivity)
 
-            val all = activityDao.getAll()
-            assert(all.isEmpty())
-
-        }
-
+        val all = activityDao.getAll()
+        assert(all.isEmpty())
 
     }
 }
