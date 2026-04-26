@@ -11,4 +11,8 @@ data class ActivityEntry(
     val name: String,
     val createdAt: Long, // Room has no Date, so Long -> Date in a Mapper or Repository
     val userId: String? = null // For future Keycloak integration, currently mocked
-)
+){
+    init {
+        require(name.isNotBlank()) { "Name darf nicht leer sein!" }
+    }
+}

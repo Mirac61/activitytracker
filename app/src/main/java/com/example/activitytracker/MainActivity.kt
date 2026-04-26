@@ -4,9 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.lifecycleScope
 import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.ui.main.ActivityTrackerApp
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,9 +25,9 @@ class MainActivity : ComponentActivity() {
         // Temporary trigger to initialize the database. should be moved to a ViewModel
         val db = AppDatabase.getInstance(applicationContext)
 
-        Thread {
-            db.activityDao().getAll()
-        }.start()
+        lifecycleScope.launch{
+            db.activityDao().getAll().firstOrNull()
+        }
     }
 }
 

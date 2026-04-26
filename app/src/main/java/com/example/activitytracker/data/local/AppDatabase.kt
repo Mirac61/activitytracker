@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntry
 
-@Database(entities = [ActivityEntry::class], version = 2)
+@Database(entities = [ActivityEntry::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
     // Refactoring to Singleton

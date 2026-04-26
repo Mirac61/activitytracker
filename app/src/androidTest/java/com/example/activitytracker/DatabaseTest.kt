@@ -6,6 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +24,7 @@ class SimpleEntityReadWriteTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         db = Room.inMemoryDatabaseBuilder(
-            context, AppDatabase::class.java).build()
+            context, AppDatabase::class.java).allowMainThreadQueries().build()
         activityDao = db.activityDao()
     }
 
@@ -33,22 +35,22 @@ class SimpleEntityReadWriteTest {
 
     @Test
     @Throws(Exception::class)
-    fun getAllReturnsEmptyWhenEmpty(){
-        val result = activityDao.getAll()
+    fun getAllReturnsEmptyWhenEmpty() = runBlocking{
+        val result = activityDao.getAll().first()
         assert(result.isEmpty())
     }
 
     @Test
     @Throws(Exception::class)
-    fun insertAndReadActivity() {
+    fun insertAndReadActivity() = runBlocking{
         val activity = ActivityEntry(
             name = "Jogging",
             createdAt = System.currentTimeMillis(),
             userId = "mock_user_1"
         )
 
-        activityDao.insertAll(activity)
-        val allActivities = activityDao.getAll()
+        activityDao.safeinsert(activity)
+        val allActivities = activityDao.getAll().first()
 
         assert(allActivities.isNotEmpty())
         assert(allActivities[0].name == "Jogging")
@@ -57,7 +59,7 @@ class SimpleEntityReadWriteTest {
 
     @Test
     @Throws(Exception::class)
-    fun findByIdReturnsCorrectActivity() {
+    fun findByIdReturnsCorrectActivity() = runBlocking{
 
         val firstActivity = ActivityEntry(
             name = "Jogging",
@@ -70,10 +72,11 @@ class SimpleEntityReadWriteTest {
             userId = "mock_user_2"
         )
 
-        activityDao.insertAll(firstActivity, secondActivity)
+        activityDao.safeinsert(firstActivity)
+        activityDao.safeinsert(secondActivity)
 
-        val allActivities = activityDao.getAll()
-        val secondId = allActivities[1].id
+        val allActivities = activityDao.getAll().first()
+        val secondId = allActivities[0].id
         val found = activityDao.findById(secondId)
 
         assert(found != null)
@@ -82,8 +85,8 @@ class SimpleEntityReadWriteTest {
 
     @Test
     @Throws(Exception::class)
-    fun findByIdReturnsNullWhenMissing(){
-        val result = activityDao.getAll()
+    fun findByIdReturnsNullWhenMissing() = runBlocking{
+        val result = activityDao.getAll().first()
         assert(result.isEmpty())
 
         val found = activityDao.findById(99)
@@ -92,27 +95,27 @@ class SimpleEntityReadWriteTest {
 
     @Test
     @Throws(Exception::class)
-    fun deleteInsertedActivity() {
+    fun deleteInsertedActivity() = runBlocking{
         val activity = ActivityEntry(
             name = "Jogging",
             createdAt = 10000,
             userId = "mock_user_1"
         )
 
-        activityDao.insertAll(activity)
+        activityDao.safeinsert(activity)
 
-        val allActivities = activityDao.getAll()
+        val allActivities = activityDao.getAll().first()
         val id = allActivities[0].id
         val found = activityDao.findById(id)
 
         activityDao.delete(found!!)
 
-        assert(activityDao.getAll().isEmpty())
+        assert(activityDao.getAll().first().isEmpty())
     }
 
     @Test
     @Throws(Exception::class)
-    fun deleteNonExistentDoesNotCrash() {
+    fun deleteNonExistentDoesNotCrash() = runBlocking{
 
         val fakeActivity = ActivityEntry(
             id=999,
@@ -123,8 +126,18 @@ class SimpleEntityReadWriteTest {
 
         activityDao.delete(fakeActivity)
 
-        val all = activityDao.getAll()
+        val all = activityDao.getAll().first()
         assert(all.isEmpty())
 
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun insertEmptyName_throwsException() = runBlocking{
+        val invalidActivity = ActivityEntry(
+            name = "",
+            createdAt = System.currentTimeMillis()
+        )
+
+        activityDao.safeinsert(invalidActivity)
     }
 }

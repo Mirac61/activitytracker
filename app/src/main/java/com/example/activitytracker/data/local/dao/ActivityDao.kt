@@ -5,19 +5,29 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.activitytracker.data.local.entity.ActivityEntry
+import kotlinx.coroutines.flow.Flow
 
 // Inspiration from https://developer.android.com/training/data-storage/room?hl=de
 @Dao
 interface ActivityDao {
-    @Query("SELECT * FROM activity_entries")
-    fun getAll(): List<ActivityEntry>
+    @Query("SELECT * FROM activity_entries ORDER BY createdAt DESC")
+    fun getAll(): Flow<List<ActivityEntry>>
 
     @Query("SELECT * FROM activity_entries WHERE id = :id")
-    fun findById(id: Int): ActivityEntry?
+    suspend fun findById(id: Int): ActivityEntry?
 
     @Insert
-    fun insertAll(vararg activityEntry: ActivityEntry)
+    suspend fun insert(entry: ActivityEntry)
+
+    suspend fun safeinsert(entry: ActivityEntry) {
+        if (entry.name.isNotBlank()) {
+            insert(entry)
+        }
+        else{
+            android.util.Log.e("ActivityDao", "Name ist leer")
+        }
+    }
 
     @Delete
-    fun delete(activityEntry: ActivityEntry)
+    suspend fun delete(activityEntry: ActivityEntry)
 }
