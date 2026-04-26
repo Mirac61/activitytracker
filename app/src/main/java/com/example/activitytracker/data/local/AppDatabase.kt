@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntry
+import android.content.Context
 
 @Database(entities = [ActivityEntry::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
@@ -15,7 +16,7 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: android.content.Context): AppDatabase {
+        fun getInstance(context: Context): AppDatabase {
 
             synchronized(this) {
                 var instance = INSTANCE
