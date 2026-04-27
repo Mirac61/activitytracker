@@ -8,3 +8,11 @@ how to set up postgresql with docker:
 4. Go to `application.properties` and add our password in the empty space
 5. Insert into your terminal: "docker-compose up -d" 
 6. Run `BackendApplication.java`
+7. Press Database button on the right edge of IntelliJ
+8. Add new Database:
+   - Type in name in front of @localhost our database name
+   - Type in the `Database` field our database name
+   - Type in username and password and press apply
+
+ Now you should see our two tables if you open up the public folder
+ If so everything worked properly!
