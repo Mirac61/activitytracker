@@ -19,7 +19,7 @@ interface ActivityDao {
     @Insert
     suspend fun insert(entry: ActivityEntry)
 
-    suspend fun safeinsert(entry: ActivityEntry) {
+    suspend fun safeInsert(entry: ActivityEntry) {
         if (entry.name.isNotBlank()) {
             insert(entry)
         }
