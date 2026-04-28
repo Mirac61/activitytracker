@@ -35,3 +35,8 @@ local.properties
 
 # Temporäre Patches/Sicherungen
 *.patch
+
+# Env
+.env
+*.env
+!.env.example

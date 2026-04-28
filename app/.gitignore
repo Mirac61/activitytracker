@@ -1,1 +1,14 @@
+# Build
 /build
+/captures
+
+# Gradle
+.gradle/
+
+# Android-spezifisch
+local.properties
+.externalNativeBuild
+.cxx
+
+# Kotlin
+.kotlin/
