@@ -1,29 +1,31 @@
 package com.activitytracker.backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "activities")
-@Data
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Activities {
+public class Activity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long activity_id;
+    private final UUID activityId = UUID.randomUUID();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private User user;
 
     @Column(nullable = false)
-    private String name;
+    @NonNull String name;
 
     @Column(nullable = false)
-    private LocalDateTime timestamp;
+    @NonNull LocalDateTime timestamp;
 }
