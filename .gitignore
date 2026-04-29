@@ -1,33 +1,33 @@
 *.iml
 .gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/android/local.properties
+/android/.idea/caches
+/android/.idea/libraries
+/android/.idea/modules.xml
+/android/.idea/workspace.xml
+/android/.idea/navEditor.xml
+/android/.idea/assetWizardSettings.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-/.idea/caches/deviceStreaming.xml
-/.idea/markdown.xml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/ss26-aktivitatstracker.iml
-/.idea/vcs.xml
-/.idea/workspace.xml
+android/local.properties
+/android/.idea/caches/deviceStreaming.xml
+/android/.idea/markdown.xml
+/android/.idea/misc.xml
+/android/.idea/modules.xml
+/android/.idea/ss26-aktivitatstracker.iml
+/android/.idea/vcs.xml
+/android/.idea/workspace.xml
 
 # Android / Gradle
 **/build/
 .gradle/
-local.properties
+android/local.properties
 
 # IDE Einstellungen
-.idea/
+android/.idea/
 *.iml
 
 # Mac Systemdateien
