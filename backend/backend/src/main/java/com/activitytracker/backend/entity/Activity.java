@@ -24,8 +24,8 @@ public class Activity {
     private User user;
 
     @Column(nullable = false)
-    @NonNull String name;
+    @NonNull private String name;
 
     @Column(nullable = false)
-    @NonNull LocalDateTime timestamp;
+    @NonNull private LocalDateTime timestamp;
 }

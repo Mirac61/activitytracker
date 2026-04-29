@@ -16,5 +16,5 @@ public class User {
     private final UUID userId = UUID.randomUUID();
 
     @Column(nullable = false)
-    @NonNull String username;
+    @NonNull private String username;
 }
