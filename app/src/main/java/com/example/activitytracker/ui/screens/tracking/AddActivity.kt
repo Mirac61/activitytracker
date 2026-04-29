@@ -1,4 +1,5 @@
 package com.example.activitytracker.ui.screens.tracking
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 
@@ -17,9 +18,17 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
     var activityName by remember {mutableStateOf( "")}
-    var activityDate by remember {mutableStateOf("")}
+    var showDatePicker by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(24.dp).imePadding()) {
+    // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+
+    var selectedDate = datePickerState.selectedDateMillis?.let {
+        val sdf = java.text.SimpleDateFormat("dd.MM.yyyy", java.util.Locale.getDefault())
+        sdf.format(java.util.Date(it))
+    }?: ""
+
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
 
         // Der Header
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -48,20 +57,45 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
         // Eintrag für den Datum
         Text("Datum", style = MaterialTheme.typography.labelMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = activityDate,
-            onValueChange = {activityDate = it},
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true,
-            placeholder = { Text("TT.MM.JJJJ")}
-        )
+        Box {
+            OutlinedTextField(
+                value = selectedDate,
+                onValueChange = { selectedDate = it },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                readOnly = true,
+                placeholder = { Text("TT.MM.JJJJ") }
+            )
+            Box(
+                modifier = Modifier.matchParentSize().clickable { showDatePicker = true }
+            )
+        }
+
+
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Abbrechen")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         //Knopf zum Speichern
         Button(
-            onClick = {onSave(activityName, activityDate)},
+            onClick = {onSave(activityName, selectedDate)},
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50))
