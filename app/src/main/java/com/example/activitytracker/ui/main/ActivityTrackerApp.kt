@@ -17,7 +17,7 @@ import com.example.activitytracker.ui.screens.tracking.AddActivity
 fun ActivityTrackerApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -50,7 +50,8 @@ fun ActivityTrackerApp() {
         ) {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
-                onSave = {
+                onSave = { activityName, activityDate ->
+                    // Speicherlogik (in die DB)
                     showBottomSheet = false
 
                 }
