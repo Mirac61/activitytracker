@@ -44,3 +44,5 @@ android/.idea/
 /.idea/caches/deviceStreaming.xml
 /local.properties
 /.idea/markdown.xml
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
