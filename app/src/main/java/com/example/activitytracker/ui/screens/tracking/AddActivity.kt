@@ -20,12 +20,20 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
 
-    // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
 
-    var selectedDate = datePickerState.selectedDateMillis?.let {
-        val sdf = java.text.SimpleDateFormat("dd.MM.yyyy", java.util.Locale.getDefault())
-        sdf.format(java.util.Date(it))
+    val today = java.util.Calendar.getInstance().apply{
+        set(java.util.Calendar.HOUR_OF_DAY, 12) // auf dem Mittag gestellt, damit der Datum auf Langzeit immer noch stimmt
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = today)
+
+    val selectedDate = datePickerState.selectedDateMillis?.let {
+        val sdf = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy", java.util.Locale.getDefault())
+        sdf.format(java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate())
     }?: ""
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
@@ -60,7 +68,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
         Box {
             OutlinedTextField(
                 value = selectedDate,
-                onValueChange = { selectedDate = it },
+                onValueChange = { },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
@@ -98,7 +106,8 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
             onClick = {onSave(activityName, selectedDate)},
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50)),
+            enabled = activityName.isNotBlank() && selectedDate.isNotBlank() // Speichern ausgegraut bis Aktivität eingetragen wird
         ) {
             Text("Speichern", color = Color.White)
         }
