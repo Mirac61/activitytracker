@@ -4,16 +4,19 @@ how to set up postgresql with docker:
 
 1. Install docker and log in
 2. Copy `.env.example` file and name it `.env`
-3. Go to `.env` and insert our data in the empty space 
-4. Copy `application.properties.example` file and name it `application.properties`
-5. Go to `application.properties` and insert our data in the empty space
-6. Insert into your terminal: "docker-compose up -d" 
-7. Run `BackendApplication.java`
-8. Press Database button on the right edge of IntelliJ
-9. Add new Database:
-   - Type in name in front of @localhost our database name
-   - Type in the `Database` field our database name
-   - Type in username and password and press apply
+3. Go to `.env` and insert our data in the empty space
+4. Install `EnvFile` PlugIn (Power supply Icon) 
+5. Edit your Build configurations (3 dots on the upper right)
+6. Enable EnvFile and Substitute Environment Variables
+7. Click + and add our `.env` file which is in our backend directory
+8. Insert into your terminal: "docker-compose up -d" 
+9. Run `BackendApplication.java`
+10. Press Database button on the right edge of IntelliJ
+11. Add new Database:
+    - Type in name in front of @localhost our database name
+    - Type in the `Database` field our database name
+    - Type in username and password and press apply
 
- Now you should see our two tables if you open up the public folder
+ Now you should see our two tables if you open up the public folder.
+
  If so everything worked properly!
