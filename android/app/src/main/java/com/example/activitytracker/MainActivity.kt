@@ -27,6 +27,11 @@ class MainActivity : ComponentActivity() {
         // Temporary trigger to initialize the database. should be moved to a ViewModel
         val db = AppDatabase.getInstance(applicationContext)
 
+        //binding.newTas
+
+//        // Temporary trigger to initialize the database. should be moved to a ViewModel
+//        val db = AppDatabase.getInstance(applicationContext)
+//
 //        lifecycleScope.launch{
 //            db.activityDao().getAll().firstOrNull()
 //        }

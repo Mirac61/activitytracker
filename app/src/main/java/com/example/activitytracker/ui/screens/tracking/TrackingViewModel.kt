@@ -6,27 +6,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.activitytracker.data.local.dao.ActivityDao
-import com.example.activitytracker.data.local.entity.ActivityEntry
+import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.repository.ActivityRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 
 class TrackingViewModel (private val repository: ActivityRepository) : ViewModel(){
 
     var name  = MutableLiveData<String>()
 
-    val activityEntry: LiveData<List<ActivityEntry>> = repository.getAll.asLiveData()
+    val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
 
     fun saveActivity(name: String) {
-        if (name.isBlank()) return
+        //If no activity name was given -> log the exception and cancel
+        if (name.isBlank()){
+            android.util.Log.e("ActivityDao", "Name ist leer")
+            return
+        }
 
+        //Call repository with name, createdAt and userId
         viewModelScope.launch {
             repository.insert(
-                ActivityEntry(
+                ActivityEntity(
                     name = name.trim(),
-                    createdAt = System.currentTimeMillis(),
+                    createdAt = java.time.OffsetDateTime.now(),
                     userId = null
                 )
             )
