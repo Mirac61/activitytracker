@@ -15,8 +15,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -26,6 +24,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Temporary trigger to initialize the database. should be moved to a ViewModel
+        val db = AppDatabase.getInstance(applicationContext)
 
         //binding.newTas
 
@@ -37,3 +37,4 @@ class MainActivity : ComponentActivity() {
 //        }
     }
 }
+
