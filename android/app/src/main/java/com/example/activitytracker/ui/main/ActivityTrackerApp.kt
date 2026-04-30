@@ -63,7 +63,7 @@ fun ActivityTrackerApp() {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
                 onSave = { activityName ->
-                    trackingViewModel.saveActivity(activityName)
+                    trackingViewModel.saveActivity(activityName) //Call Viewmodel (start saving process)
                     showBottomSheet = false
                 }
             )
