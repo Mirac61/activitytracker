@@ -1,4 +1,5 @@
 package com.example.activitytracker.ui.screens.tracking
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 
@@ -7,6 +8,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 
@@ -14,10 +16,27 @@ import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddActivity(onDismiss: () ->  Unit, onSave: (String) -> Unit){
+fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
     var activityName by remember {mutableStateOf( "")}
+    var showDatePicker by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+
+    val today = java.util.Calendar.getInstance().apply{
+        set(java.util.Calendar.HOUR_OF_DAY, 12) // auf dem Mittag gestellt, damit der Datum auf Langzeit immer noch stimmt
+        set(java.util.Calendar.MINUTE, 0)
+        set(java.util.Calendar.SECOND, 0)
+        set(java.util.Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+    // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = today)
+
+    val selectedDate = datePickerState.selectedDateMillis?.let {
+        val sdf = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy", java.util.Locale.getDefault())
+        sdf.format(java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+    }?: ""
+
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
 
         // Der Header
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -37,17 +56,58 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String) -> Unit){
             value = activityName,
             onValueChange = { activityName = it },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Eintrag für den Datum
+        Text("Datum", style = MaterialTheme.typography.labelMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Box {
+            OutlinedTextField(
+                value = selectedDate,
+                onValueChange = { },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true,
+                readOnly = true,
+                placeholder = { Text("TT.MM.JJJJ") }
+            )
+            Box(
+                modifier = Modifier.matchParentSize().clickable { showDatePicker = true }
+            )
+        }
+
+
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Abbrechen")
+                    }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         //Knopf zum Speichern
         Button(
-            onClick = {onSave(activityName)},
+            onClick = {onSave(activityName, selectedDate)},
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50)),
+            enabled = activityName.isNotBlank() && selectedDate.isNotBlank() // Speichern ausgegraut bis Aktivität eingetragen wird
         ) {
             Text("Speichern", color = Color.White)
         }
