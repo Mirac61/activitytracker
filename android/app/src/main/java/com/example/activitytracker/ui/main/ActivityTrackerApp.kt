@@ -65,6 +65,7 @@ fun ActivityTrackerApp() {
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
+
                 }
             )
         }
