@@ -14,7 +14,7 @@ interface ActivityDao {
     fun getAll(): Flow<List<ActivityEntity>>
 
     @Query("SELECT * FROM activity_entries WHERE id = :id")
-    suspend fun findById(id: Int): ActivityEntity?
+    suspend fun findById(id: String): ActivityEntity?
 
     @Insert
     suspend fun insert(entry: ActivityEntity)

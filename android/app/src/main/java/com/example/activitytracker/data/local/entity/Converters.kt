@@ -17,4 +17,14 @@ class Converters {
     fun dateToTimestamp(date: OffsetDateTime?): String? {
         return date?.format(formatter)
     }
+
+    @TypeConverter
+    fun fromLocalDate(value: String?): java.time.LocalDate? {
+        return value?.let { java.time.LocalDate.parse(it) }
+    }
+
+    @TypeConverter
+    fun localDateToString(date: java.time.LocalDate?): String? {
+        return date?.toString()
+    }
 }

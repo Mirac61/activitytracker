@@ -37,8 +37,7 @@ fun ActivityTrackerApp() {
             MainNavBar(
                 currentDestination = currentDestination,
                 onNavigate = { selectedDestination ->
-                    currentDestination = selectedDestination;
-
+                    currentDestination = selectedDestination
                 },
                 onPlusClicked = {
                     showBottomSheet = true

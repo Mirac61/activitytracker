@@ -6,6 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.data.repository.IActivityRepository
+import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -44,8 +46,9 @@ class SimpleEntityReadWriteTest {
     @Throws(Exception::class)
     fun insertAndReadActivity() = runBlocking{
         val activity = ActivityEntity(
-            name = "Jogging",
-            createdAt = java.time.OffsetDateTime.now(),
+            activityName = "Jogging",
+            activityDate = java.time.LocalDate.of(2026, 5, 1),
+            createdAt = java.time.OffsetDateTime.parse("2026-05-01T15:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -53,7 +56,8 @@ class SimpleEntityReadWriteTest {
         val allActivities = activityDao.getAll().first()
 
         assert(allActivities.isNotEmpty())
-        assert(allActivities[0].name == "Jogging")
+        assert(allActivities[0].activityName == "Jogging")
+        assert(allActivities[0].activityDate == java.time.LocalDate.of(2026, 5, 1))
         assert(allActivities[0].userId == "mock_user_1")
     }
 
@@ -62,13 +66,15 @@ class SimpleEntityReadWriteTest {
     fun findByIdReturnsCorrectActivity() = runBlocking{
 
         val firstActivity = ActivityEntity(
-            name = "Jogging",
-            createdAt = 10000,
+            activityName = "Jogging",
+            activityDate = java.time.LocalDate.of(2026, 2, 1),
+            createdAt = java.time.OffsetDateTime.parse("2026-06-01T10:00:00Z"),
             userId = "mock_user_1"
         )
         val secondActivity = ActivityEntity(
-            name = "Rad fahren",
-            createdAt = 20000,
+            activityName = "Rad fahren",
+            activityDate = java.time.LocalDate.of(2026, 1, 21),
+            createdAt = java.time.OffsetDateTime.parse("2026-07-01T10:00:00Z"),
             userId = "mock_user_2"
         )
 
@@ -80,7 +86,8 @@ class SimpleEntityReadWriteTest {
         val found = activityDao.findById(secondId)
 
         assert(found != null)
-        assert(found?.name == "Rad fahren")
+        assert(found?.activityName == "Rad fahren")
+        assert(allActivities[0].activityDate == java.time.LocalDate.of(2026, 1, 21))
     }
 
     @Test
@@ -89,7 +96,7 @@ class SimpleEntityReadWriteTest {
         val result = activityDao.getAll().first()
         assert(result.isEmpty())
 
-        val found = activityDao.findById(99)
+        val found = activityDao.findById("99")
         assert(found == null)
     }
 
@@ -97,8 +104,9 @@ class SimpleEntityReadWriteTest {
     @Throws(Exception::class)
     fun deleteInsertedActivity() = runBlocking{
         val activity = ActivityEntity(
-            name = "Jogging",
-            createdAt = 10000,
+            activityName = "Jogging",
+            activityDate = java.time.LocalDate.of(2026, 4, 21),
+            createdAt = java.time.OffsetDateTime.parse("2026-08-21T10:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -118,9 +126,10 @@ class SimpleEntityReadWriteTest {
     fun deleteNonExistentDoesNotCrash() = runBlocking{
 
         val fakeActivity = ActivityEntity(
-            id=999,
-            name = "Jogging",
-            createdAt = 10000,
+            id="999",
+            activityName = "Jogging",
+            activityDate = java.time.LocalDate.of(2021, 8, 21),
+            createdAt = java.time.OffsetDateTime.parse("2026-08-21T10:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -131,13 +140,22 @@ class SimpleEntityReadWriteTest {
 
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun insertEmptyName_throwsException() = runBlocking{
-        val invalidActivity = ActivityEntity(
-            name = "",
-            createdAt = java.time.OffsetDateTime.now()
-        )
+    @Test
+    fun saveActivity_withEmptyName_doesNotInsertToRepository() = runBlocking {
+        var insertCount = 0
 
-        activityDao.insert(invalidActivity)
+        val fakeRepository = object : IActivityRepository {
+            override val getAll: kotlinx.coroutines.flow.Flow<List<ActivityEntity>> =
+                kotlinx.coroutines.flow.flowOf(emptyList())
+
+            override suspend fun insert(entity: ActivityEntity) {
+                insertCount++
+            }
+        }
+
+        val viewModel = TrackingViewModel(fakeRepository)
+        viewModel.saveActivity("", java.time.LocalDate.now())
+
+        assert(insertCount == 0)
     }
 }

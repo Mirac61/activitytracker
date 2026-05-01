@@ -5,13 +5,20 @@ import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import kotlinx.coroutines.flow.Flow
 
-//Interface between Viewmodel and Database
-class ActivityRepository(private val activityDao: ActivityDao) {
+interface IActivityRepository {
+    suspend fun insert(entity: ActivityEntity)
 
-    val getAll: Flow<List<ActivityEntity>> = activityDao.getAll()
+    val getAll: Flow<List<ActivityEntity>>
+}
+
+
+//Interface between Viewmodel and Database
+class ActivityRepository(private val activityDao: ActivityDao) : IActivityRepository {
+
+    override val getAll: Flow<List<ActivityEntity>> = activityDao.getAll()
 
     @WorkerThread
-    suspend fun insert(entry: ActivityEntity) {
-        activityDao.insert(entry)
+    override suspend fun insert(entity: ActivityEntity) {
+        activityDao.insert(entity)
     }
 }
