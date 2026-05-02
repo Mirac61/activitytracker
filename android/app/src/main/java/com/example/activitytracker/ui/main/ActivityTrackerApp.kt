@@ -7,10 +7,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.MainNavBar
 import com.example.activitytracker.ui.screens.home.HomeScreen
 import com.example.activitytracker.ui.screens.friends.FriendsScreen
 import com.example.activitytracker.ui.screens.tracking.AddActivity
+import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,14 +25,19 @@ fun ActivityTrackerApp() {
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val application = LocalContext.current.applicationContext as ActivityApplication
+
+    val trackingViewModel: TrackingViewModel = viewModel(
+        factory = ActivityEntryModelFactory(application.repository)
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             MainNavBar(
                 currentDestination = currentDestination,
                 onNavigate = { selectedDestination ->
-                    currentDestination = selectedDestination;
-
+                    currentDestination = selectedDestination
                 },
                 onPlusClicked = {
                     showBottomSheet = true
@@ -51,7 +62,7 @@ fun ActivityTrackerApp() {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
                 onSave = { activityName, activityDate ->
-                    // Speicherlogik (in die DB)
+                    trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
 
                 }

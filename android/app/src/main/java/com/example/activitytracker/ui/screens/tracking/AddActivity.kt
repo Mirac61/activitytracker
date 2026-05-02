@@ -11,30 +11,23 @@ import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
-
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
+fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
 
-
-    val today = java.util.Calendar.getInstance().apply{
-        set(java.util.Calendar.HOUR_OF_DAY, 12) // auf dem Mittag gestellt, damit der Datum auf Langzeit immer noch stimmt
-        set(java.util.Calendar.MINUTE, 0)
-        set(java.util.Calendar.SECOND, 0)
-        set(java.util.Calendar.MILLISECOND, 0)
-    }.timeInMillis
-
     // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = today)
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
 
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        val sdf = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy", java.util.Locale.getDefault())
-        sdf.format(java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate())
-    }?: ""
+    val dateTextForUI = datePickerState.selectedDateMillis?.let {
+        java.time.Instant.ofEpochMilli(it)
+            .atZone(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+    } ?: ""
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
 
@@ -67,7 +60,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
         Spacer(modifier = Modifier.height(8.dp))
         Box {
             OutlinedTextField(
-                value = selectedDate,
+                value = dateTextForUI,
                 onValueChange = { },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -79,7 +72,6 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
                 modifier = Modifier.matchParentSize().clickable { showDatePicker = true }
             )
         }
-
 
         if (showDatePicker) {
             DatePickerDialog(
@@ -103,11 +95,18 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, String) -> Unit){
 
         //Knopf zum Speichern
         Button(
-            onClick = {onSave(activityName, selectedDate)},
+            onClick = {
+                val millis = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
+                val localDate = java.time.Instant.ofEpochMilli(millis)
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toLocalDate()
+
+                onSave(activityName, localDate)
+            },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50)),
-            enabled = activityName.isNotBlank() && selectedDate.isNotBlank() // Speichern ausgegraut bis Aktivität eingetragen wird
+            enabled = activityName.isNotBlank() && dateTextForUI.isNotBlank()
         ) {
             Text("Speichern", color = Color.White)
         }

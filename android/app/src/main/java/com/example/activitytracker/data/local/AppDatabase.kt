@@ -4,10 +4,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
-import com.example.activitytracker.data.local.entity.ActivityEntry
+import com.example.activitytracker.data.local.entity.ActivityEntity
 import android.content.Context
+import androidx.room.TypeConverters
+import com.example.activitytracker.data.local.converter.Converters
 
-@Database(entities = [ActivityEntry::class], version = 4)
+@Database(entities = [ActivityEntity::class], version = 4)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
     // Refactoring to Singleton
