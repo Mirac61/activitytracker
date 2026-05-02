@@ -7,7 +7,7 @@ import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import android.content.Context
 import androidx.room.TypeConverters
-import com.example.activitytracker.data.local.entity.Converters
+import com.example.activitytracker.data.local.converter.Converters
 
 @Database(entities = [ActivityEntity::class], version = 4)
 @TypeConverters(Converters::class)

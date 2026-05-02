@@ -17,12 +17,12 @@ class TrackingViewModel (private val repository: IActivityRepository) : ViewMode
 
     var name  = MutableLiveData<String>()
 
-    val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
+    //val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData() für zukünftige Tickets
 
     fun saveActivity(activityName: String, activityDate: LocalDate) {
         //If no activity name was given -> log the exception and cancel
         if (activityName.isBlank()){
-            android.util.Log.e("ActivityDao", "Name ist leer")
+            android.util.Log.e("TrackingViewModel", "Name ist leer")
             return
         }
 
@@ -41,7 +41,7 @@ class TrackingViewModel (private val repository: IActivityRepository) : ViewMode
 }
 
 
-class ActivityEntryModelFactory(private val repository: ActivityRepository): ViewModelProvider.Factory {
+class ActivityEntryModelFactory(private val repository: IActivityRepository): ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TrackingViewModel::class.java))

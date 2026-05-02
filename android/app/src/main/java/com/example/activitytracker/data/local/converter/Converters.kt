@@ -1,6 +1,7 @@
-package com.example.activitytracker.data.local.entity
+package com.example.activitytracker.data.local.converter
 
 import androidx.room.TypeConverter
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
@@ -19,12 +20,12 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromLocalDate(value: String?): java.time.LocalDate? {
-        return value?.let { java.time.LocalDate.parse(it) }
+    fun fromLocalDate(value: String?): LocalDate? {
+        return value?.let { LocalDate.parse(it) }
     }
 
     @TypeConverter
-    fun localDateToString(date: java.time.LocalDate?): String? {
+    fun localDateToString(date: LocalDate?): String? {
         return date?.toString()
     }
 }
