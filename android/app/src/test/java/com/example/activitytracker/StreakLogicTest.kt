@@ -20,6 +20,16 @@ class StreakLogicTest {
     }
 
     @Test
+    fun whenTodayHasManyEntriesThenStreakIsOne() {
+        val todayOne = LocalDate.now()
+        val todayTwo = LocalDate.now()
+        val todayThree = LocalDate.now()
+        val dates = listOf(todayOne, todayTwo, todayThree)
+        val result = StreakLogic.calculateStreak(dates = dates)
+        assertEquals(1, result)
+    }
+
+    @Test
     fun whenYesterdayHasEntryAndTodayNoneThenStreakOne() {
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)
@@ -48,12 +58,21 @@ class StreakLogicTest {
     }
 
     @Test
-    fun whenTwoDaysAgoAndNotYesterdayHasEntryThenStreakIsOne() {
+    fun whenTwoDaysAgoAndNotYesterdayAndTodayHasEntryThenStreakIsOne() {
         val today = LocalDate.now()
         val twoDaysAgo = today.minusDays(2)
         val dates = listOf(today, twoDaysAgo)
         val result = StreakLogic.calculateStreak(dates = dates)
         assertEquals(1, result)
+    }
+
+    @Test
+    fun whenTwoDaysAgoAndNotYesterdayAndNotTodayHasEntryThenStreakIsZero() {
+        val today = LocalDate.now()
+        val twoDaysAgo = today.minusDays(2)
+        val dates = listOf(twoDaysAgo)
+        val result = StreakLogic.calculateStreak(dates = dates)
+        assertEquals(0, result)
     }
 
     @Test

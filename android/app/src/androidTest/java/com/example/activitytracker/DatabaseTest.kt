@@ -8,12 +8,16 @@ import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.repository.IActivityRepository
 import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 // Inspiration from https://developer.android.com/training/data-storage/room/testing-db?hl=de
 
@@ -47,8 +51,8 @@ class SimpleEntityReadWriteTest {
     fun insertAndReadActivity() = runBlocking{
         val activity = ActivityEntity(
             activityName = "Jogging",
-            activityDate = java.time.LocalDate.of(2026, 5, 1),
-            createdAt = java.time.OffsetDateTime.parse("2026-05-01T15:00:00Z"),
+            activityDate = LocalDate.of(2026, 5, 1),
+            createdAt = OffsetDateTime.parse("2026-05-01T15:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -57,7 +61,7 @@ class SimpleEntityReadWriteTest {
 
         assert(allActivities.isNotEmpty())
         assert(allActivities[0].activityName == "Jogging")
-        assert(allActivities[0].activityDate == java.time.LocalDate.of(2026, 5, 1))
+        assert(allActivities[0].activityDate == LocalDate.of(2026, 5, 1))
         assert(allActivities[0].userId == "mock_user_1")
     }
 
@@ -67,14 +71,14 @@ class SimpleEntityReadWriteTest {
 
         val firstActivity = ActivityEntity(
             activityName = "Jogging",
-            activityDate = java.time.LocalDate.of(2026, 2, 1),
-            createdAt = java.time.OffsetDateTime.parse("2026-06-01T10:00:00Z"),
+            activityDate = LocalDate.of(2026, 2, 1),
+            createdAt = OffsetDateTime.parse("2026-06-01T10:00:00Z"),
             userId = "mock_user_1"
         )
         val secondActivity = ActivityEntity(
             activityName = "Rad fahren",
-            activityDate = java.time.LocalDate.of(2026, 1, 21),
-            createdAt = java.time.OffsetDateTime.parse("2026-07-01T10:00:00Z"),
+            activityDate = LocalDate.of(2026, 1, 21),
+            createdAt = OffsetDateTime.parse("2026-07-01T10:00:00Z"),
             userId = "mock_user_2"
         )
 
@@ -87,7 +91,7 @@ class SimpleEntityReadWriteTest {
 
         assert(found != null)
         assert(found?.activityName == "Rad fahren")
-        assert(allActivities[0].activityDate == java.time.LocalDate.of(2026, 1, 21))
+        assert(allActivities[0].activityDate == LocalDate.of(2026, 1, 21))
     }
 
     @Test
@@ -105,8 +109,8 @@ class SimpleEntityReadWriteTest {
     fun deleteInsertedActivity() = runBlocking{
         val activity = ActivityEntity(
             activityName = "Jogging",
-            activityDate = java.time.LocalDate.of(2026, 4, 21),
-            createdAt = java.time.OffsetDateTime.parse("2026-08-21T10:00:00Z"),
+            activityDate = LocalDate.of(2026, 4, 21),
+            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -128,8 +132,8 @@ class SimpleEntityReadWriteTest {
         val fakeActivity = ActivityEntity(
             id="999",
             activityName = "Jogging",
-            activityDate = java.time.LocalDate.of(2021, 8, 21),
-            createdAt = java.time.OffsetDateTime.parse("2026-08-21T10:00:00Z"),
+            activityDate = LocalDate.of(2021, 8, 21),
+            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
             userId = "mock_user_1"
         )
 
@@ -145,8 +149,9 @@ class SimpleEntityReadWriteTest {
         var insertCount = 0
 
         val fakeRepository = object : IActivityRepository {
-            override val getAll: kotlinx.coroutines.flow.Flow<List<ActivityEntity>> =
-                kotlinx.coroutines.flow.flowOf(emptyList())
+            override val getAll: Flow<List<ActivityEntity>> = flowOf(emptyList())
+
+            override val getDates: Flow<List<LocalDate>> = flowOf(emptyList())
 
             override suspend fun insert(entity: ActivityEntity) {
                 insertCount++
@@ -154,7 +159,7 @@ class SimpleEntityReadWriteTest {
         }
 
         val viewModel = TrackingViewModel(fakeRepository)
-        viewModel.saveActivity("", java.time.LocalDate.now())
+        viewModel.saveActivity("", LocalDate.now())
 
         assert(insertCount == 0)
     }
