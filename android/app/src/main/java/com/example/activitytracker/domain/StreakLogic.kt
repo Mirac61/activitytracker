@@ -1,14 +1,16 @@
 package com.example.activitytracker.domain
 
+import java.time.Clock
 import java.time.LocalDate
 
 object StreakLogic {
 
-    fun calculateStreak(dates: List<LocalDate>): Int {
+    fun calculateStreak(dates: List<LocalDate>, clock: Clock = Clock.systemDefaultZone()): Int {
+        val today = LocalDate.now(clock)
         if (dates.isEmpty()) return 0
 
-        val uniqueDays = dates.filter { it <= LocalDate.now() }.distinct().sortedDescending()
-        var currentDate = LocalDate.now()
+        val uniqueDays = dates.filter { it <= today }.distinct().sortedDescending()
+        var currentDate = today
 
         if (currentDate !in uniqueDays) {
             currentDate = currentDate.minusDays(1)
