@@ -7,7 +7,7 @@ object StreakLogic {
     fun calculateStreak(dates: List<LocalDate>): Int {
         if (dates.isEmpty()) return 0
 
-        val uniqueDays = dates.distinct().sortedDescending()
+        val uniqueDays = dates.filter { it <= LocalDate.now() }.distinct().sortedDescending()
         var currentDate = LocalDate.now()
 
         if (currentDate !in uniqueDays) {

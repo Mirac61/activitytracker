@@ -84,4 +84,25 @@ class StreakLogicTest {
         val result = StreakLogic.calculateStreak(dates = dates)
         assertEquals(0, result)
     }
+
+    @Test
+    fun whenFutureDatesHasEntryThenIsIgnored() {
+        val today = LocalDate.now()
+        val tomorrow = today.plusDays(1)
+        val twoDaysLater = today.plusDays(2)
+        val dates = listOf(tomorrow, twoDaysLater)
+        val result = StreakLogic.calculateStreak(dates = dates)
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun whenLongStreakBrokenThenOnlyRecentStreakCounts() {
+        val today = LocalDate.now()
+        val fiveDaysAgo = today.minusDays(5)
+        val twoDaysAgo = today.minusDays(2)
+        val yesterday = today.minusDays(1)
+        val dates = listOf(fiveDaysAgo, twoDaysAgo, yesterday, today)
+        val result = StreakLogic.calculateStreak(dates = dates)
+        assertEquals(3, result)
+    }
 }
