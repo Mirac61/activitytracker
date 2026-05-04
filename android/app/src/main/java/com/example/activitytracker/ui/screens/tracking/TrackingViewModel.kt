@@ -18,7 +18,7 @@ class TrackingViewModel(private val repository: IActivityRepository) : ViewModel
 
     var name = MutableLiveData<String>()
 
-    //val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData() für zukünftige Tickets
+    val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
 
     // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
