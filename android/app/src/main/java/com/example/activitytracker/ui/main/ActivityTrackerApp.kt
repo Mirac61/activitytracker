@@ -51,6 +51,8 @@ fun ActivityTrackerApp() {
                 AppDestinations.HOME -> HomeScreen()
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
+
+                //placeholder to test Registration screen until full implementation
                 AppDestinations.REGISTER -> RegistrationScreen()
 
             }

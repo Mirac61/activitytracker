@@ -30,6 +30,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
+            .imePadding()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
