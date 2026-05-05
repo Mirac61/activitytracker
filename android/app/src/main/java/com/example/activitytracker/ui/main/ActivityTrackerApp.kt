@@ -16,6 +16,7 @@ import com.example.activitytracker.ui.screens.tracking.AddActivity
 import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
+import com.example.activitytracker.ui.screens.register.RegistrationScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,7 @@ fun ActivityTrackerApp() {
                 AppDestinations.HOME -> HomeScreen()
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
+                AppDestinations.REGISTER -> RegistrationScreen()
 
             }
         }
