@@ -6,11 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 class RegisterViewModel : ViewModel() {
-    var username by mutableStateOf("")
+    var vorname by mutableStateOf("")
+    var nachname by mutableStateOf("")
+
     var email by mutableStateOf("")
     var password by mutableStateOf("")
 
-    // Validierungs-Logik
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val isFormValid: Boolean get() = username.isNotBlank() && isEmailValid && password.isNotBlank()
+    val isFormValid: Boolean get() = vorname.isNotBlank() && nachname.isNotBlank() && isEmailValid && password.isNotBlank()
 }

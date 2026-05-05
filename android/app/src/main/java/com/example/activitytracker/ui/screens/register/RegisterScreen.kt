@@ -37,7 +37,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(40.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 8.dp) // Kleiner Puffer nach unten
+            modifier = Modifier.padding(bottom = 8.dp)
         ) {
             Icon(
                 painter = painterResource(id = android.R.drawable.ic_menu_edit),
@@ -56,7 +56,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        //Überschrift
+        //Text above inputs
         Text(
             text = "Registrierung",
             modifier = Modifier.fillMaxWidth(),
@@ -64,6 +64,9 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         Text(
             text = "Willkommen! Registriere dich, um fortzufahren.",
             modifier = Modifier.fillMaxWidth(),
@@ -74,11 +77,17 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 3. Eingabefelder
+        //Input fields
         CustomTextField(
-            value = viewModel.username,
-            onValueChange = { viewModel.username = it },
-            label = "Username"
+            value = viewModel.vorname,
+            onValueChange = { viewModel.vorname = it },
+            label = "Vorname"
+        )
+
+        CustomTextField(
+            value = viewModel.nachname,
+            onValueChange = { viewModel.nachname = it },
+            label = "Nachname"
         )
 
         CustomTextField(
@@ -98,9 +107,9 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 4. Google Login Button (Visual Only)
+        // 4. Google Login Button
         OutlinedButton(
-            onClick = { /* Noch keine Logik nötig für das UI-Ticket */ },
+            onClick = { /* TODO: Google Login */ },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -109,7 +118,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
                 containerColor = Color.White,
                 contentColor = Color.Black
             ),
-            border = BorderStroke(1.dp, Color(0xFFE0E0E0))
+            border = BorderStroke(1.dp, Color(0xFF000000))
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -132,9 +141,9 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 5. Registrieren Button
+        // 5. Register button
         Button(
-            onClick = { /* TODO: BE Call vorbereiten */ },
+            onClick = { /* TODO: Regular Login */ },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = viewModel.isFormValid,
             colors = ButtonDefaults.buttonColors(
