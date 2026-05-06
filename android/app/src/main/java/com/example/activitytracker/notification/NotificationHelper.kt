@@ -49,7 +49,7 @@ class NotificationHelper(private val context: Context) {
             .setContentTitle("Zeit aktiv zu sein")
             .setContentText("Vergiss deine Ziele heute nicht!")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentIntent(pendingIntent) // NEU: Klick-Aktion verknüpfen
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
