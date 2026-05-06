@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.activitytracker.Core.theme.PrimaryAccent
 
 @Composable
 fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
@@ -44,7 +45,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
                 painter = painterResource(id = android.R.drawable.ic_menu_edit),
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = Color(0xFF38663E)
+                tint = PrimaryAccent
             )
             Spacer(Modifier.width(16.dp))
             Text(
@@ -148,7 +149,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
             modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = viewModel.isFormValid,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF38663E),
+                containerColor = PrimaryAccent,
                 disabledContainerColor = Color.LightGray
             ),
             shape = RoundedCornerShape(25.dp)
