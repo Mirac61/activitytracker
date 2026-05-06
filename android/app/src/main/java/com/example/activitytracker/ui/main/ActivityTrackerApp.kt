@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +33,9 @@ fun ActivityTrackerApp() {
         factory = ActivityEntryModelFactory(application.repository)
     )
 
+    // Observe the activity List from Room
+    val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -48,7 +52,7 @@ fun ActivityTrackerApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen()
+                AppDestinations.HOME -> HomeScreen(activities = activities)
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
 

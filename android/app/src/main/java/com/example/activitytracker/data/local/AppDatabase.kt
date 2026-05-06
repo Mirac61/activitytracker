@@ -9,7 +9,7 @@ import android.content.Context
 import androidx.room.TypeConverters
 import com.example.activitytracker.data.local.converter.Converters
 
-@Database(entities = [ActivityEntity::class], version = 4)
+@Database(entities = [ActivityEntity::class], version = 5)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
