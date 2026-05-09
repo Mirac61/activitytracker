@@ -8,9 +8,10 @@ import com.example.activitytracker.data.local.entity.ActivityEntity
 import android.content.Context
 import androidx.room.TypeConverters
 import com.example.activitytracker.data.local.converter.Converters
+import com.example.activitytracker.data.local.converter.SyncStatusConverter
 
-@Database(entities = [ActivityEntity::class], version = 5)
-@TypeConverters(Converters::class)
+@Database(entities = [ActivityEntity::class], version = 6)
+@TypeConverters(Converters::class, SyncStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
     // Refactoring to Singleton
