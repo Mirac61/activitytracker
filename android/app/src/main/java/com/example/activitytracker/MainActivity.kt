@@ -1,27 +1,43 @@
 package com.example.activitytracker
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.example.activitytracker.Core.theme.ActivityTrackerTheme
-import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.ui.main.ActivityTrackerApp
-import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private var openAddActivityRequestId by mutableStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        handleIntent(intent)
+
         setContent {
             ActivityTrackerTheme {
-                ActivityTrackerApp()
+                ActivityTrackerApp(openAddActivityRequestId = openAddActivityRequestId)
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val shouldOpenAdd = intent?.getBooleanExtra("openAdd", false) ?: false
+
+        if (shouldOpenAdd) {
+            openAddActivityRequestId++
         }
     }
 }
