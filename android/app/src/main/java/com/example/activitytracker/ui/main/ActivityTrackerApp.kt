@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,6 +17,7 @@ import com.example.activitytracker.ui.screens.tracking.AddActivity
 import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
+import com.example.activitytracker.ui.screens.register.RegistrationScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +40,9 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         factory = ActivityEntryModelFactory(application.repository)
     )
 
+    // Observe the activity List from Room
+    val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -54,9 +59,12 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen()
+                AppDestinations.HOME -> HomeScreen(activities = activities)
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
+
+                //placeholder to test Registration screen until full implementation
+                AppDestinations.REGISTER -> RegistrationScreen()
 
             }
         }
