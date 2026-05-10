@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
-import java.util.UUID;
 
 @Service
 public class KeycloakService {
@@ -28,7 +27,9 @@ public class KeycloakService {
     @Value("${keycloak.realm}")
     private String targetRealm;
 
-    public UUID createUserInKeycloak(UserRegistrationDto dto) {
+    public String createUserInKeycloak(UserRegistrationDto dto) {
+
+        //Set up Keycloak
         Keycloak keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(adminRealm)
@@ -37,6 +38,7 @@ public class KeycloakService {
                 .password(adminPassword)
                 .build();
 
+        //Set user information
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(dto.getEmail());
@@ -44,19 +46,20 @@ public class KeycloakService {
         user.setFirstName(dto.getVorname());
         user.setLastName(dto.getNachname());
 
+        //set password information
         CredentialRepresentation passwordCred = new CredentialRepresentation();
         passwordCred.setTemporary(false);
         passwordCred.setType(CredentialRepresentation.PASSWORD);
         passwordCred.setValue(dto.getPassword());
         user.setCredentials(Collections.singletonList(passwordCred));
 
+        //Create user
         UsersResource usersResource = keycloak.realm(targetRealm).users();
         Response response = usersResource.create(user);
 
         if (response.getStatus() == 201) {
             String path = response.getLocation().getPath();
-            String userId = path.substring(path.lastIndexOf("/") + 1);
-            return UUID.fromString(userId);
+            return path.substring(path.lastIndexOf("/") + 1);
         } else {
             throw new RuntimeException("Keycloak Fehler: " + response.getStatusInfo().getReasonPhrase());
         }
