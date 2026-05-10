@@ -22,9 +22,16 @@ import com.example.activitytracker.ui.screens.register.RegistrationScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerApp() {
+fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(openAddActivityRequestId) {
+        if (openAddActivityRequestId > 0) {
+            showBottomSheet = true
+        }
+    }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val application = LocalContext.current.applicationContext as ActivityApplication
