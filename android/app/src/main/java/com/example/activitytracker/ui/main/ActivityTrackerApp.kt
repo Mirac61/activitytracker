@@ -57,8 +57,11 @@ fun ActivityTrackerApp() {
                 AppDestinations.TRACKING -> {}
 
                 //placeholder to test Registration screen until full implementation
-                AppDestinations.REGISTER -> RegistrationScreen()
-
+                AppDestinations.REGISTER -> RegistrationScreen(
+                    onRegistrationComplete = {
+                        currentDestination = AppDestinations.HOME
+                    }
+                )
             }
         }
     }
