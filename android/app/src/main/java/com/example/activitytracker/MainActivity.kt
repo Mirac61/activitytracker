@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.ui.main.ActivityTrackerApp
+import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
 
 class MainActivity : ComponentActivity() {
     private var openAddActivityRequestId by mutableStateOf(0)
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        val shouldOpenAdd = intent?.getBooleanExtra("openAdd", false) ?: false
+        val shouldOpenAdd = AddActivityWidgetIntentHandler.shouldOpenAddActivity(intent)
 
         if (shouldOpenAdd) {
             openAddActivityRequestId++
