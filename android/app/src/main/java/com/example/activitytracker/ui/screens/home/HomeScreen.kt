@@ -57,32 +57,8 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            //Medal with streak
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Box(
-                    modifier = Modifier.size(36.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    SvgImage(
-                        rawResId = com.example.activitytracker.R.raw.medal,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Text(
-                        text = "$streak",
-                        style = TextStyle(
-                            fontFamily = InterTightFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color.Black,
-                        ),
-                        modifier = Modifier.offset(x = (32).dp)
+            // Extra space for the medal and streak
 
-                    )
-                }
-            }
 
             // Date
             Text(

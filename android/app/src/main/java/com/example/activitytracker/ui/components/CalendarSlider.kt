@@ -112,7 +112,7 @@ fun WeekStrip(monday: LocalDate, today: LocalDate, selectedDay: LocalDate, activ
                 ) {
                     when {
                         isFuture -> Unit
-                        hasActivity || isToday -> SvgImage(
+                        hasActivity -> SvgImage(
                             rawResId = R.raw.noto_fire,
                             modifier = Modifier.size(24.dp)
                         )
