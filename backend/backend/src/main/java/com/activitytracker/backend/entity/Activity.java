@@ -17,10 +17,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Activity {
     @Id
-    private final UUID activityId = UUID.randomUUID();
+    private UUID activityId;
 
+    // Testing until Keycloak implemented
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @Column(nullable = false)
