@@ -35,6 +35,10 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
 }
 
 dependencies {
@@ -53,6 +57,17 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.identity.jvm)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation("org.mockito:mockito-core:5.+")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.+")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
