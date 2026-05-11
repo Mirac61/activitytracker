@@ -4,7 +4,7 @@ import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.repository.UserRepository;
 import com.activitytracker.backend.service.KeycloakService;
-import com.activitytracker.backend.service.UserService; // Den brauchen wir jetzt!
+import com.activitytracker.backend.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -30,21 +31,36 @@ public class UserServiceTest {
 
     @Test
     public void testRegisterUser_Success() {
-        //Arrange data
+        // 1. Arrange
         UserRegistrationDto dto = new UserRegistrationDto("Max", "Mustermann", "max@test.de", "password123");
-        String fakeKeycloakId = UUID.randomUUID().toString();
+        UUID fakeKeycloakId = UUID.randomUUID();
 
-        //simulate Keycloak
+        // simulate keycloak with fake UUID
         when(keycloakService.createUserInKeycloak(dto)).thenReturn(fakeKeycloakId);
 
-        //call userservice to register the user
+        // 2. Act
         userService.registerUser(dto);
 
         // 3. Assert
-        //Test to see if the user service called the keycloak service
         verify(keycloakService, times(1)).createUserInKeycloak(dto);
-
-        //Test to see if the user service called the repository to save the user
         verify(userRepository, times(1)).save(any(User.class));
+        verify(keycloakService, never()).deleteUserFromKeycloak(any(UUID.class));
+    }
+
+    @Test
+    public void testRegisterUser_DatabaseFails_ShouldRollbackKeycloak() {
+        // 1. Arrange
+        UserRegistrationDto dto = new UserRegistrationDto("Max", "Mustermann", "max@test.de", "password123");
+        UUID fakeKeycloakId = UUID.randomUUID();
+
+        when(keycloakService.createUserInKeycloak(dto)).thenReturn(fakeKeycloakId);
+
+        // Simulate database error
+        doThrow(new RuntimeException("DB Error")).when(userRepository).save(any(User.class));
+
+        // 2. Act & Assert
+        assertThrows(RuntimeException.class, () -> userService.registerUser(dto));
+
+        verify(keycloakService, times(1)).deleteUserFromKeycloak(fakeKeycloakId);
     }
 }

@@ -18,13 +18,15 @@ public class UserService {
     }
 
     public void registerUser(UserRegistrationDto dto) {
-        // Create User
-        String keycloakId = keycloakService.createUserInKeycloak(dto);
+        UUID keycloakId = keycloakService.createUserInKeycloak(dto);
 
-        // Save user
-        User user = new User();
-        user.setUserId(UUID.fromString(keycloakId));
-
-        userRepository.save(user);
+        try {
+            User user = new User();
+            user.setUserId(keycloakId);
+            userRepository.save(user);
+        } catch (Exception e) {
+            keycloakService.deleteUserFromKeycloak(keycloakId);
+            throw new RuntimeException("Database-failure: Registration canceled. Please try again.");
+        }
     }
 }

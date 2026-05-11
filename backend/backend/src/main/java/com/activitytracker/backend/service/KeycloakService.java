@@ -1,6 +1,7 @@
 package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.UserRegistrationDto;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -10,9 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import jakarta.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.UUID;
 
+@Slf4j
 @Service
 public class KeycloakService {
+
+    private Keycloak keycloak;
 
     @Value("${keycloak.serverUrl}")
     private String serverUrl;
@@ -27,16 +32,19 @@ public class KeycloakService {
     @Value("${keycloak.realm}")
     private String targetRealm;
 
-    public String createUserInKeycloak(UserRegistrationDto dto) {
 
-        //Set up Keycloak
-        Keycloak keycloak = KeycloakBuilder.builder()
+    @jakarta.annotation.PostConstruct
+    public void initKeycloak() {
+        this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(adminRealm)
                 .clientId(clientId)
                 .username(adminUser)
                 .password(adminPassword)
                 .build();
+    }
+
+    public UUID createUserInKeycloak(UserRegistrationDto dto) {
 
         //Set user information
         UserRepresentation user = new UserRepresentation();
@@ -55,13 +63,24 @@ public class KeycloakService {
 
         //Create user
         UsersResource usersResource = keycloak.realm(targetRealm).users();
-        Response response = usersResource.create(user);
 
-        if (response.getStatus() == 201) {
-            String path = response.getLocation().getPath();
-            return path.substring(path.lastIndexOf("/") + 1);
-        } else {
-            throw new RuntimeException("Keycloak Fehler: " + response.getStatusInfo().getReasonPhrase());
+        // Try-with-resources makes sure, that response.close() is always called
+        try (Response response = usersResource.create(user)) {
+
+            if (response.getStatus() == 201) {
+                String path = response.getLocation().getPath();
+                String stringId = path.substring(path.lastIndexOf("/") + 1);
+                log.info("User successfully created in Keycloak. ID: {}", stringId);
+                return UUID.fromString(stringId);
+            } else {
+                String errorReason = response.getStatusInfo().getReasonPhrase();
+                log.error("Keycloak error while creating: {}", errorReason);
+                throw new RuntimeException("Keycloak error: " + errorReason);
+            }
         }
+    }
+
+    public void deleteUserFromKeycloak(UUID userId) {
+        keycloak.realm(targetRealm).users().get(userId.toString()).remove();
     }
 }
