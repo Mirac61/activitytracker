@@ -33,7 +33,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     val application = LocalContext.current.applicationContext as ActivityApplication
 
     val trackingViewModel: TrackingViewModel = viewModel(
@@ -42,6 +41,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     // Observe the activity List from Room
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
+    val streak by trackingViewModel.streak.observeAsState(0)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -59,7 +59,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(activities = activities)
+                AppDestinations.HOME -> HomeScreen(activities = activities, streak = streak, onSettingsClick = {})
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
 
