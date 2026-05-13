@@ -35,10 +35,8 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
     // Passing only dates having activites in CalendarSlider
     var activeDays = activities.map{it.activityDate}.toSet()
 
-    val filteredActivites = activities.filter { it.activityDate == selectedDay }
+    val filteredActivities = activities.filter { it.activityDate == selectedDay }
 
-    // Filter list by whatever day is selected in the slider
-    val filteredDays = activities.filter { it.activityDate == selectedDay }
 
     val selectedDayFormatted = selectedDay.format(
         DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
@@ -49,7 +47,7 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 12.dp, vertical = 12.dp)
     ) {
 
         // Header
@@ -58,7 +56,7 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Extra space for the medal and streak
-
+            Box(modifier = Modifier.weight(1f)) // -> change this when the medal with the streak counter is added
 
             // Date
             Text(
@@ -90,7 +88,7 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
         Spacer(modifier = Modifier.height(32.dp))
 
 
-        if (filteredActivites.isEmpty()) {
+        if (filteredActivities.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentAlignment = Alignment.TopCenter
@@ -107,7 +105,7 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(filteredActivites) { entity ->
+                items(filteredActivities) { entity ->
                     ActivityCard(name = entity.activityName)
                 }
             }
