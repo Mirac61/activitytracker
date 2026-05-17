@@ -13,8 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,7 +21,6 @@ import com.example.activitytracker.Core.theme.*
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import java.time.LocalDate
 import com.example.activitytracker.ui.components.CalendarSlider
-import com.example.activitytracker.ui.components.SvgImage
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -37,7 +34,7 @@ fun HomeScreen(
     val today = LocalDate.now()
     var selectedDay by remember { mutableStateOf(today) }
     // Passing only dates having activites in CalendarSlider
-    var activeDays = activities.map{it.activityDate}.toSet()
+    val activeDays = activities.map{it.activityDate}.toSet()
 
     val filteredActivities = activities.filter { it.activityDate == selectedDay }
 
@@ -51,7 +48,7 @@ fun HomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 12.dp)
+            .padding(vertical = 12.dp)
     ) {
 
         // Header
@@ -59,9 +56,11 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Extra space for the medal and streak
+            // medal and streak
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 StreakBadge(streak = streak)
@@ -75,11 +74,16 @@ fun HomeScreen(
             )
 
             // Settings
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment
+                    .CenterEnd) {
                 IconButton(onClick = onSettingsClick) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Einstellungen",
+                        contentDescription = "Settings",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -98,7 +102,10 @@ fun HomeScreen(
 
         if (filteredActivities.isEmpty()) {
             Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Text(
@@ -110,7 +117,10 @@ fun HomeScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(filteredActivities) { entity ->

@@ -5,7 +5,6 @@
     import androidx.compose.foundation.layout.*
     import androidx.compose.foundation.layout.Arrangement
     import androidx.compose.foundation.pager.HorizontalPager
-    import androidx.compose.foundation.pager.PagerState
     import androidx.compose.foundation.pager.rememberPagerState
     import androidx.compose.foundation.shape.CircleShape
     import androidx.compose.material3.MaterialTheme
@@ -23,13 +22,16 @@
     import com.example.activitytracker.Core.theme.StreakFill
     import com.example.activitytracker.R
     import java.time.LocalDate
-    import java.time.format.DateTimeFormatter
-    
+
     private const val PAGE_COUNT = 10_000
     private const val INITIAL_PAGE = 5_000
     
     @Composable
-    fun CalendarSlider(activeDays: Set<LocalDate>, selectedDay: LocalDate, onDaySelected: (LocalDate) -> Unit){
+    fun CalendarSlider(
+        activeDays: Set<LocalDate>,
+        selectedDay: LocalDate,
+        onDaySelected: (LocalDate) -> Unit){
+
         val today = LocalDate.now()
         val todayisMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
         val pagerState = rememberPagerState(
@@ -61,7 +63,6 @@
     
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             for (i in 0..6){
@@ -74,7 +75,9 @@
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.clickable { onDaySelected(day) }
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onDaySelected(day) }
                 ) {
                     Box(
                         modifier = Modifier
