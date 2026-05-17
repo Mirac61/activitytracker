@@ -1,5 +1,6 @@
 package com.example.activitytracker.ui.screens.home
 
+import com.example.activitytracker.ui.components.StreakBadge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +29,10 @@ import java.util.Locale
 
 
 @Composable
-fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, onSettingsClick: () -> Unit = {}
+fun HomeScreen(
+    activities: List<ActivityEntity> = emptyList(),
+    streak: Int = 0,
+    onSettingsClick: () -> Unit = {}
 ) {
     val today = LocalDate.now()
     var selectedDay by remember { mutableStateOf(today) }
@@ -56,8 +60,12 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList(), streak: Int = 0, 
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Extra space for the medal and streak
-            Box(modifier = Modifier.weight(1f)) // -> change this when the medal with the streak counter is added
-
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                StreakBadge(streak = streak)
+            }
             // Date
             Text(
                 text = selectedDayFormatted,
