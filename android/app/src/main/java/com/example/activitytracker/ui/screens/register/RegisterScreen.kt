@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
@@ -31,7 +30,6 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .imePadding()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -156,6 +154,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
         ) {
             Text("Registrieren", color = Color.White)
         }
+        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
