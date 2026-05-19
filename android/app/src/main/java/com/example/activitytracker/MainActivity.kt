@@ -13,17 +13,8 @@ import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.ui.main.ActivityTrackerApp
 import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.example.activitytracker.Core.theme.ActivityTrackerTheme
-import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.notification.AlarmScheduler
 import com.example.activitytracker.notification.NotificationHelper
-import com.example.activitytracker.ui.main.ActivityTrackerApp
-import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import android.Manifest
 
 class MainActivity : ComponentActivity() {
@@ -62,6 +53,7 @@ class MainActivity : ComponentActivity() {
 
         if (shouldOpenAdd) {
             openAddActivityRequestId++
+            intent?.removeExtra(AddActivityWidgetIntentHandler.EXTRA_OPEN_ADD)
         }
     }
 }

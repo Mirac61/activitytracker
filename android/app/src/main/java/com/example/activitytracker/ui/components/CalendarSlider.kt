@@ -5,7 +5,6 @@
     import androidx.compose.foundation.layout.*
     import androidx.compose.foundation.layout.Arrangement
     import androidx.compose.foundation.pager.HorizontalPager
-    import androidx.compose.foundation.pager.PagerState
     import androidx.compose.foundation.pager.rememberPagerState
     import androidx.compose.foundation.shape.CircleShape
     import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,6 @@
     import com.example.activitytracker.Core.theme.StreakFill
     import com.example.activitytracker.R
     import java.time.LocalDate
-    import java.time.format.DateTimeFormatter
     
     private const val PAGE_COUNT = 10_000
     private const val INITIAL_PAGE = 5_000
