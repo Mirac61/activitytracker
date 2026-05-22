@@ -1,4 +1,4 @@
-package com.activitytracker.backend.Controller;
+package com.activitytracker.backend.controller;
 
 import com.activitytracker.backend.repository.ActivityRepository;
 import org.junit.jupiter.api.BeforeEach;
