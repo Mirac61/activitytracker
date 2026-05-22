@@ -30,7 +30,7 @@ class TrackingViewModel(
 
     // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
-    val streak = dates.map { StreakLogic.calculateStreak(it) }
+    val streak: LiveData<Int> = dates.map { StreakLogic.calculateStreak(it) }
 
     fun saveActivity(activityName: String, activityDate: LocalDate) {
         //If no activity name was given -> log the exception and cancel

@@ -18,7 +18,7 @@ interface ActivityDao {
     @Query("SELECT DISTINCT activityDate FROM activity_entries ORDER BY activityDate DESC")
     fun getDates(): Flow<List<LocalDate>>
 
-    @Query("SELECT * FROM activity_entries WHERE status IN ('PENDING', 'CHANGED') ORDER BY createdAt DESC")
+    @Query("SELECT * FROM activity_entries WHERE status IN ('PENDING') ORDER BY createdAt DESC")
     suspend fun getSyncWorkQue(): List<ActivityEntity>
 
     @Query("UPDATE activity_entries SET status = :status WHERE id = :id")
