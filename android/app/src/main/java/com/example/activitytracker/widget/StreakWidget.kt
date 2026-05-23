@@ -91,17 +91,18 @@ private fun StreakWidgetContent(
 ) {
     val size = LocalSize.current
 
-    val visibleDays = when {
-        size.width < 100.dp -> 1
-        size.width < 170.dp -> 3
-        size.width < 240.dp -> 5
-        else -> 7
+    val visibleDays = StreakWidgetLogic.getVisibleDays(size.width.value.toInt())
+
+    val visibleLogo = when (visibleDays) {
+        1 -> 20.dp
+        3 -> 22.dp
+        5 -> 24.dp
+        else -> 26.dp
     }
-// 0xFF88a376   0xFFEDEDED
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFF88a376))
+            .background(Color(0xFFEDEDED))
             .cornerRadius(12.dp)
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .clickable(
@@ -123,14 +124,19 @@ private fun StreakWidgetContent(
             Text(
                 text = "$streak",
                 style = TextStyle(
-                    fontSize = 18.sp,
+                    fontSize = when (visibleDays) {
+                        1 -> 16.sp
+                        3 -> 18.sp
+                        5 -> 18.sp
+                        else -> 18.sp
+                    },
                 )
             )
             Spacer(modifier = GlanceModifier.size(8.dp))
             Image(
-                provider = ImageProvider(R.drawable.ic_running_man_white),
+                provider = ImageProvider(R.drawable.ic_running_man),
                 contentDescription = "App Logo",
-                modifier = GlanceModifier.size(22.dp)
+                modifier = GlanceModifier.size(visibleLogo)
             )
         }
 
@@ -151,9 +157,7 @@ private fun StreakDaysRow(
 ) {
     val today = LocalDate.now()
 
-    val days = (visibleDays - 1 downTo 0).map { offset ->
-        today.minusDays(offset.toLong())
-    }
+    val days = StreakWidgetLogic.getDisplayedDays(today, visibleDays)
 
     val labels = mapOf(
         1 to "Mo",
@@ -165,35 +169,47 @@ private fun StreakDaysRow(
         7 to "So"
     )
 
+    val dayBoxSize = when (visibleDays) {
+        1 -> 42.dp
+        3 -> 38.dp
+        5 -> 36.dp
+        else -> 34.dp
+    }
+
+    val dayIconSize = when (visibleDays) {
+        1 -> 30.dp
+        3 -> 30.dp
+        5 -> 28.dp
+        else -> 26.dp
+    }
+
+    val horizontalPadding = when (visibleDays) {
+        1 -> 0.dp
+        3 -> 4.dp
+        5 -> 1.dp
+        else -> 1.dp
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         days.forEach { day ->
             val hasActivity = activeDays.contains(day)
+            val isToday = day == today
 
             Column(
-                modifier = GlanceModifier.padding(horizontal = 4.dp),
+                modifier = GlanceModifier.padding(horizontal = horizontalPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val isToday = day == today
-
                 Box(
                     modifier = GlanceModifier
-                        .size(
-                            when (visibleDays) {
-                                1 -> 42.dp
-                                3 -> 38.dp
-                                5 -> 38.dp
-                                else -> 32.dp
-                            }
-                        )
+                        .size(dayBoxSize)
                         .then(
                             if (isToday) {
                                 GlanceModifier
                                     .background(Color(0x33FF7043))
-                                    .cornerRadius(if (visibleDays == 1) 24.dp else 20.dp)
-                                    .size(36.dp)
+                                    .cornerRadius(dayBoxSize / 2)
                             } else {
                                 GlanceModifier
                             }
@@ -202,10 +218,14 @@ private fun StreakDaysRow(
                 ) {
                     Image(
                         provider = ImageProvider(
-                            if (hasActivity) R.drawable.ic_streak_on else R.drawable.ic_streak_off
+                            if (hasActivity) {
+                                R.drawable.ic_streak_on
+                            } else {
+                                R.drawable.ic_streak_off
+                            }
                         ),
                         contentDescription = null,
-                        modifier = GlanceModifier.size(30.dp)
+                        modifier = GlanceModifier.size(dayIconSize)
                     )
                 }
 
@@ -214,7 +234,12 @@ private fun StreakDaysRow(
                 Text(
                     text = labels[day.dayOfWeek.value] ?: "",
                     style = TextStyle(
-                        fontSize = if (visibleDays == 1) 10.sp else 12.sp
+                        fontSize = when (visibleDays) {
+                            1 -> 12.sp
+                            3 -> 12.sp
+                            5 -> 12.sp
+                            else -> 13.sp
+                        }
                     )
                 )
             }
