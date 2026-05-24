@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".data.ActivityApplication"
@@ -13,7 +14,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ActivityTracker">
+        android:theme="@style/Theme.ActivityTracker"
+        android:usesCleartextTraffic="true">
 
         <receiver
             android:name=".notification.BootReceiver"
@@ -78,5 +80,4 @@
                 android:resource="@xml/streak_widget_info" />
         </receiver>
     </application>
-
 </manifest>

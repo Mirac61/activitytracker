@@ -64,6 +64,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidsvg)
-
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidsvg.aar)
 }
