@@ -36,7 +36,10 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val application = LocalContext.current.applicationContext as ActivityApplication
 
     val trackingViewModel: TrackingViewModel = viewModel(
-        factory = ActivityEntryModelFactory(application.repository)
+        factory = ActivityEntryModelFactory(
+            repository = application.repository,
+            appContext = application.applicationContext
+        )
     )
 
     // Observe the activity List from Room

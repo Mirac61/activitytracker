@@ -22,7 +22,7 @@
     import com.example.activitytracker.Core.theme.StreakFill
     import com.example.activitytracker.R
     import java.time.LocalDate
-
+    
     private const val PAGE_COUNT = 10_000
     private const val INITIAL_PAGE = 5_000
     
