@@ -22,19 +22,29 @@ import com.example.activitytracker.ui.screens.register.RegistrationScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActivityTrackerApp() {
+fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var showBottomSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    LaunchedEffect(openAddActivityRequestId) {
+        if (openAddActivityRequestId > 0) {
+            showBottomSheet = true
+        }
+    }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val application = LocalContext.current.applicationContext as ActivityApplication
 
     val trackingViewModel: TrackingViewModel = viewModel(
-        factory = ActivityEntryModelFactory(application.repository)
+        factory = ActivityEntryModelFactory(
+            repository = application.repository,
+            appContext = application.applicationContext
+        )
     )
 
     // Observe the activity List from Room
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
+    val streak by trackingViewModel.streak.observeAsState(0)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -52,7 +62,7 @@ fun ActivityTrackerApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(activities = activities)
+                AppDestinations.HOME -> HomeScreen(activities = activities, streak = streak, onSettingsClick = {})
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
 

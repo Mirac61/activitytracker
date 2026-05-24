@@ -1,5 +1,6 @@
 package com.example.activitytracker
 
+import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,7 +29,7 @@ class SimpleEntityReadWriteTest {
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context, AppDatabase::class.java).allowMainThreadQueries().build()
         activityDao = db.activityDao()
@@ -157,8 +158,8 @@ class SimpleEntityReadWriteTest {
                 insertCount++
             }
         }
-
-        val viewModel = TrackingViewModel(fakeRepository)
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val viewModel = TrackingViewModel(fakeRepository, context)
         viewModel.saveActivity("", LocalDate.now())
 
         assert(insertCount == 0)

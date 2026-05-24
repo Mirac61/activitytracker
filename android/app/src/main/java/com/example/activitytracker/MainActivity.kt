@@ -1,29 +1,30 @@
 package com.example.activitytracker
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.example.activitytracker.Core.theme.ActivityTrackerTheme
-import com.example.activitytracker.data.local.AppDatabase
+import com.example.activitytracker.ui.main.ActivityTrackerApp
+import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
+import androidx.core.app.ActivityCompat
 import com.example.activitytracker.notification.AlarmScheduler
 import com.example.activitytracker.notification.NotificationHelper
-import com.example.activitytracker.ui.main.ActivityTrackerApp
-import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import android.Manifest
 
 class MainActivity : ComponentActivity() {
+    private var openAddActivityRequestId by mutableStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        handleIntent(intent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(
                 this,
@@ -34,10 +35,25 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ActivityTrackerTheme {
-                ActivityTrackerApp()
+                ActivityTrackerApp(openAddActivityRequestId = openAddActivityRequestId)
             }
         }
         NotificationHelper(this).createNotificationChannel()
         AlarmScheduler(this).scheduleDailyAlarm()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        val shouldOpenAdd = AddActivityWidgetIntentHandler.shouldOpenAddActivity(intent)
+
+        if (shouldOpenAdd) {
+            openAddActivityRequestId++
+            intent?.removeExtra(AddActivityWidgetIntentHandler.EXTRA_OPEN_ADD)
+        }
     }
 }
