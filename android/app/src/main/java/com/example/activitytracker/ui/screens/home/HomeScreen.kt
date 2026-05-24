@@ -1,42 +1,111 @@
 package com.example.activitytracker.ui.screens.home
 
+import com.example.activitytracker.ui.components.StreakBadge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.activitytracker.Core.theme.*
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import java.time.LocalDate
+import com.example.activitytracker.ui.components.CalendarSlider
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
-fun HomeScreen(activities: List<ActivityEntity> = emptyList()) {
+fun HomeScreen(
+    activities: List<ActivityEntity> = emptyList(),
+    streak: Int = 0,
+    onSettingsClick: () -> Unit = {}
+) {
     val today = LocalDate.now()
+    var selectedDay by remember { mutableStateOf(today) }
+    // Passing only dates having activites in CalendarSlider
+    val activeDays = activities.map{it.activityDate}.toSet()
 
-    val todaysActivities = activities.filter { it.activityDate == today }
+    val filteredActivities = activities.filter { it.activityDate == selectedDay }
+
+
+    val selectedDayFormatted = selectedDay.format(
+        DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
+    ).replaceFirstChar { it.uppercase() }
+
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(vertical = 12.dp)
     ) {
 
-        // HEADER aus Branch 19 - Kalenderanzeige
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Kalenderslider aus Branch 19 - Kalenderanzeige
-
-        if (todaysActivities.isEmpty()) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // medal and streak
             Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                StreakBadge(streak = streak)
+            }
+            // Date
+            Text(
+                text = selectedDayFormatted,
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 18.sp),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(2f)
+            )
+
+            // Settings
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment
+                    .CenterEnd) {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CalendarSlider(
+            activeDays = activeDays,
+            selectedDay = selectedDay,
+            onDaySelected = {selectedDay = it}
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+
+
+        if (filteredActivities.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Text(
@@ -48,10 +117,13 @@ fun HomeScreen(activities: List<ActivityEntity> = emptyList()) {
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                items(todaysActivities) { entity ->
+                items(filteredActivities) { entity ->
                     ActivityCard(name = entity.activityName)
                 }
             }
@@ -65,8 +137,8 @@ fun ActivityCard(name: String) {
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .clip(RoundedCornerShape(50))
-            .border(1.5.dp, PrimaryAccent, RoundedCornerShape(50)),
+            .clip(RoundedCornerShape(35))
+            .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35)),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(

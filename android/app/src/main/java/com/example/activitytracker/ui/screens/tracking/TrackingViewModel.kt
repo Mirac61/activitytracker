@@ -7,14 +7,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.repository.IActivityRepository
 import com.example.activitytracker.domain.StreakLogic
+import com.example.activitytracker.widget.ActivityWidgetUpdater
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
-class TrackingViewModel(private val repository: IActivityRepository) : ViewModel() {
+
+class TrackingViewModel(
+    private val repository: IActivityRepository,
+    private val appContext: Context
+) : ViewModel() {
 
     var name = MutableLiveData<String>()
 
@@ -22,7 +30,7 @@ class TrackingViewModel(private val repository: IActivityRepository) : ViewModel
 
     // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
-    val streak = dates.map { StreakLogic.calculateStreak(it) }
+    val streak: LiveData<Int> = dates.map { StreakLogic.calculateStreak(it) }
 
     fun saveActivity(activityName: String, activityDate: LocalDate) {
         //If no activity name was given -> log the exception and cancel
@@ -41,16 +49,25 @@ class TrackingViewModel(private val repository: IActivityRepository) : ViewModel
                     userId = null
                 )
             )
+            delay(200)
+            val currentDates = repository.getDates.first()
+            ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
+            android.util.Log.d("TRACKER_WIDGET", "Speichern für $activityDate abgeschlossen")
         }
     }
 }
 
 
-class ActivityEntryModelFactory(private val repository: IActivityRepository) : ViewModelProvider.Factory {
+class ActivityEntryModelFactory(
+    private val repository: IActivityRepository,
+    private val appContext: Context
+) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(TrackingViewModel::class.java))
-            return TrackingViewModel(repository) as T
+        if (modelClass.isAssignableFrom(TrackingViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return TrackingViewModel(repository, appContext) as T
+        }
 
         throw IllegalArgumentException("Unknown Class for View Model")
     }
