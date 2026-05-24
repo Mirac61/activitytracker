@@ -27,29 +27,17 @@
     private const val INITIAL_PAGE = 5_000
     
     @Composable
-    fun CalendarSlider(activeDays: Set<LocalDate>, selectedDay: LocalDate, onDaySelected: (LocalDate) -> Unit){
+    fun CalendarSlider(
+        activeDays: Set<LocalDate>,
+        selectedDay: LocalDate,
+        onDaySelected: (LocalDate) -> Unit){
+
         val today = LocalDate.now()
         val todayisMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
         val pagerState = rememberPagerState(
             initialPage = INITIAL_PAGE,
             pageCount = { PAGE_COUNT }
         )
-    
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            page ->         val weekOffset = page - INITIAL_PAGE
-            val pageMonday = todayisMonday.plusWeeks(weekOffset.toLong())
-    
-            WeekStrip(
-                monday = pageMonday,
-                today = today,
-                selectedDay = selectedDay,
-                activeDays = activeDays,
-                onDaySelected = onDaySelected
-            )
-        }
     }
     
     
@@ -59,7 +47,6 @@
     
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             for (i in 0..6){
@@ -72,62 +59,39 @@
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.clickable { onDaySelected(day) }
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onDaySelected(day) }
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .then(
-                                when {
-                                    isToday && isSelected -> Modifier
-                                        .clip(CircleShape)
-                                        .background(StreakFill.copy(alpha = 0.25f))
-                                        .border(2.dp, Outline, CircleShape)
-                                    isSelected -> Modifier
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                                        .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), CircleShape)
-                                    isToday -> Modifier
-                                        .clip(CircleShape)
-                                        .background(StreakFill.copy(alpha = 0.25f))
-                                        .border(2.dp, Outline, CircleShape)
-                                    isFuture -> Modifier
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                                    else -> Modifier
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        when {
-                            isFuture -> Unit
-                            hasActivity -> SvgImage(
-                                rawResId = R.raw.noto_fire,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            else -> SvgImage(
-                                rawResId = R.raw.noto_grayed_fire,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-    
-                    Spacer(modifier = Modifier.height(8.dp))
-    
-                    Text(
-                        text = dayLabels[i],
-                        style = TextStyle(
-                            fontFamily = InterFamily,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 11.sp,
-                            color = if (isSelected)
-                                MaterialTheme.colorScheme.onSurface
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    when {
+                        isFuture -> Unit
+                        hasActivity -> SvgImage(
+                            rawResId = R.raw.noto_fire,
+                            modifier = Modifier.size(24.dp)
                         )
-                    )
+                        else -> SvgImage(
+                            rawResId = R.raw.noto_grayed_fire,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = dayLabels[i],
+                    style = TextStyle(
+                        fontFamily = InterFamily,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 11.sp,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                )
             }
         }
-        Spacer(modifier = Modifier.height(48.dp))
     }
+    Spacer(modifier = Modifier.height(48.dp))
+}
