@@ -38,7 +38,6 @@ class AddActivityWidget : GlanceAppWidget() {
 
 }
 
-
 @Composable
 private fun AddActivityWidgetContent() {
     Column(

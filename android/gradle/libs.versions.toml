@@ -17,6 +17,7 @@ ksp = "2.1.10-1.0.29"
 lifecycleLivedataKtx = "2.10.0"
 runtime = "1.11.0"
 runtimeLivedata = "1.11.0"
+retrofit = "2.9.0"
 
 [libraries]
 androidsvg = { module = "com.caverock:androidsvg", version.ref = "androidsvgAar" }
@@ -47,6 +48,9 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version = "2.10.0" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
