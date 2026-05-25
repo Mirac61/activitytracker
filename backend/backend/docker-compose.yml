@@ -24,6 +24,7 @@ services:
       - db
 
   backend:
+    build: .
     image: ghcr.io/hse-classes/ss26-aktivitatstracker:latest
     container_name: activitytracker-backend
     ports:
