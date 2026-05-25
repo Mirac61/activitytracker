@@ -101,27 +101,28 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, viewModel: RegisterVi
             //Input fields
             CustomTextField(
                 value = viewModel.vorname,
-                onValueChange = { viewModel.vorname = it },
+                onValueChange = { viewModel.onVornameChanged(it) },
                 label = "Vorname"
             )
 
             CustomTextField(
                 value = viewModel.nachname,
-                onValueChange = { viewModel.nachname = it },
+                onValueChange = { viewModel.onNachnameChanged(it) },
                 label = "Nachname"
             )
 
             CustomTextField(
                 value = viewModel.email,
-                onValueChange = { viewModel.email = it },
+                onValueChange = { viewModel.onEmailChanged(it) },
                 label = "E-Mail",
+                keyboardType = KeyboardType.Email,
                 isError = viewModel.email.isNotEmpty() && !viewModel.isEmailValid,
                 errorMessage = "Ungültige Emailadresse"
             )
 
             CustomTextField(
                 value = viewModel.password,
-                onValueChange = { viewModel.password = it },
+                onValueChange = { viewModel.onPasswordChanged(it) },
                 label = "Passwort",
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -201,7 +202,8 @@ fun CustomTextField(
     label: String,
     isError: Boolean = false,
     errorMessage: String = "",
-    visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None
+    visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(text = label, style = MaterialTheme.typography.labelMedium)
@@ -218,7 +220,7 @@ fun CustomTextField(
             keyboardOptions = if (visualTransformation is PasswordVisualTransformation) {
                 KeyboardOptions(keyboardType = KeyboardType.Password)
             } else {
-                KeyboardOptions.Default
+                KeyboardOptions(keyboardType = keyboardType)
             }
         )
         if (isError) {

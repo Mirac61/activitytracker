@@ -13,9 +13,29 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RegisterViewModel : ViewModel() {
     var vorname by mutableStateOf("")
+        private set
     var nachname by mutableStateOf("")
+        private set
     var email by mutableStateOf("")
+        private set
     var password by mutableStateOf("")
+        private set
+
+    fun onVornameChanged(newValue: String) {
+        vorname = newValue
+    }
+
+    fun onNachnameChanged(newValue: String) {
+        nachname = newValue
+    }
+
+    fun onEmailChanged(newValue: String) {
+        email = newValue
+    }
+
+    fun onPasswordChanged(newValue: String) {
+        password = newValue
+    }
 
     // Create Retrofit instance
     private val retrofit = Retrofit.Builder()
