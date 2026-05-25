@@ -35,6 +35,8 @@ services:
       KEYCLOAK_SERVERURL: http://keycloak:8080
       KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      WEATHERAPI_KEY: ${weatherapi_key}
+      WEATHERAPI_CITY: ${weatherapi_city}
     depends_on:
       - db
       - keycloak
