@@ -24,7 +24,7 @@ services:
       - db
 
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/activitytracker-backend:latest
+    image: ghcr.io/hse-classes/ss26-aktivitatstracker:latest
     container_name: activitytracker-backend
     ports:
       - "8080:8080"
