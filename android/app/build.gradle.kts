@@ -66,4 +66,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidsvg.aar)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 }
