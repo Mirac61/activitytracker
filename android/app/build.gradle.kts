@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.activitytracker"
-        minSdk = 29
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -34,6 +34,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
@@ -79,6 +80,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidsvg.aar)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation(libs.androidsvg.aar)

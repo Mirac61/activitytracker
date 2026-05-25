@@ -1,11 +1,13 @@
 package com.example.activitytracker.ui.components
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,121 +15,136 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.activitytracker.Core.theme.InterFamily
-import com.example.activitytracker.Core.theme.Outline
-import com.example.activitytracker.Core.theme.StreakFill
 import com.example.activitytracker.R
 import java.time.LocalDate
+import java.time.format.TextStyle as FormatStyle
+import java.util.Locale
 
-private const val PAGE_COUNT = 10_000
-private const val INITIAL_PAGE = 5_000
+
+
+private const val BACKWARD_DAYS_COUNT = 365
 
 @Composable
-fun CalendarSlider(activeDays: Set<LocalDate>, selectedDay: LocalDate, onDaySelected: (LocalDate) -> Unit){
+fun CalendarSlider(
+    activeDays: Set<LocalDate>,
+    selectedDay: LocalDate,
+    onDaySelected: (LocalDate) -> Unit) {
+
     val today = LocalDate.now()
-    val todayisMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-    val pagerState = rememberPagerState(
-        initialPage = INITIAL_PAGE,
-        pageCount = { PAGE_COUNT }
-    )
 
-    HorizontalPager(
-        state = pagerState,
+    val daysList = remember(today) {
+        (BACKWARD_DAYS_COUNT downTo 0).map { today.minusDays(it.toLong()) }
+    }
+
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = daysList.lastIndex)
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val itemWidth = (screenWidth - 16.dp) / 7
+
+    LazyRow(
+        state = listState,
         modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        page ->         val weekOffset = page - INITIAL_PAGE
-        val pageMonday = todayisMonday.plusWeeks(weekOffset.toLong())
-
-        WeekStrip(
-            monday = pageMonday,
-            today = today,
-            selectedDay = selectedDay,
-            activeDays = activeDays,
-            onDaySelected = onDaySelected
-        )
+        items(daysList) { day ->
+            DayItem(
+                day = day,
+                today = today,
+                selectedDay = selectedDay,
+                activeDays = activeDays,
+                itemWidth = itemWidth,
+                onDaySelected = onDaySelected
+            )
+        }
     }
 }
 
 
 @Composable
-fun WeekStrip(monday: LocalDate, today: LocalDate, selectedDay: LocalDate, activeDays: Set<LocalDate>, onDaySelected: (LocalDate) -> Unit ){
-    val dayLabels = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+fun DayItem(
+    day: LocalDate,
+    today: LocalDate,
+    selectedDay: LocalDate,
+    activeDays: Set<LocalDate>,
+    itemWidth: androidx.compose.ui.unit.Dp,
+    onDaySelected: (LocalDate) -> Unit
+) {
+    val isToday = day == today
+    val isSelected = day == selectedDay
+    val hasActivity = activeDays.contains(day)
+    val dayLabel = day.dayOfWeek.getDisplayName(FormatStyle.SHORT, Locale.GERMAN)
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .width(itemWidth)
+            .clickable { onDaySelected(day) }
     ) {
-        for (i in 0..6){
-            val day = monday.plusDays(i.toLong())
-            val isToday = day == today
-            val isSelected = day == selectedDay
-            val isFuture = day.isAfter(today)
-            val hasActivity = activeDays.contains(day)
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.clickable { onDaySelected(day) }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .then(
-                            when {
-                                isToday && isSelected -> Modifier
-                                    .clip(CircleShape)
-                                    .background(StreakFill.copy(alpha = 0.25f))
-                                    .border(2.dp, Outline, CircleShape)
-                                isSelected -> Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                                    .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), CircleShape)
-                                isToday -> Modifier
-                                    .clip(CircleShape)
-                                    .background(StreakFill.copy(alpha = 0.25f))
-                                    .border(2.dp, Outline, CircleShape)
-                                isFuture -> Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                                else -> Modifier
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+        Box(
+            modifier = Modifier.size(42.dp)
+                .then(
                     when {
-                        isFuture -> Unit
-                        hasActivity -> SvgImage(
-                            rawResId = R.raw.noto_fire,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        else -> SvgImage(
-                            rawResId = R.raw.noto_grayed_fire,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        isSelected -> Modifier
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                            .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), CircleShape)
+                        else -> Modifier.size(24.dp)
                     }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = dayLabels[i],
-                    style = TextStyle(
-                        fontFamily = InterFamily,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        fontSize = 11.sp,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurface
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                hasActivity && isSelected ->
+                    SvgImage(
+                        rawResId = R.raw.noto_fire,
+                        modifier = Modifier.size(32.dp)
                 )
+                hasActivity ->
+                    SvgImage(
+                        rawResId = R.raw.noto_fire,
+                        modifier = Modifier.size(24.dp)
+                    )
+                !hasActivity && isSelected ->
+                    SvgImage(
+                        rawResId = R.raw.noto_grayed_fire,
+                        modifier = Modifier.size(32.dp)
+                    )
+                !hasActivity ->
+                    SvgImage(
+                        rawResId = R.raw.noto_grayed_fire,
+                        modifier = Modifier.size(24.dp)
+                    )
             }
         }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        Box(
+            modifier = Modifier.height(20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = dayLabel,
+                style = TextStyle(
+                    fontFamily = InterFamily,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    fontSize = if (isSelected) 14.sp else 12.sp,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            )
+        }
     }
-    Spacer(modifier = Modifier.height(48.dp))
 }

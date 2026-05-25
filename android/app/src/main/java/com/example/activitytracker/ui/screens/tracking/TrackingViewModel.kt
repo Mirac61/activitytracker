@@ -1,7 +1,5 @@
 package com.example.activitytracker.ui.screens.tracking
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,22 +9,27 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
+import android.content.Context
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncWorker
 import com.example.activitytracker.data.repository.IActivityRepository
 import com.example.activitytracker.domain.StreakLogic
+import com.example.activitytracker.widget.ActivityWidgetUpdater
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+
 class TrackingViewModel(
-    application: Application,
-    private val repository: IActivityRepository
-) : AndroidViewModel(application) {
+    private val repository: IActivityRepository,
+    private val appContext: Context
+) : ViewModel() {
 
     var name = MutableLiveData<String>()
+
     val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
-    private val context = getApplication<Application>().applicationContext
 
     // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
@@ -49,9 +52,13 @@ class TrackingViewModel(
                     userId = null
                 )
             )
+            delay(200)
+            val currentDates = repository.getDates.first()
+            ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
+            android.util.Log.d("TRACKER_WIDGET", "Speichern für $activityDate abgeschlossen")
         }
 
-        WorkManager.getInstance(context).enqueueUniqueWork(
+        WorkManager.getInstance(appContext).enqueueUniqueWork(
             "sync",
             ExistingWorkPolicy.REPLACE,
             SyncWorker.startUpSyncWork()
@@ -61,13 +68,15 @@ class TrackingViewModel(
 
 
 class ActivityEntryModelFactory(
-    private val application: Application,
-    private val repository: IActivityRepository
+    private val repository: IActivityRepository,
+    private val appContext: Context
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(TrackingViewModel::class.java))
-            return TrackingViewModel(application, repository) as T
+        if (modelClass.isAssignableFrom(TrackingViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return TrackingViewModel(repository, appContext) as T
+        }
 
         throw IllegalArgumentException("Unknown Class for View Model")
     }

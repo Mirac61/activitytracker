@@ -11,8 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +23,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.Core.theme.PrimaryAccent
 
 @Composable
-fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
+fun RegistrationScreen(onRegistrationComplete: () -> Unit, viewModel: RegisterViewModel = viewModel()) {
+
+    LaunchedEffect(viewModel.registrationSuccess) {
+        if (viewModel.registrationSuccess) {
+            onRegistrationComplete()
+        }
+    }
 
     val scrollState = rememberScrollState()
 
@@ -145,7 +151,7 @@ fun RegistrationScreen(viewModel: RegisterViewModel = viewModel()) {
 
         // 5. Register button
         Button(
-            onClick = { /* TODO: Regular Login */ },
+            onClick = { viewModel.register() },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = viewModel.isFormValid,
             colors = ButtonDefaults.buttonColors(
@@ -173,7 +179,9 @@ fun CustomTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(label),
             shape = RoundedCornerShape(12.dp),
             isError = isError,
             visualTransformation = visualTransformation,

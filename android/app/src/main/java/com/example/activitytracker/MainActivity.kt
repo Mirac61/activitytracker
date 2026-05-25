@@ -13,13 +13,9 @@ import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.ui.main.ActivityTrackerApp
 import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
 import androidx.core.app.ActivityCompat
-import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.notification.AlarmScheduler
 import com.example.activitytracker.notification.NotificationHelper
-import com.example.activitytracker.ui.main.ActivityTrackerApp
-
 import android.Manifest
-
 
 class MainActivity : ComponentActivity() {
     private var openAddActivityRequestId by mutableStateOf(0)
@@ -57,6 +53,7 @@ class MainActivity : ComponentActivity() {
 
         if (shouldOpenAdd) {
             openAddActivityRequestId++
+            intent?.removeExtra(AddActivityWidgetIntentHandler.EXTRA_OPEN_ADD)
         }
     }
 }

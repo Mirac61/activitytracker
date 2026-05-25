@@ -1,5 +1,6 @@
 package com.example.activitytracker
 
+import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,13 +23,13 @@ import java.time.OffsetDateTime
 // Inspiration from https://developer.android.com/training/data-storage/room/testing-db?hl=de
 
 @RunWith(AndroidJUnit4::class)
-class SimpleEntityReadWriteTest {
+class DatabaseTest {
     private lateinit var activityDao: ActivityDao
     private lateinit var db: AppDatabase
 
     @Before
     fun createDb() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context, AppDatabase::class.java).allowMainThreadQueries().build()
         activityDao = db.activityDao()
@@ -150,15 +151,18 @@ class SimpleEntityReadWriteTest {
 
         val fakeRepository = object : IActivityRepository {
             override val getAll: Flow<List<ActivityEntity>> = flowOf(emptyList())
-
             override val getDates: Flow<List<LocalDate>> = flowOf(emptyList())
 
             override suspend fun insert(entity: ActivityEntity) {
                 insertCount++
             }
-        }
 
-        val viewModel = TrackingViewModel(fakeRepository)
+            override suspend fun syncPendingActivities(): Boolean {
+                return true  // einfach true zurückgeben für Tests
+            }
+        }
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val viewModel = TrackingViewModel(fakeRepository, context)
         viewModel.saveActivity("", LocalDate.now())
 
         assert(insertCount == 0)
