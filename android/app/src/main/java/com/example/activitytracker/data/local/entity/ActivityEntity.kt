@@ -15,6 +15,5 @@ data class ActivityEntity(
     val activityName: String,
     val activityDate: LocalDate,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
-    val status: SyncStatus = SyncStatus.PENDING,
-    val userId: String? = null // For future Keycloak integration, currently mocked
+    val status: SyncStatus = SyncStatus.PENDING
 )

@@ -6,12 +6,14 @@ data class ActivityUploadDto(
     val id: String,
     val activityName: String,
     val activityDate: String,
-    val createdAt: String
+    val createdAt: String,
+    val userId: String
 )
 
-fun ActivityEntity.toUploadDto() = ActivityUploadDto(
+fun ActivityEntity.toUploadDto(userId: String) = ActivityUploadDto(
     id = id,
     activityName = activityName,
     activityDate = activityDate.toString(),
-    createdAt = createdAt.toString()
+    createdAt = createdAt.toString(),
+    userId = userId
 )

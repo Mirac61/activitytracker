@@ -34,12 +34,12 @@ class ActivityRepositoryTest {
             id = "550e8400-e29b-41d4-a716-446655440000",
             activityName = "Laufen",
             activityDate = LocalDate.of(2026, 5, 10),
-            status = SyncStatus.PENDING
+            status = SyncStatus.PENDING,
         )
 
         whenever(activityDao.getSyncWorkQue()).thenReturn(listOf(entity))
         whenever(apiService.uploadActivity(any())).thenReturn(Response.success(Unit))
-        repository.syncPendingActivities()
+        repository.syncPendingActivities("test-user-123")
         verify(activityDao).updateSyncStatus(eq(entity.id), eq(SyncStatus.SYNCED))
     }
 }

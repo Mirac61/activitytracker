@@ -54,7 +54,6 @@ class DatabaseTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 5, 1),
             createdAt = OffsetDateTime.parse("2026-05-01T15:00:00Z"),
-            userId = "mock_user_1"
         )
 
         activityDao.insert(activity)
@@ -63,7 +62,6 @@ class DatabaseTest {
         assert(allActivities.isNotEmpty())
         assert(allActivities[0].activityName == "Jogging")
         assert(allActivities[0].activityDate == LocalDate.of(2026, 5, 1))
-        assert(allActivities[0].userId == "mock_user_1")
     }
 
     @Test
@@ -74,13 +72,11 @@ class DatabaseTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 2, 1),
             createdAt = OffsetDateTime.parse("2026-06-01T10:00:00Z"),
-            userId = "mock_user_1"
         )
         val secondActivity = ActivityEntity(
             activityName = "Rad fahren",
             activityDate = LocalDate.of(2026, 1, 21),
             createdAt = OffsetDateTime.parse("2026-07-01T10:00:00Z"),
-            userId = "mock_user_2"
         )
 
         activityDao.insert(firstActivity)
@@ -112,7 +108,6 @@ class DatabaseTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 4, 21),
             createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
-            userId = "mock_user_1"
         )
 
         activityDao.insert(activity)
@@ -134,8 +129,7 @@ class DatabaseTest {
             id="999",
             activityName = "Jogging",
             activityDate = LocalDate.of(2021, 8, 21),
-            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
-            userId = "mock_user_1"
+            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z")
         )
 
         activityDao.delete(fakeActivity)
@@ -157,8 +151,8 @@ class DatabaseTest {
                 insertCount++
             }
 
-            override suspend fun syncPendingActivities(): Boolean {
-                return true  // einfach true zurückgeben für Tests
+            override suspend fun syncPendingActivities(userId: String): Boolean {
+                return true
             }
         }
         val context = ApplicationProvider.getApplicationContext<Context>()

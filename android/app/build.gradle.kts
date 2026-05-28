@@ -62,11 +62,6 @@ dependencies {
     implementation(libs.identity.jvm)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.jupiter.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
     testImplementation("org.mockito:mockito-core:5.+")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.+")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
@@ -87,4 +82,5 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation(libs.androidsvg.aar)
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 }
