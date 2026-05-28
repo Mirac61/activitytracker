@@ -4,6 +4,7 @@ import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.UUID;
 
 @Service
@@ -17,7 +18,7 @@ public class UserService {
         this.keycloakService = keycloakService;
     }
 
-    public void registerUser(UserRegistrationDto dto) {
+    public UUID registerUser(UserRegistrationDto dto) {
         UUID keycloakId = keycloakService.createUserInKeycloak(dto);
 
         try {
@@ -28,5 +29,6 @@ public class UserService {
             keycloakService.deleteUserFromKeycloak(keycloakId);
             throw new RuntimeException("Database-failure: Registration canceled. Please try again.");
         }
+        return keycloakId;
     }
 }
