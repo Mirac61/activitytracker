@@ -22,3 +22,22 @@ services:
       - ./keycloak-config:/opt/keycloak/data/import
     depends_on:
       - db
+
+  backend:
+    build: .
+    image: ghcr.io/hse-classes/ss26-aktivitatstracker:latest
+    container_name: activitytracker-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_SERVERURL: http://keycloak:8080
+      KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      WEATHERAPI_KEY: ${weatherapi_key}
+      WEATHERAPI_CITY: ${weatherapi_city}
+    depends_on:
+      - db
+      - keycloak

@@ -17,9 +17,29 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RegisterViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
     var vorname by mutableStateOf("")
+        private set
     var nachname by mutableStateOf("")
+        private set
     var email by mutableStateOf("")
+        private set
     var password by mutableStateOf("")
+        private set
+
+    fun onVornameChanged(newValue: String) {
+        vorname = newValue
+    }
+
+    fun onNachnameChanged(newValue: String) {
+        nachname = newValue
+    }
+
+    fun onEmailChanged(newValue: String) {
+        email = newValue
+    }
+
+    fun onPasswordChanged(newValue: String) {
+        password = newValue
+    }
 
     // Create Retrofit instance
     private val retrofit = Retrofit.Builder()
@@ -33,11 +53,22 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val isFormValid: Boolean get() = vorname.isNotBlank() && nachname.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
 
-    //Variable that listens if the registration process is successful
+    // Variable that listens if the registration process is successful
     var registrationSuccess by mutableStateOf(false)
         private set
 
-    //sending the input Data to RegisterApi.kt
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
+
+    fun clearErrorMessage() {
+        errorMessage = null
+    }
+
+    fun resetRegistrationStatus() {
+        registrationSuccess = false
+    }
+
+    // sending the input Data to RegisterApi.kt
     fun register() {
         viewModelScope.launch {
             try {
@@ -64,10 +95,12 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
                 }else {
                     println("DEBUG: Server Failure: ${response.code()}")
+                    errorMessage = "Registrierung fehlgeschlagen. E-Mail eventuell bereits vergeben."
                 }
             } catch (e: Exception) {
                 println("DEBUG: Connection not made! Mistake: ${e.localizedMessage}")
                 e.printStackTrace()
+                errorMessage = "Netzwerkfehler."
             }
         }
     }

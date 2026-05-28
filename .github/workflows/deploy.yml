@@ -1,0 +1,66 @@
+name: Java CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  packages: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Java JDK 25 einrichten
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Backend kompilieren (Clean Install)
+        run: |
+          cd backend/backend
+          mvn clean install -Dmaven.test.skip=true
+
+      - name: Bei GitHub Container Registry einloggen
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker-Image auf GitHub bauen und pushen
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/backend
+          file: ./backend/backend/Dockerfile
+          push: true
+          tags: ghcr.io/hse-classes/ss26-aktivitatstracker:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Auf Hetzner-Server einloggen und deployen
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 116.203.19.54
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/ss26-aktivitatstracker
+            git pull origin main
+            cd backend/backend
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker compose down
+            docker compose pull
+            docker compose up -d
