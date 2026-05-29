@@ -2,7 +2,7 @@ name: Java CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feat/45/lokale-und-remote-db-sync" ]
 
 permissions:
   packages: write
