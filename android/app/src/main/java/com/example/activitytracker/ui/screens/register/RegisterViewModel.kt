@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.network.RegisterApi
@@ -43,7 +44,7 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
     // Create Retrofit instance
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080/")
+        .baseUrl(BuildConfig.BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
