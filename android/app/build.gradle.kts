@@ -51,7 +51,7 @@ android {
         }
         create("server") {
             dimension = "environment"
-            buildConfigField("String", "BASE_URL", "\"${localProps.getProperty("server.base.url", "http://PLACEHOLDER:8080/")}\"")
+            buildConfigField("String", "BASE_URL", "\"https://116.203.19.54:8443/\"")
         }
     }
     testOptions {
