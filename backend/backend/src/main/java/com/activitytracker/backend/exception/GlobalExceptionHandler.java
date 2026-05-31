@@ -1,6 +1,7 @@
 package com.activitytracker.backend.exception;
 
-import jakarta.ws.rs.ForbiddenException;
+import com.activitytracker.backend.dto.ErrorResponseDto;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body("wrong JSON-Format");
+    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest().body(new ErrorResponseDto(400, "wrong JSON-Format"));
     }
 
     // System error
@@ -41,8 +42,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError().body("a Unknown error happened.");
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<String> handleForbidden(ForbiddenException e) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleForbidden(AccessDeniedException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<String> handleDuplicateUser(UserAlreadyExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

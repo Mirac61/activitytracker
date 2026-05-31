@@ -7,7 +7,7 @@ import com.activitytracker.backend.exception.InvalidActivityException;
 import com.activitytracker.backend.mapper.ActivityMapper;
 import com.activitytracker.backend.repository.ActivityRepository;
 import com.activitytracker.backend.repository.UserRepository;
-import jakarta.ws.rs.ForbiddenException;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +29,6 @@ public class ActivityService {
         if (request.getId() == null || request.getId().isBlank()) {
             throw new InvalidActivityException("Id must not be empty");
         }
-        UUID activityId = UUID.fromString(request.getId());
-
-        Optional<Activity> existing = activityRepository.findById(activityId);
-        if (existing.isPresent()) {
-            if (!existing.get().getUser().getUserId().toString().equals(userId)) {
-                throw new ForbiddenException("Activity belongs to another user");
-            }
-            return;
-        }
         if (request.getActivityName() == null || request.getActivityName().isBlank()) {
             throw new InvalidActivityException("Name can not be empty");
         }
@@ -45,11 +36,26 @@ public class ActivityService {
             throw new InvalidActivityException("Date can not be empty");
         }
 
+        UUID activityId;
+        try {
+            activityId = UUID.fromString(request.getId());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidActivityException("Invalid UUID format for activity ID");
+        }
+
+        Optional<Activity> existing = activityRepository.findById(activityId);
+        if (existing.isPresent()) {
+            if (!existing.get().getUser().getUserId().toString().equals(userId)) {
+                throw new AccessDeniedException("Activity belongs to another user");
+            }
+            // Activity already exists for this user
+            return;
+        }
+
         User user = userRepository.findById(UUID.fromString(userId)).
                 orElseThrow(() -> new RuntimeException("User not found"));
 
-        var activity = activityMapper.toEntity(request);
-        activity.setUser(user);
+        var activity = activityMapper.toEntity(request, user);
         activityRepository.save(activity);
     }
 }
