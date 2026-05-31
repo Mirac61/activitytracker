@@ -9,9 +9,8 @@ import kotlinx.coroutines.flow.first
 
 // Inspiration from: https://blog.kinto-technologies.com/posts/2025-06-16-encrypted-shared-preferences-migration-en/
 
-class AuthStorage(
-    private val context: Context,
-) {
+class AuthStorage(context: Context) {
+    private val context: Context = context.applicationContext
     companion object {
         private val Context.dataStore by preferencesDataStore(name = "auth")
         private val USER_ID_KEY = stringPreferencesKey("user_id")
@@ -24,13 +23,18 @@ class AuthStorage(
     }
 
     suspend fun getUserId(): String? {
-        val prefs = context.dataStore.data.first()
-        return prefs[USER_ID_KEY]
+        return try {
+            val prefs = context.dataStore.data.first()
+            prefs[USER_ID_KEY]
+        }
+        catch (e: Exception){
+            null
+        }
     }
 
-    suspend fun clearUserId() {
+    suspend fun clearAll() {
         context.dataStore.edit { prefs ->
-            prefs.remove(USER_ID_KEY)
+            prefs.clear()
         }
     }
 }

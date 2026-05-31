@@ -94,7 +94,7 @@ class SyncTest {
 
         val hasError = repository.syncPendingActivities(USER_ID)
 
-        assertFalse(hasError)
+        assertTrue(hasError)
         verify(dao, never()).updateSyncStatus(any(), any())
     }
 

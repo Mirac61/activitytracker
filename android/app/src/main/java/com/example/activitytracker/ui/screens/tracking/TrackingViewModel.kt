@@ -10,13 +10,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import android.content.Context
-import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncWorker
 import com.example.activitytracker.data.repository.IActivityRepository
 import com.example.activitytracker.domain.StreakLogic
 import com.example.activitytracker.widget.ActivityWidgetUpdater
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -52,15 +50,14 @@ class TrackingViewModel(
                     createdAt = OffsetDateTime.now()
                     )
             )
-            delay(200)
             val currentDates = repository.getDates.first()
             ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
             android.util.Log.d("TRACKER_WIDGET", "Speichern für $activityDate abgeschlossen")
 
             WorkManager.getInstance(appContext).enqueueUniqueWork(
                 "sync",
-                ExistingWorkPolicy.REPLACE,
-                SyncWorker.startUpSyncWork()
+                ExistingWorkPolicy.KEEP,
+                SyncWorker.buildSyncRequest()
             )
         }
     }
