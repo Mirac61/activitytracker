@@ -1,6 +1,7 @@
 package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.exception.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
@@ -10,6 +11,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import jakarta.ws.rs.core.Response;
+
 import java.util.Collections;
 import java.util.UUID;
 
@@ -72,6 +74,8 @@ public class KeycloakService {
                 String stringId = path.substring(path.lastIndexOf("/") + 1);
                 log.info("User successfully created in Keycloak. ID: {}", stringId);
                 return UUID.fromString(stringId);
+            } else if (response.getStatus() == 409) {
+                throw new UserAlreadyExistsException("User with this email already exists");
             } else {
                 String errorReason = response.getStatusInfo().getReasonPhrase();
                 log.error("Keycloak error while creating: {}", errorReason);

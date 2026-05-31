@@ -1,6 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/aJfDxjD8)
 
-how to set up postgresql with docker:
+## Setting up postgresql with docker:
 
 1. Install docker and log in
 2. Copy `.env.example` file and name it `.env`
@@ -21,3 +21,10 @@ how to set up postgresql with docker:
  Now you should see our two tables if you open up the public folder.
 
  If so everything worked properly!
+
+## Choosing local or server 
+
+1. In Android Studio, click the three dots on the left sidebar
+2. You should find "Build Variants" with a hammer icon
+3. Under "Active Build Variant" switch between `localDebug` and `serverDebug`
+4. For local testing, make sure the backend is running locally

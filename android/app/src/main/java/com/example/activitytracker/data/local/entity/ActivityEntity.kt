@@ -2,6 +2,7 @@ package com.example.activitytracker.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.activitytracker.data.local.sync.SyncStatus
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -14,5 +15,5 @@ data class ActivityEntity(
     val activityName: String,
     val activityDate: LocalDate,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
-    val userId: String? = null // For future Keycloak integration, currently mocked
+    val status: SyncStatus = SyncStatus.PENDING
 )

@@ -28,7 +28,9 @@ services:
     image: ghcr.io/hse-classes/ss26-aktivitatstracker:latest
     container_name: activitytracker-backend
     ports:
-      - "8080:8080"
+      - "8443:8443"
+    volumes:
+      - /root/keystore.p12:/app/keystore.p12
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
@@ -38,6 +40,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       WEATHERAPI_KEY: ${weatherapi_key}
       WEATHERAPI_CITY: ${weatherapi_city}
+      SPRING_PROFILES_ACTIVE: server
     depends_on:
       - db
       - keycloak

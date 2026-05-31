@@ -23,7 +23,7 @@ import java.time.OffsetDateTime
 // Inspiration from https://developer.android.com/training/data-storage/room/testing-db?hl=de
 
 @RunWith(AndroidJUnit4::class)
-class SimpleEntityReadWriteTest {
+class DatabaseTest {
     private lateinit var activityDao: ActivityDao
     private lateinit var db: AppDatabase
 
@@ -54,7 +54,6 @@ class SimpleEntityReadWriteTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 5, 1),
             createdAt = OffsetDateTime.parse("2026-05-01T15:00:00Z"),
-            userId = "mock_user_1"
         )
 
         activityDao.insert(activity)
@@ -63,7 +62,6 @@ class SimpleEntityReadWriteTest {
         assert(allActivities.isNotEmpty())
         assert(allActivities[0].activityName == "Jogging")
         assert(allActivities[0].activityDate == LocalDate.of(2026, 5, 1))
-        assert(allActivities[0].userId == "mock_user_1")
     }
 
     @Test
@@ -74,13 +72,11 @@ class SimpleEntityReadWriteTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 2, 1),
             createdAt = OffsetDateTime.parse("2026-06-01T10:00:00Z"),
-            userId = "mock_user_1"
         )
         val secondActivity = ActivityEntity(
             activityName = "Rad fahren",
             activityDate = LocalDate.of(2026, 1, 21),
             createdAt = OffsetDateTime.parse("2026-07-01T10:00:00Z"),
-            userId = "mock_user_2"
         )
 
         activityDao.insert(firstActivity)
@@ -112,7 +108,6 @@ class SimpleEntityReadWriteTest {
             activityName = "Jogging",
             activityDate = LocalDate.of(2026, 4, 21),
             createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
-            userId = "mock_user_1"
         )
 
         activityDao.insert(activity)
@@ -134,8 +129,7 @@ class SimpleEntityReadWriteTest {
             id="999",
             activityName = "Jogging",
             activityDate = LocalDate.of(2021, 8, 21),
-            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z"),
-            userId = "mock_user_1"
+            createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z")
         )
 
         activityDao.delete(fakeActivity)
@@ -151,11 +145,14 @@ class SimpleEntityReadWriteTest {
 
         val fakeRepository = object : IActivityRepository {
             override val getAll: Flow<List<ActivityEntity>> = flowOf(emptyList())
-
             override val getDates: Flow<List<LocalDate>> = flowOf(emptyList())
 
             override suspend fun insert(entity: ActivityEntity) {
                 insertCount++
+            }
+
+            override suspend fun syncPendingActivities(userId: String): Boolean {
+                return true
             }
         }
         val context = ApplicationProvider.getApplicationContext<Context>()

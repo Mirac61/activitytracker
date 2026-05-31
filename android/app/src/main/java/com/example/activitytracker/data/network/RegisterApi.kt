@@ -11,9 +11,10 @@ data class RegisterRequest(
     val email: String,
     val password: String
 )
+data class AuthResponse(val userId: String)
 
 //Api call to backend
 interface RegisterApi {
     @POST("api/users/register")
-    suspend fun registerUser(@Body request: RegisterRequest): Response<Unit>
+    suspend fun registerUser(@Body request: RegisterRequest): Response<AuthResponse>
 }

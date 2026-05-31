@@ -1,8 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.android)
+}
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) load(f.inputStream())
 }
 
 android {
@@ -35,7 +41,23 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
+    flavorDimensions += "environment"
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
+        }
+        create("server") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"https://116.203.19.54:8443/\"")
+        }
+    }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
 }
 
 dependencies {
@@ -54,6 +76,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.identity.jvm)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.jupiter.junit.jupiter)
+    testImplementation("org.mockito:mockito-core:5.+")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.+")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -68,4 +97,8 @@ dependencies {
     implementation(libs.androidsvg.aar)
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation(libs.androidsvg.aar)
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
 }

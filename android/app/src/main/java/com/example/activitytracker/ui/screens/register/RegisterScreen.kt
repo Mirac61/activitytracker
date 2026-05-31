@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.painterResource
@@ -23,9 +24,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.Core.theme.PrimaryAccent
+import com.example.activitytracker.data.ActivityApplication
 
 @Composable
-fun RegistrationScreen(onRegistrationComplete: () -> Unit, viewModel: RegisterViewModel = viewModel()) {
+fun RegistrationScreen(onRegistrationComplete: () -> Unit) {
+
+    val application = LocalContext.current.applicationContext as ActivityApplication
+    val viewModel: RegisterViewModel = viewModel(
+        factory = RegisterViewModelFactory(application.authStorage, application)
+    )
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
