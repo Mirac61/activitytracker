@@ -11,5 +11,6 @@ enum class AppDestinations(
     TRACKING("Tracking", R.drawable.ic_add),
 
     //placeholder to test Registration screen until full implementation
-    REGISTER("Register", R.drawable.ic_google_logo)
+    REGISTER("Register", R.drawable.ic_google_logo),
+    LOGIN("Login", R.drawable.ic_google_logo)
 }

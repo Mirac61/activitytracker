@@ -18,12 +18,13 @@ import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
 import com.example.activitytracker.ui.screens.register.RegistrationScreen
+import com.example.activitytracker.ui.screens.login.LoginScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.LOGIN) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(openAddActivityRequestId) {
@@ -49,19 +50,30 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            MainNavBar(
-                currentDestination = currentDestination,
-                onNavigate = { selectedDestination ->
-                    currentDestination = selectedDestination
-                },
-                onPlusClicked = {
-                    showBottomSheet = true
-                }
-            )
+            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.REGISTER) {
+                MainNavBar(
+                    currentDestination = currentDestination,
+                    onNavigate = { selectedDestination ->
+                        currentDestination = selectedDestination
+                    },
+                    onPlusClicked = {
+                        showBottomSheet = true
+                    }
+                )
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
+                AppDestinations.LOGIN -> LoginScreen(
+                    onLoginSuccess = {
+                        currentDestination = AppDestinations.HOME
+                    },
+                    onNavigateToRegister = {
+                        currentDestination = AppDestinations.REGISTER
+                    }
+                )
+
                 AppDestinations.HOME -> HomeScreen(activities = activities, streak = streak, onSettingsClick = {})
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
@@ -69,12 +81,16 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 //placeholder to test Registration screen until full implementation
                 AppDestinations.REGISTER -> RegistrationScreen(
                     onRegistrationComplete = {
-                        currentDestination = AppDestinations.HOME
+                        currentDestination = AppDestinations.LOGIN
+                    },
+                    onNavigateToLogin = {
+                        currentDestination = AppDestinations.LOGIN
                     }
                 )
             }
         }
     }
+
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
@@ -85,7 +101,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
-
                 }
             )
         }

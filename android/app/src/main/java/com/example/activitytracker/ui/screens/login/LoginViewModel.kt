@@ -1,4 +1,4 @@
-package com.example.activitytracker.ui.screens.register
+package com.example.activitytracker.ui.screens.login
 
 import android.content.Context
 import androidx.compose.runtime.getValue
@@ -8,31 +8,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.activitytracker.BuildConfig
-import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.RegisterApi
-import com.example.activitytracker.data.network.RegisterRequest
+import com.example.activitytracker.data.network.LoginApi
+import com.example.activitytracker.data.network.LoginRequest
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class RegisterViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
-    var vorname by mutableStateOf("")
-        private set
-    var nachname by mutableStateOf("")
-        private set
+class LoginViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
+
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
-
-    fun onVornameChanged(newValue: String) {
-        vorname = newValue
-    }
-
-    fun onNachnameChanged(newValue: String) {
-        nachname = newValue
-    }
 
     fun onEmailChanged(newValue: String) {
         email = newValue
@@ -46,22 +34,14 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
     // Validation
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val isFormValid: Boolean get() = vorname.isNotBlank() && nachname.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
+    val isFormValid: Boolean get() = isEmailValid && password.isNotBlank()
 
-    // Variable that listens if the registration process is successful
-    var registrationSuccess by mutableStateOf(false)
+    // Status-variables
+    var loginSuccess by mutableStateOf(false)
         private set
 
     var errorMessage by mutableStateOf<String?>(null)
         private set
-
-    fun clearErrorMessage() {
-        errorMessage = null
-    }
-
-    fun resetRegistrationStatus() {
-        registrationSuccess = false
-    }
 
     var isLoading by mutableStateOf(false)
         private set
@@ -72,38 +52,41 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val api = retrofit.create(RegisterApi::class.java)
+    private val api = retrofit.create(LoginApi::class.java)
 
-    // sending the input Data to RegisterApi.kt
-    fun register() {
+    // Senden der Login-Daten an die Spring-Boot-API
+    fun login() {
+        if (!isFormValid) return
+
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
-                val request = RegisterRequest(
-                    vorname = vorname,
-                    nachname = nachname,
+                val request = LoginRequest(
                     email = email,
                     password = password
                 )
 
-                val response = api.registerUser(request)
+                val response = api.loginUser(request)
 
                 if (response.isSuccessful) {
-                    val userId = response.body()?.userId
-                    if (userId != null) {
-                        // Alte Activities löschen bei neuem Account
-                        val db = AppDatabase.getInstance(appContext)
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            db.clearAllTables()
-                        }
-                        authStorage.saveUserId(userId)
-                        registrationSuccess = true
-                    }
+                    val loginResponse = response.body()
+                    if (loginResponse != null) {
+                        // Tokens und UserID im AuthStorage sichern
+                        authStorage.saveUserId(loginResponse.userId)
+                        // Falls euer AuthStorage schon Methoden für Tokens hat, z.B.:
+                        // authStorage.saveAccessToken(loginResponse.accessToken)
+                        // authStorage.saveRefreshToken(loginResponse.refreshToken)
 
-                }else {
+                        loginSuccess = true
+                    }
+                } else {
                     println("DEBUG: Server Failure: ${response.code()}")
-                    errorMessage = "Registrierung fehlgeschlagen. E-Mail eventuell bereits vergeben."
+                    if (response.code() == 401) {
+                        errorMessage = "E-Mail oder Passwort ist falsch."
+                    } else {
+                        errorMessage = "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+                    }
                 }
             } catch (e: Exception) {
                 println("DEBUG: Connection not made! Mistake: ${e.localizedMessage}")
@@ -116,15 +99,15 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     }
 }
 
-class RegisterViewModelFactory(
+class LoginViewModelFactory(
     private val authStorage: AuthStorage,
     private val appContext: Context
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RegisterViewModel(authStorage, appContext) as T
+            return LoginViewModel(authStorage, appContext) as T
         }
         throw IllegalArgumentException("Unknown Class for View Model")
     }

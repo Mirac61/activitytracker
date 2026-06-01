@@ -1,4 +1,4 @@
-package com.example.activitytracker.ui.screens.register
+package com.example.activitytracker.ui.screens.login
 
 import androidx.compose.foundation.BorderStroke
 import com.example.activitytracker.R
@@ -24,26 +24,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.Core.theme.PrimaryAccent
 import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.CustomTextField
-import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 
 @Composable
-fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: () -> Unit) {
+fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
     val application = LocalContext.current.applicationContext as ActivityApplication
-    val viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModelFactory(application.authStorage, application)
+    val viewModel: LoginViewModel = viewModel(
+        factory = LoginViewModelFactory(application.authStorage, application)
     )
 
     val scrollState = rememberScrollState()
-    var showSuccessMessage by remember { mutableStateOf(false)}
 
-    LaunchedEffect(viewModel.registrationSuccess) {
-        if (viewModel.registrationSuccess) {
-            showSuccessMessage = true
-            delay(1500)
-            showSuccessMessage = false
-            viewModel.resetRegistrationStatus()
-            onRegistrationComplete()
+    // status-check for successful login
+    LaunchedEffect(viewModel.loginSuccess) {
+        if (viewModel.loginSuccess) {
+            onLoginSuccess()
         }
     }
 
@@ -56,8 +53,10 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            //logo and title
+
             Spacer(modifier = Modifier.height(40.dp))
+
+            //logo and title
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -80,7 +79,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             //Text above inputs
             Text(
-                text = "Registrierung",
+                text = "Anmeldung",
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 24.sp,
                 style = MaterialTheme.typography.headlineSmall,
@@ -90,7 +89,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Willkommen! Registriere dich, um fortzufahren.",
+                text = "Melde dich an, um fortzufahren.",
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.bodyMedium,
@@ -101,52 +100,26 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             //Input fields
             CustomTextField(
-                value = viewModel.vorname,
-                onValueChange = { viewModel.onVornameChanged(it) },
-                label = "Vorname"
-            )
-
-            CustomTextField(
-                value = viewModel.nachname,
-                onValueChange = { viewModel.onNachnameChanged(it) },
-                label = "Nachname"
-            )
-
-            CustomTextField(
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChanged(it) },
                 label = "E-Mail",
                 keyboardType = KeyboardType.Email,
-                isError = viewModel.email.isNotEmpty() && !viewModel.isEmailValid,
-                errorMessage = "Ungültige Emailadresse"
             )
 
             CustomTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
                 label = "Passwort",
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardType = KeyboardType.Password
             )
 
-            //show error message
             if (!viewModel.errorMessage.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = viewModel.errorMessage!!,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            //show success message
-            if (showSuccessMessage) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Registrierung erfolgreich! Leite weiter...",
-                    color = PrimaryAccent,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -187,11 +160,11 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Register button
+            // 5. Login button
             Button(
-                onClick = { viewModel.register() },
+                onClick = { viewModel.login() },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                enabled = viewModel.isFormValid && !viewModel.isLoading && !showSuccessMessage,
+                enabled = viewModel.isFormValid && !viewModel.isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimaryAccent,
                     disabledContainerColor = Color.LightGray
@@ -202,7 +175,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
-                        "Registrieren",
+                        "Anmelden",
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
@@ -212,12 +185,13 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            //Link to Register Screen
             TextButton(
-                onClick = onNavigateToLogin,
+                onClick = onNavigateToRegister,
                 modifier = Modifier.align(CenterHorizontally)
             ) {
                 Text(
-                    text = "Bereits ein Konto? Hier anmelden",
+                    text = "Noch kein Konto? Registrieren",
                     color = PrimaryAccent,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
