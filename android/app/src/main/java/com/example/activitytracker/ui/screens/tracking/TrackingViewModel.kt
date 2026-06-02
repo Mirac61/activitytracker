@@ -71,9 +71,15 @@ class TrackingViewModel(
         viewModelScope.launch {
             repository.update(activity)
 
-            val currentDates = repository.getDates.first()
 
+            val currentDates = repository.getDates.first()
             ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
+
+            WorkManager.getInstance(appContext).enqueueUniqueWork(
+                "sync",
+                ExistingWorkPolicy.KEEP,
+                SyncWorker.buildSyncRequest()
+            )
 
             android.util.Log.d(
                 "TrackingViewModel",

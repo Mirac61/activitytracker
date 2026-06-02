@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
 import com.example.activitytracker.data.local.converter.Converters
 import com.example.activitytracker.data.local.converter.SyncStatusConverter
 
-@Database(entities = [ActivityEntity::class], version = 6)
+@Database(entities = [ActivityEntity::class], version = 7)
 @TypeConverters(Converters::class, SyncStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
