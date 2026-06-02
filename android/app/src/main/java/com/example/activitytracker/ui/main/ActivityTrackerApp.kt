@@ -45,6 +45,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     // Observe the activity List from Room
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
     val streak by trackingViewModel.streak.observeAsState(0)
+    val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -85,8 +87,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
-
-                }
+                },
+                activityNames = listOfActivityNames
             )
         }
     }
