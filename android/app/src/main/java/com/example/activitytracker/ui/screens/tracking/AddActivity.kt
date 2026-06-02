@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: (List<String>)){
+fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: List<String>){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
     val filtered: List<String> = activityNames.filter { it.contains(activityName, ignoreCase = true) }
