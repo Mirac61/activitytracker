@@ -1,6 +1,5 @@
 package com.example.activitytracker.data.repository
 
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
@@ -14,6 +13,8 @@ interface IActivityRepository {
     suspend fun insert(entity: ActivityEntity)
 
     suspend fun syncPendingActivities(userId: String): Boolean
+
+    suspend fun update(entity: ActivityEntity)
 
     val getAll: Flow<List<ActivityEntity>>
 
@@ -30,6 +31,13 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
     @WorkerThread
     override suspend fun insert(entity: ActivityEntity) {
         activityDao.insert(entity)
+    }
+
+    @WorkerThread
+    override suspend fun update(entity: ActivityEntity) {
+        activityDao.update(
+            entity.copy(status = SyncStatus.PENDING)
+        )
     }
 
     override suspend fun syncPendingActivities(userId: String): Boolean{

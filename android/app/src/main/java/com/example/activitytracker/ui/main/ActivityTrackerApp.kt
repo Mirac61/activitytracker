@@ -18,6 +18,8 @@ import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
 import com.example.activitytracker.ui.screens.register.RegistrationScreen
+import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.ui.screens.tracking.EditActivity
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,13 +28,18 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+
+
     LaunchedEffect(openAddActivityRequestId) {
         if (openAddActivityRequestId > 0) {
             showBottomSheet = true
         }
     }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val addSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val application = LocalContext.current.applicationContext as ActivityApplication
 
     val trackingViewModel: TrackingViewModel = viewModel(
@@ -62,7 +69,15 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(activities = activities, streak = streak, onSettingsClick = {})
+                AppDestinations.HOME -> HomeScreen(
+                    activities = activities,
+                    streak = streak,
+                    onSettingsClick = {},
+                    onActivityClick = { activity ->
+                        selectedActivity = activity
+                        showEditBottomSheet = true
+                    }
+                )
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
 
@@ -78,17 +93,38 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState
+            sheetState = addSheetState
         ) {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
-
                 }
             )
         }
     }
 
+    if (showEditBottomSheet && selectedActivity != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showEditBottomSheet = false
+                selectedActivity = null
+            },
+            sheetState = editSheetState
+        ) {
+            EditActivity(
+                activity = selectedActivity!!,
+                onDismiss = {
+                    showEditBottomSheet = false
+                    selectedActivity = null
+                },
+                onSave = { updatedActivity ->
+                    trackingViewModel.updateActivity(updatedActivity)
+                    showEditBottomSheet = false
+                    selectedActivity = null
+                }
+            )
+        }
+    }
 }

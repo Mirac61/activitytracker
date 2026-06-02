@@ -2,6 +2,7 @@ package com.example.activitytracker.ui.screens.home
 
 import com.example.activitytracker.ui.components.StreakBadge
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,7 +30,8 @@ import java.util.Locale
 fun HomeScreen(
     activities: List<ActivityEntity> = emptyList(),
     streak: Int = 0,
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onActivityClick: (ActivityEntity) -> Unit = {}
 ) {
     val today = LocalDate.now()
     var selectedDay by remember { mutableStateOf(today) }
@@ -124,7 +126,10 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(filteredActivities) { entity ->
-                    ActivityCard(name = entity.activityName)
+                    ActivityCard(
+                        name = entity.activityName,
+                        onClick = { onActivityClick(entity) }
+                    )
                 }
             }
         }
@@ -132,13 +137,14 @@ fun HomeScreen(
 }
 
 @Composable
-fun ActivityCard(name: String) {
+fun ActivityCard(name: String, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(35))
-            .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35)),
+            .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35))
+            .clickable() { onClick() },
         contentAlignment = Alignment.CenterStart
     ) {
         Text(

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncStatus
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +30,9 @@ interface ActivityDao {
 
     @Insert
     suspend fun insert(entry: ActivityEntity)
+
+    @Update
+    suspend fun update(activityEntity: ActivityEntity)
 
     @Delete
     suspend fun delete(activityEntity: ActivityEntity)
