@@ -27,6 +27,9 @@ interface ActivityDao {
     @Query("SELECT * FROM activity_entries WHERE id = :id")
     suspend fun findById(id: String): ActivityEntity?
 
+    @Query("SELECT DISTINCT activityName FROM activity_entries ORDER BY activityName ASC")
+    fun getActivityNames(): Flow<List<String>>
+
     @Insert
     suspend fun insert(entry: ActivityEntity)
 
