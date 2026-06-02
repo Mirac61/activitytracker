@@ -28,6 +28,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
     val filtered: List<String> = activityNames.filter { it.contains(activityName, ignoreCase = true) }
 
     var textFieldWidth by remember { mutableStateOf(0) }
+    var showSuggestions by remember { mutableStateOf(true) }
 
 
 
@@ -61,13 +62,13 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
       Box{
           OutlinedTextField(
               value = activityName,
-              onValueChange = { activityName = it },
+              onValueChange = { activityName = it; showSuggestions = true },
               modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width},
               shape = RoundedCornerShape(12.dp),
               singleLine = true
           )
           DropdownMenu(
-              expanded = filtered.isNotEmpty() && activityName.isNotBlank(),
+              expanded = filtered.isNotEmpty() && activityName.isNotBlank() && showSuggestions,
               onDismissRequest = { },
               properties = PopupProperties(focusable = false),
               modifier =  Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp()}),
@@ -75,7 +76,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
               filtered.forEach{ suggestion ->
                   DropdownMenuItem(
                       text = { Text(suggestion) },
-                      onClick = {activityName = suggestion
+                      onClick = {activityName = suggestion; showSuggestions = false
                       }
                   )
               }
