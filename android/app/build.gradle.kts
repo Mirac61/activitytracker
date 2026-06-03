@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.identity.jvm)
+    implementation(libs.play.services.location)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.jupiter.junit.jupiter)
     testImplementation("org.mockito:mockito-core:5.+")
@@ -101,4 +102,6 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation(libs.androidsvg.aar)
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 }
