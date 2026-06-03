@@ -29,12 +29,15 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Rename APK
+        run: mv app/build/outputs/apk/server/release/app-server-release.apk app/build/outputs/apk/server/release/aktivitatstracker-v${{ github.run_number }}.apk
+        working-directory: android
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: Release v${{ github.run_number }}
-          files: android/app/build/outputs/apk/server/release/*.apk
+          files: android/app/build/outputs/apk/server/release/aktivitatstracker-v${{ github.run_number }}.apk
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
