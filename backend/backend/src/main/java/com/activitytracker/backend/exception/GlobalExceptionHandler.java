@@ -51,4 +51,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDuplicateUser(UserAlreadyExistsException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
+
+    @ExceptionHandler(jakarta.ws.rs.NotAuthorizedException.class)
+    public ResponseEntity<String> handleUnauthorized(jakarta.ws.rs.NotAuthorizedException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("E-Mail oder Passwort falsch.");
+    }
 }

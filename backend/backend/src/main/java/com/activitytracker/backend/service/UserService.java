@@ -1,5 +1,7 @@
 package com.activitytracker.backend.service;
 
+import com.activitytracker.backend.dto.AuthResponseDto;
+import com.activitytracker.backend.dto.LoginRequestDto;
 import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.repository.UserRepository;
@@ -29,6 +31,12 @@ public class UserService {
             keycloakService.deleteUserFromKeycloak(keycloakId);
             throw new RuntimeException("Database-failure: Registration canceled. Please try again.");
         }
+        return keycloakId;
+    }
+
+    public UUID loginUser(LoginRequestDto dto) {
+        UUID keycloakId = keycloakService.verifyCredentialsAndGetId(dto.getEmail(), dto.getPassword());
+
         return keycloakId;
     }
 }

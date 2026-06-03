@@ -87,4 +87,26 @@ public class KeycloakService {
     public void deleteUserFromKeycloak(UUID userId) {
         keycloak.realm(targetRealm).users().get(userId.toString()).remove();
     }
+
+    public UUID verifyCredentialsAndGetId(String email, String password) {
+        UserRepresentation user = keycloak.realm(targetRealm)
+                .users()
+                .searchByEmail(email, true)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new jakarta.ws.rs.NotAuthorizedException("E-Mail oder Passwort falsch."));
+
+        try (Keycloak userKeycloak = KeycloakBuilder.builder()
+                .serverUrl(serverUrl)
+                .realm(targetRealm)
+                .clientId(clientId)
+                .username(user.getUsername())
+                .password(password)
+                .build()) {
+
+            userKeycloak.tokenManager().getAccessTokenString();
+        }
+
+        return UUID.fromString(user.getId());
+    }
 }
