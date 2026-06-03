@@ -103,7 +103,7 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
                 }else {
                     println("DEBUG: Server Failure: ${response.code()}")
-                    errorMessage = "Registrierung fehlgeschlagen. E-Mail eventuell bereits vergeben."
+                    errorMessage = "Registrierung fehlgeschlagen. E-Mail bereits vergeben."
                 }
             } catch (e: Exception) {
                 println("DEBUG: Connection not made! Mistake: ${e.localizedMessage}")
