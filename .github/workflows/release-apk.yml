@@ -1,7 +1,7 @@
 name: Release APK
 on:
   push:
-    branches: ["feat/64/apk-generation"]
+    branches: ["main"]
 jobs:
   build:
     runs-on: ubuntu-latest
