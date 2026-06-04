@@ -59,6 +59,7 @@ object RetrofitClient {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
             .create(RegisterApi::class.java)
+    }
     val weatherApi: WeatherApi by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)

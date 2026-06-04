@@ -64,6 +64,8 @@ public class GlobalExceptionHandler {
         log.error("Abgefangener Fehler bei der User-Registrierung: ", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponseDto(500, e.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest().body("Validation failed");
