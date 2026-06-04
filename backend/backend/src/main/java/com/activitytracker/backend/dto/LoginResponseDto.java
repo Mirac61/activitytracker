@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class LoginResponseDto {
-    public String userId;
-    public String accessToken;
-    public String refreshToken;
+    private String userId;
+    private String accessToken;
+    private String refreshToken;
 }

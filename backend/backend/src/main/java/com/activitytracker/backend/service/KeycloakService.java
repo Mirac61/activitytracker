@@ -1,6 +1,7 @@
 package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.exception.InvalidCredentialsException;
 import com.activitytracker.backend.exception.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -31,6 +32,8 @@ import java.util.UUID;
 public class KeycloakService {
 
     private Keycloak keycloak;
+
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${keycloak.serverUrl}")
     private String serverUrl;
@@ -74,7 +77,7 @@ public class KeycloakService {
                 log.info("User successfully created in Keycloak. ID: {}", stringId);
                 return UUID.fromString(stringId);
             } else if (response.getStatus() == 409) {
-                throw new UserAlreadyExistsException("User with this email already exists");
+                throw new UserAlreadyExistsException("Nutzer mit dieser Email existiert bereits");
             } else {
                 String errorReason = response.getStatusInfo().getReasonPhrase();
                 log.error("Keycloak error while creating: {}", errorReason);
@@ -131,18 +134,19 @@ public class KeycloakService {
 
             return new AuthenticationResult(user.getId(), tokenResponse);
 
-        } catch (NotAuthorizedException e) {
-            throw e;
+        } catch (jakarta.ws.rs.NotAuthorizedException e) {
+            log.warn("Failed to login (wrong credentials) for: {}", email);
+            throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
+
         } catch (Exception e) {
-            log.error("Login in Keycloak fehlgeschlagen für: {} {}", email, e.getMessage());
-            throw new NotAuthorizedException("E-Mail oder Passwort falsch.");
+            log.error("Critical system failure at Keycloak-Login for {}: ", email, e);
+
+            throw new RuntimeException("Keycloak service unavailable", e);
         }
     }
 
     public AuthenticationResult refreshTokens(String refreshToken) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -166,8 +170,8 @@ public class KeycloakService {
             return new AuthenticationResult(verifiedUserId, tokenResponse);
 
         } catch (Exception e) {
-            log.error("Fehler beim Token-Refresh via RestTemplate: {}", e.getMessage());
-            throw new NotAuthorizedException("Session abgelaufen. Bitte erneut anmelden.");
+            log.error("Error during token refresh via RestTemplate: {}", e.getMessage());
+            throw new InvalidCredentialsException("Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.");
         }
     }
 

@@ -52,9 +52,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-    @ExceptionHandler(jakarta.ws.rs.NotAuthorizedException.class)
+    @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<String> handleUnauthorized(jakarta.ws.rs.NotAuthorizedException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("E-Mail oder Passwort falsch.");
+    }
+
+    @ExceptionHandler(UserRegistrationException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserRegistrationError(UserRegistrationException e) {
+        log.error("Abgefangener Fehler bei der User-Registrierung: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponseDto(500, e.getMessage()));
     }
 }
