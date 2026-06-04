@@ -2,7 +2,7 @@ name: Java CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main"]
+    branches: [ "main", "**"]
 
 permissions:
   packages: write
@@ -25,12 +25,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Backend kompilieren (Clean Install)
+      - name: Backend kompilieren und Tests ausführen
         run: |
           cd backend/backend
-          mvn clean install -Dmaven.test.skip=true
+          mvn clean install
 
       - name: Bei GitHub Container Registry einloggen
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -38,6 +39,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker-Image auf GitHub bauen und pushen
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v5
         with:
           context: ./backend/backend
@@ -48,6 +50,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ github.ref == 'refs/heads/main' }}
 
     steps:
       - name: Auf Hetzner-Server einloggen und deployen
