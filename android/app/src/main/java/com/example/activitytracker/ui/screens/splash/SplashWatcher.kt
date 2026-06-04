@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.data.ActivityApplication
-import com.example.activitytracker.ui.screens.login.LoginViewModel
-import com.example.activitytracker.ui.screens.login.LoginViewModelFactory
 
 @Composable
 fun SplashWatcher(
@@ -17,17 +15,16 @@ fun SplashWatcher(
     onNavigateToLogin: () -> Unit
 ) {
     val application = LocalContext.current.applicationContext as ActivityApplication
-    val viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModelFactory(application.authStorage, application)
+
+    val viewModel: SplashViewModel = viewModel(
+        factory = SplashViewModelFactory(application.authStorage)
     )
 
-    LaunchedEffect(viewModel.isChecking) {
-        if (!viewModel.isChecking) {
-            if (viewModel.loginSuccess) {
-                onNavigateToHome()
-            } else {
-                onNavigateToLogin()
-            }
+    LaunchedEffect(viewModel.navigationState) {
+        when (viewModel.navigationState) {
+            is SplashViewModel.NavigationState.Authenticated -> onNavigateToHome()
+            is SplashViewModel.NavigationState.Unauthenticated -> onNavigateToLogin()
+            is SplashViewModel.NavigationState.Loading -> { }
         }
     }
 
