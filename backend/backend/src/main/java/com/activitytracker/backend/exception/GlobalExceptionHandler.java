@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<String> handleUnauthorized(jakarta.ws.rs.NotAuthorizedException e) {
+    public ResponseEntity<String> handleUnauthorized(InvalidCredentialsException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body("E-Mail oder Passwort falsch.");
     }

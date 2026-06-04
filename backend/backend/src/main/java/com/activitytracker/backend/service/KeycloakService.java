@@ -114,7 +114,7 @@ public class KeycloakService {
                 .searchByEmail(email, true)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new NotAuthorizedException("E-Mail oder Passwort falsch."));
+                .orElseThrow(() -> new InvalidCredentialsException("E-Mail oder Passwort falsch."));
 
         //Token Manager
         try (Keycloak userKeycloak = KeycloakBuilder.builder()
@@ -138,6 +138,8 @@ public class KeycloakService {
             log.warn("Failed to login (wrong credentials) for: {}", email);
             throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
 
+        } catch (InvalidCredentialsException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Critical system failure at Keycloak-Login for {}: ", email, e);
 
@@ -175,5 +177,6 @@ public class KeycloakService {
         }
     }
 
-    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse) {}
+    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse) {
+    }
 }
