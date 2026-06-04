@@ -30,6 +30,10 @@ class TrackingViewModel(
 
     val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
 
+
+    // List of existing activity names upon new entry
+    val listOfActivityNames: LiveData<List<String>> = repository.getActivityNames.asLiveData()
+
     // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
     val streak: LiveData<Int> = dates.map { StreakLogic.calculateStreak(it) }
