@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: List<String>){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
-    val filtered: List<String> = if (activityName.isNotBlank()) {activityNames} else {activityNames.filter { it.contains(activityName, ignoreCase = true) }}
+    val filtered: List<String> = if (activityName.isBlank()) {activityNames} else {activityNames.filter { it.contains(activityName, ignoreCase = true) }}
 
     var textFieldWidth by remember { mutableStateOf(0) }
     var showSuggestions by remember { mutableStateOf(true) }
@@ -70,7 +70,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
       Box{
           OutlinedTextField(
               value = activityName,
-              onValueChange = { activityName = it; showSuggestions = true },
+              onValueChange = { activityName = it },
               modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width}
                   .onFocusChanged{isFocused = it.isFocused; if(it.isFocused){showSuggestions = true} },
               shape = RoundedCornerShape(12.dp),
