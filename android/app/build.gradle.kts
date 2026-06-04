@@ -114,4 +114,6 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.androidx.activity.compose)
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 }
