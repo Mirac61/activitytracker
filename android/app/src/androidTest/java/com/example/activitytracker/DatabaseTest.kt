@@ -9,6 +9,11 @@ import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.repository.IActivityRepository
 import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
+import com.example.activitytracker.data.local.sync.SyncStatus
+import com.example.activitytracker.data.repository.ActivityRepository
+import com.example.activitytracker.data.remote.ApiService
+import com.example.activitytracker.data.remote.dto.ActivityUploadDto
+import retrofit2.Response
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -38,6 +43,82 @@ class DatabaseTest {
     @After
     fun closeDb() {
         db.close()
+    }
+
+    private class FakeApiService : ApiService {
+        override suspend fun uploadActivity(activity: ActivityUploadDto): Response<Unit> {
+            return Response.success(Unit)
+        }
+
+        override suspend fun updateActivity(
+            id: String,
+            activity: ActivityUploadDto
+        ): Response<Unit> {
+            return Response.success(Unit)
+        }
+    }
+
+    @Test
+    fun update_setsStatusToPendingUpdate() = runBlocking {
+        val repository = ActivityRepository(activityDao, FakeApiService())
+
+        val activity = ActivityEntity(
+            activityName = "Laufen",
+            activityDate = LocalDate.of(2026, 6, 2),
+            createdAt = OffsetDateTime.parse("2026-06-02T10:00:00Z"),
+            status = SyncStatus.SYNCED
+        )
+
+        activityDao.insert(activity)
+
+        repository.update(
+            activity.copy(activityName = "Joggen")
+        )
+
+        val updated = activityDao.findById(activity.id)
+
+        assert(updated?.activityName == "Joggen")
+        assert(updated?.status == SyncStatus.PENDING_UPDATE)
+    }
+
+    @Test
+    fun syncPendingCreate_success_setsStatusToSynced() = runBlocking {
+        val repository = ActivityRepository(activityDao, FakeApiService())
+
+        val activity = ActivityEntity(
+            activityName = "Laufen",
+            activityDate = LocalDate.of(2026, 6, 2),
+            createdAt = OffsetDateTime.parse("2026-06-02T10:00:00Z"),
+            status = SyncStatus.PENDING_CREATE
+        )
+
+        activityDao.insert(activity)
+
+        repository.syncPendingActivities("mock_user_1")
+
+        val synced = activityDao.findById(activity.id)
+
+        assert(synced?.status == SyncStatus.SYNCED)
+    }
+
+    @Test
+    fun syncPendingUpdate_success_setsStatusToSynced() = runBlocking {
+        val repository = ActivityRepository(activityDao, FakeApiService())
+
+        val activity = ActivityEntity(
+            activityName = "Joggen",
+            activityDate = LocalDate.of(2026, 6, 2),
+            createdAt = OffsetDateTime.parse("2026-06-02T10:00:00Z"),
+            status = SyncStatus.PENDING_UPDATE
+        )
+
+        activityDao.insert(activity)
+
+        repository.syncPendingActivities("mock_user_1")
+
+        val synced = activityDao.findById(activity.id)
+
+        assert(synced?.status == SyncStatus.SYNCED)
     }
 
     @Test
@@ -149,6 +230,10 @@ class DatabaseTest {
 
             override suspend fun insert(entity: ActivityEntity) {
                 insertCount++
+            }
+
+            override suspend fun update(entity: ActivityEntity) {
+
             }
 
             override suspend fun syncPendingActivities(userId: String): Boolean {

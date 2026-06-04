@@ -21,4 +21,14 @@ public class ActivityController {
         activityService.uploadActivity(request, request.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable String id,
+            @Valid @RequestBody ActivityDto request
+    ) {
+        activityService.updateActivity(id, request, request.getUserId());
+
+        return ResponseEntity.noContent().build();
+    }
 }

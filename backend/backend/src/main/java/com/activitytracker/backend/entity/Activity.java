@@ -11,12 +11,13 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "activities")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+
 public class Activity {
     @Id
     private UUID activityId;
-    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
