@@ -1,6 +1,7 @@
 package com.example.activitytracker.ui.screens.login
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +12,9 @@ import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.network.LoginApi
 import com.example.activitytracker.data.network.LoginRequest
+import com.example.activitytracker.data.network.LoginResponse
 import com.example.activitytracker.data.network.RefreshRequest
+import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -23,10 +26,6 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
     var password by mutableStateOf("")
         private set
 
-    init {
-        checkAndRefreshLogin()
-    }
-
     fun onEmailChanged(newValue: String) {
         email = newValue
         errorMessage = null
@@ -37,7 +36,6 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
         errorMessage = null
     }
 
-    // Validation
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val isFormValid: Boolean get() = isEmailValid && password.isNotBlank()
 
@@ -51,16 +49,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
     var isLoading by mutableStateOf(false)
         private set
 
-    var isChecking by mutableStateOf(true)
-        private set
-
-    // Create Retrofit instance
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(LoginApi::class.java)
+    private val instance = RetrofitClient.logininstance
 
     // process login data
     fun login() {
@@ -75,7 +64,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                     password = password
                 )
 
-                val response = api.loginUser(request)
+                val response = instance.loginUser(request)
 
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
@@ -83,11 +72,9 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                         authStorage.saveUserId(loginResponse.userId)
                         authStorage.saveAccessToken(loginResponse.accessToken)
                         authStorage.saveRefreshToken(loginResponse.refreshToken)
-
                         loginSuccess = true
                     }
                 } else {
-                    println("DEBUG: Server Failure: ${response.code()}")
                     if (response.code() == 401) {
                         errorMessage = "E-Mail oder Passwort ist falsch."
                     } else {
@@ -95,45 +82,11 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                     }
                 }
             } catch (e: Exception) {
-                println("DEBUG: Connection not made! Mistake: ${e.localizedMessage}")
+                Log.e("LoginViewModel", "Netzwerk- oder Serverfehler aufgetreten", e)
                 e.printStackTrace()
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
             } finally {
                 isLoading = false
-            }
-        }
-    }
-
-    //get new tokens
-    private fun checkAndRefreshLogin() {
-        viewModelScope.launch {
-            val savedRefreshToken = authStorage.getRefreshToken()
-
-            if (savedRefreshToken.isNullOrBlank()) {
-                isChecking = false
-                return@launch
-            }
-
-            try {
-                val response = api.refreshToken(RefreshRequest(refreshToken = savedRefreshToken))
-
-                if (response.isSuccessful) {
-                    val loginResponse = response.body()
-                    if (loginResponse != null) {
-                        authStorage.saveUserId(loginResponse.userId)
-                        authStorage.saveAccessToken(loginResponse.accessToken)
-                        authStorage.saveRefreshToken(loginResponse.refreshToken)
-
-                        loginSuccess = true
-                    }
-                } else {
-                    authStorage.clearAll()
-                    errorMessage = "Deine Sitzung ist abgelaufen."
-                }
-            } catch (e: Exception) {
-                errorMessage = "Netzwerkfehler."
-            } finally {
-                isChecking = false
             }
         }
     }

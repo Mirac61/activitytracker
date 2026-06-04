@@ -21,7 +21,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.activitytracker.Core.theme.InputField
 import com.example.activitytracker.Core.theme.PrimaryAccent
+import com.example.activitytracker.Core.theme.TextDescription
 import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.CustomTextField
 import kotlinx.coroutines.delay
@@ -94,7 +96,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = TextDescription
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -128,14 +130,11 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                 visualTransformation = PasswordVisualTransformation()
             )
 
-            //show error message
-            if (!viewModel.errorMessage.isNullOrEmpty()) {
+            viewModel.errorMessage?.takeIf { it.isNotEmpty() }?.let { message ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = viewModel.errorMessage!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
+                    text = message,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
 
@@ -199,11 +198,11 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                 shape = RoundedCornerShape(25.dp)
             ) {
                 if (viewModel.isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = InputField, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
                         "Registrieren",
-                        color = Color.White,
+                        color = InputField,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )

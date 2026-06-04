@@ -26,6 +26,8 @@ import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.CustomTextField
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import com.example.activitytracker.Core.theme.InputField
+import com.example.activitytracker.Core.theme.TextDescription
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
@@ -93,7 +95,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 16.sp,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = TextDescription
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -172,11 +174,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
                 shape = RoundedCornerShape(25.dp)
             ) {
                 if (viewModel.isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = InputField, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
                         "Anmelden",
-                        color = Color.White,
+                        color = InputField,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
