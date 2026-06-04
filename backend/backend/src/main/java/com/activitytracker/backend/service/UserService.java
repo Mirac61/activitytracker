@@ -1,8 +1,6 @@
 package com.activitytracker.backend.service;
 
-import com.activitytracker.backend.dto.AuthResponseDto;
-import com.activitytracker.backend.dto.LoginRequestDto;
-import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -34,9 +32,23 @@ public class UserService {
         return keycloakId;
     }
 
-    public UUID loginUser(LoginRequestDto dto) {
-        UUID keycloakId = keycloakService.verifyCredentialsAndGetId(dto.getEmail(), dto.getPassword());
+    public LoginResponseDto loginUser(LoginRequestDto dto) {
+        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateUser(dto.getEmail(), dto.getPassword());
 
-        return keycloakId;
+        return new LoginResponseDto(
+                authResult.userId(),
+                authResult.tokenResponse().getToken(),
+                authResult.tokenResponse().getRefreshToken()
+        );
+    }
+
+    public LoginResponseDto refreshUserToken(RefreshRequestDto dto) {
+        KeycloakService.AuthenticationResult refreshResult = keycloakService.refreshTokens(dto.getRefreshToken());
+
+        return new LoginResponseDto(
+                refreshResult.userId(),
+                refreshResult.tokenResponse().getToken(),
+                refreshResult.tokenResponse().getRefreshToken()
+        );
     }
 }
