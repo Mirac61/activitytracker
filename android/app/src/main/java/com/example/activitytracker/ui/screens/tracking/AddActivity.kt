@@ -1,5 +1,6 @@
 package com.example.activitytracker.ui.screens.tracking
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 
@@ -12,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.window.PopupProperties
 import java.time.Instant
 import java.time.LocalDate
@@ -31,6 +34,7 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
     var textFieldWidth by remember { mutableStateOf(0) }
     var showSuggestions by remember { mutableStateOf(true) }
     var isFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
 
 
@@ -45,7 +49,9 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
 
 
 
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
+    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding().pointerInput(Unit) {
+        detectTapGestures(onTap = { focusManager.clearFocus() })
+    }) {
 
         // Der Header
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -66,13 +72,13 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
               value = activityName,
               onValueChange = { activityName = it; showSuggestions = true },
               modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width}
-                  .onFocusChanged{isFocused = it.isFocused},
+                  .onFocusChanged{isFocused = it.isFocused; if(it.isFocused){showSuggestions = true} },
               shape = RoundedCornerShape(12.dp),
               singleLine = true
           )
           DropdownMenu(
               expanded = filtered.isNotEmpty() && (isFocused || activityName.isNotBlank()) && showSuggestions,
-              onDismissRequest = { },
+              onDismissRequest = { showSuggestions = false },
               properties = PopupProperties(focusable = false),
               modifier =  Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp()}),
           ) {
