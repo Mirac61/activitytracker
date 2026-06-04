@@ -14,23 +14,25 @@ fun MainNavBar(
     onPlusClicked: () -> Unit
 ) {
     NavigationBar {
-        AppDestinations.entries.forEach { destination ->
-            NavigationBarItem(
-                selected = destination == currentDestination,
-                onClick = {
-                    if(destination == AppDestinations.TRACKING){
-                        onPlusClicked()
-                    } else {
-                        onNavigate(destination)
+        AppDestinations.entries
+            .filter { it != AppDestinations.LOGIN && it != AppDestinations.REGISTER && it != AppDestinations.SPLASH }
+            .forEach { destination ->
+                NavigationBarItem(
+                    selected = destination == currentDestination,
+                    onClick = {
+                        if (destination == AppDestinations.TRACKING) {
+                            onPlusClicked()
+                        } else {
+                            onNavigate(destination)
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(destination.icon),
+                            contentDescription = destination.label
+                        )
                     }
-                   },
-                icon = {
-                    Icon(
-                        painter = painterResource(destination.icon),
-                        contentDescription = destination.label
-                    )
-                }
-            )
-        }
+                )
+            }
     }
 }

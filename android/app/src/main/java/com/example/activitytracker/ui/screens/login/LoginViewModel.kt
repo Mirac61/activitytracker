@@ -11,6 +11,7 @@ import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.network.LoginApi
 import com.example.activitytracker.data.network.LoginRequest
+import com.example.activitytracker.data.network.RefreshRequest
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -21,6 +22,10 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
         private set
     var password by mutableStateOf("")
         private set
+
+    init {
+        checkAndRefreshLogin()
+    }
 
     fun onEmailChanged(newValue: String) {
         email = newValue
@@ -46,6 +51,9 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
     var isLoading by mutableStateOf(false)
         private set
 
+    var isChecking by mutableStateOf(true)
+        private set
+
     // Create Retrofit instance
     private val retrofit = Retrofit.Builder()
         .baseUrl(BuildConfig.BASE_URL)
@@ -54,7 +62,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
 
     private val api = retrofit.create(LoginApi::class.java)
 
-    // Senden der Login-Daten an die Spring-Boot-API
+    // process login data
     fun login() {
         if (!isFormValid) return
 
@@ -72,11 +80,9 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        // Tokens und UserID im AuthStorage sichern
                         authStorage.saveUserId(loginResponse.userId)
-                        // Falls euer AuthStorage schon Methoden für Tokens hat, z.B.:
-                        // authStorage.saveAccessToken(loginResponse.accessToken)
-                        // authStorage.saveRefreshToken(loginResponse.refreshToken)
+                        authStorage.saveAccessToken(loginResponse.accessToken)
+                        authStorage.saveRefreshToken(loginResponse.refreshToken)
 
                         loginSuccess = true
                     }
@@ -94,6 +100,40 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
             } finally {
                 isLoading = false
+            }
+        }
+    }
+
+    //get new tokens
+    private fun checkAndRefreshLogin() {
+        viewModelScope.launch {
+            val savedRefreshToken = authStorage.getRefreshToken()
+
+            if (savedRefreshToken.isNullOrBlank()) {
+                isChecking = false
+                return@launch
+            }
+
+            try {
+                val response = api.refreshToken(RefreshRequest(refreshToken = savedRefreshToken))
+
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    if (loginResponse != null) {
+                        authStorage.saveUserId(loginResponse.userId)
+                        authStorage.saveAccessToken(loginResponse.accessToken)
+                        authStorage.saveRefreshToken(loginResponse.refreshToken)
+
+                        loginSuccess = true
+                    }
+                } else {
+                    authStorage.clearAll()
+                    errorMessage = "Deine Sitzung ist abgelaufen."
+                }
+            } catch (e: Exception) {
+                errorMessage = "Netzwerkfehler."
+            } finally {
+                isChecking = false
             }
         }
     }
