@@ -25,6 +25,7 @@ android/local.properties
 **/build/
 .gradle/
 android/local.properties
+release-key.jks
 
 # IDE Einstellungen
 android/.idea/
