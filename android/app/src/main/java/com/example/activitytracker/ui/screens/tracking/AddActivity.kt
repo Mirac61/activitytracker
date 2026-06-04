@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
@@ -25,10 +26,11 @@ import java.time.format.DateTimeFormatter
 fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: List<String>){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
-    val filtered: List<String> = activityNames.filter { it.contains(activityName, ignoreCase = true) }
+    val filtered: List<String> = if (activityName.isNotBlank()) {activityNames} else {activityNames.filter { it.contains(activityName, ignoreCase = true) }}
 
     var textFieldWidth by remember { mutableStateOf(0) }
     var showSuggestions by remember { mutableStateOf(true) }
+    var isFocused by remember { mutableStateOf(false) }
 
 
 
@@ -63,12 +65,13 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
           OutlinedTextField(
               value = activityName,
               onValueChange = { activityName = it; showSuggestions = true },
-              modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width},
+              modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width}
+                  .onFocusChanged{isFocused = it.isFocused},
               shape = RoundedCornerShape(12.dp),
               singleLine = true
           )
           DropdownMenu(
-              expanded = filtered.isNotEmpty() && activityName.isNotBlank() && showSuggestions,
+              expanded = filtered.isNotEmpty() && (isFocused || activityName.isNotBlank()) && showSuggestions,
               onDismissRequest = { },
               properties = PopupProperties(focusable = false),
               modifier =  Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp()}),
