@@ -1,7 +1,6 @@
 package com.activitytracker.backend.controller;
 
-import com.activitytracker.backend.dto.AuthResponseDto;
-import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +21,17 @@ public class UserController {
     public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody UserRegistrationDto dto) {
         UUID userId = userService.registerUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponseDto(userId.toString()));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto dto) {
+        LoginResponseDto response = userService.loginUser(dto);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponseDto> refresh(@Valid @RequestBody RefreshRequestDto dto) {
+        LoginResponseDto response = userService.refreshUserToken(dto);
+        return ResponseEntity.ok(response);
     }
 }   

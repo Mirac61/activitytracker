@@ -1,12 +1,15 @@
 package com.activitytracker.backend.service;
 
-import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.entity.User;
+import com.activitytracker.backend.exception.UserRegistrationException;
 import com.activitytracker.backend.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -25,10 +28,40 @@ public class UserService {
             User user = new User();
             user.setUserId(keycloakId);
             userRepository.save(user);
+
+            return keycloakId;
+
         } catch (Exception e) {
-            keycloakService.deleteUserFromKeycloak(keycloakId);
-            throw new RuntimeException("Database-failure: Registration canceled. Please try again.");
+            log.error("Failed to save user to local database after Keycloak creation. Triggering Rollback... Error: {}", e.getMessage());
+
+            try {
+                keycloakService.deleteUserFromKeycloak(keycloakId);
+                log.info("Rollback successful: User {} removed from Keycloak to preserve data consistency.", keycloakId);
+            } catch (Exception rollbackException) {
+                log.error("CRITICAL: Rollback failed! Could not delete user {} from Keycloak: {}", keycloakId, rollbackException.getMessage());
+            }
+
+            throw new UserRegistrationException("Registrierung fehlgeschlagen. Interner Datenbankfehler.", e);
         }
-        return keycloakId;
+    }
+
+    public LoginResponseDto loginUser(LoginRequestDto dto) {
+        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateUser(dto.getEmail(), dto.getPassword());
+
+        return new LoginResponseDto(
+                authResult.userId(),
+                authResult.tokenResponse().getToken(),
+                authResult.tokenResponse().getRefreshToken()
+        );
+    }
+
+    public LoginResponseDto refreshUserToken(RefreshRequestDto dto) {
+        KeycloakService.AuthenticationResult refreshResult = keycloakService.refreshTokens(dto.getRefreshToken());
+
+        return new LoginResponseDto(
+                refreshResult.userId(),
+                refreshResult.tokenResponse().getToken(),
+                refreshResult.tokenResponse().getRefreshToken()
+        );
     }
 }

@@ -1,6 +1,7 @@
 package com.example.activitytracker.ui.screens.register
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +13,7 @@ import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.network.RegisterApi
 import com.example.activitytracker.data.network.RegisterRequest
+import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -36,21 +38,14 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
     fun onEmailChanged(newValue: String) {
         email = newValue
+        errorMessage = null
     }
 
     fun onPasswordChanged(newValue: String) {
         password = newValue
+        errorMessage = null
     }
 
-    // Create Retrofit instance
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(RegisterApi::class.java)
-
-    // Validation
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val isFormValid: Boolean get() = vorname.isNotBlank() && nachname.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
 
@@ -69,9 +64,17 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
         registrationSuccess = false
     }
 
+    var isLoading by mutableStateOf(false)
+        private set
+
+    // Create Retrofit instance
+    private val instance = RetrofitClient.registerinstance
+
     // sending the input Data to RegisterApi.kt
     fun register() {
         viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
             try {
                 val request = RegisterRequest(
                     vorname = vorname,
@@ -80,7 +83,7 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                     password = password
                 )
 
-                val response = api.registerUser(request)
+                val response = instance.registerUser(request)
 
                 if (response.isSuccessful) {
                     val userId = response.body()?.userId
@@ -95,13 +98,15 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                     }
 
                 }else {
-                    println("DEBUG: Server Failure: ${response.code()}")
-                    errorMessage = "Registrierung fehlgeschlagen. E-Mail eventuell bereits vergeben."
+                    Log.e("RegisterViewModel", "Server Failure during registration: ${response.code()}")
+                    errorMessage = "Registrierung fehlgeschlagen. E-Mail bereits vergeben."
                 }
             } catch (e: Exception) {
-                println("DEBUG: Connection not made! Mistake: ${e.localizedMessage}")
+                Log.e("RegisterViewModel", "Netzwerk- oder Serverfehler aufgetreten", e)
                 e.printStackTrace()
-                errorMessage = "Netzwerkfehler."
+                errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
+            } finally {
+                isLoading = false
             }
         }
     }

@@ -53,6 +53,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<String> handleUnauthorized(InvalidCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("E-Mail oder Passwort falsch.");
+    }
+
+    @ExceptionHandler(UserRegistrationException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserRegistrationError(UserRegistrationException e) {
+        log.error("Abgefangener Fehler bei der User-Registrierung: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponseDto(500, e.getMessage()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest().body("Validation failed");

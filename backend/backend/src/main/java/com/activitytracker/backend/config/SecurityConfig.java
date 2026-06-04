@@ -25,7 +25,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/register").permitAll()
-                        // When login is implementer this has to be changed to .authenticated()
+                        .requestMatchers("/api/users/login").permitAll()
+                        .requestMatchers("/api/users/refresh").permitAll()
                         .requestMatchers("/activities/**").permitAll()
                         .requestMatchers("/api/weather").permitAll()
                         .anyRequest().authenticated()

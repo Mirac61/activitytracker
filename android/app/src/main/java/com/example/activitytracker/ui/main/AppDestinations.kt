@@ -9,7 +9,7 @@ enum class AppDestinations(
     FRIENDS("Freunde", R.drawable.ic_friends),
     HOME("Home", R.drawable.round_home_24),
     TRACKING("Tracking", R.drawable.ic_add),
-
-    //placeholder to test Registration screen until full implementation
-    REGISTER("Register", R.drawable.ic_google_logo)
+    REGISTER("Register", R.drawable.ic_google_logo),
+    LOGIN("Login", R.drawable.ic_google_logo),
+    SPLASH("Splash", R.drawable.ic_google_logo)
 }

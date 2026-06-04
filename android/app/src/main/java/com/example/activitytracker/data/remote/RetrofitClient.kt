@@ -1,6 +1,8 @@
 package com.example.activitytracker.data.remote
 
 import com.example.activitytracker.BuildConfig
+import com.example.activitytracker.data.network.LoginApi
+import com.example.activitytracker.data.network.RegisterApi
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
@@ -43,6 +45,21 @@ object RetrofitClient {
             .create(ApiService::class.java)
     }
 
+    val logininstance: LoginApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(LoginApi::class.java)
+    }
+
+    val registerinstance: RegisterApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(RegisterApi::class.java)
+    }
     val weatherApi: WeatherApi by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
