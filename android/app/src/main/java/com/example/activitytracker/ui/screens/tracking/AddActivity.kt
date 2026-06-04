@@ -1,4 +1,5 @@
 package com.example.activitytracker.ui.screens.tracking
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*

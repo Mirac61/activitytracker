@@ -65,6 +65,32 @@ class TrackingViewModel(
             )
         }
     }
+
+    fun updateActivity(activity: ActivityEntity) {
+        if (activity.activityName.isBlank()) {
+            android.util.Log.e("TrackingViewModel", "Name ist leer")
+            return
+        }
+
+        viewModelScope.launch {
+            repository.update(activity)
+
+
+            val currentDates = repository.getDates.first()
+            ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
+
+            WorkManager.getInstance(appContext).enqueueUniqueWork(
+                "sync",
+                ExistingWorkPolicy.KEEP,
+                SyncWorker.buildSyncRequest()
+            )
+
+            android.util.Log.d(
+                "TrackingViewModel",
+                "Aktivität ${activity.id} wurde aktualisiert"
+            )
+        }
+    }
 }
 
 

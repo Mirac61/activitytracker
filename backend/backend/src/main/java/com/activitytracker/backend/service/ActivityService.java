@@ -58,4 +58,37 @@ public class ActivityService {
         var activity = activityMapper.toEntity(request, user);
         activityRepository.save(activity);
     }
+
+    @Transactional
+    public void updateActivity(String id, ActivityDto request, String userId) {
+
+        if (id == null || id.isBlank()) {
+            throw new InvalidActivityException("Id must not be empty");
+        }
+        if (request.getActivityName() == null || request.getActivityName().isBlank()) {
+            throw new InvalidActivityException("Name can not be empty");
+        }
+        if (request.getActivityDate() == null) {
+            throw new InvalidActivityException("Date can not be empty");
+        }
+
+        UUID activityId;
+        try {
+            activityId = UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidActivityException("Invalid UUID format for activity ID");
+        }
+
+        Activity existing = activityRepository.findById(activityId)
+                .orElseThrow(() -> new InvalidActivityException("Activity not found"));
+
+        if (!existing.getUser().getUserId().toString().equals(userId)) {
+            throw new AccessDeniedException("Activity belongs to another user");
+        }
+
+        existing.setName(request.getActivityName());
+        existing.setTimestamp(request.getActivityDate().atStartOfDay());
+
+        activityRepository.save(existing);
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.activitytracker.data.repository
 
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.example.activitytracker.data.local.dao.ActivityDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
@@ -14,6 +13,8 @@ interface IActivityRepository {
     suspend fun insert(entity: ActivityEntity)
 
     suspend fun syncPendingActivities(userId: String): Boolean
+
+    suspend fun update(entity: ActivityEntity)
 
     val getAll: Flow<List<ActivityEntity>>
 
@@ -33,28 +34,58 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
 
     @WorkerThread
     override suspend fun insert(entity: ActivityEntity) {
-        activityDao.insert(entity)
+        activityDao.insert(
+            entity.copy(status = SyncStatus.PENDING_CREATE)
+        )
     }
 
-    override suspend fun syncPendingActivities(userId: String): Boolean{
+    @WorkerThread
+    override suspend fun update(entity: ActivityEntity) {
+        activityDao.update(
+            entity.copy(status = SyncStatus.PENDING_UPDATE)
+        )
+    }
+
+    override suspend fun syncPendingActivities(userId: String): Boolean {
 
         val que = activityDao.getSyncWorkQue()
         var hasError = false
 
         for (activity in que) {
-            try{
-                val response = apiService.uploadActivity(activity.toUploadDto(userId))
+            try {
+                val response = when (activity.status) {
+                    SyncStatus.PENDING_CREATE -> {
+                        apiService.uploadActivity(activity.toUploadDto(userId))
+                    }
 
-                if (response.isSuccessful){
+                    SyncStatus.PENDING_UPDATE -> {
+                        apiService.updateActivity(
+                            id = activity.id,
+                            activity = activity.toUploadDto(userId)
+                        )
+                    }
+
+                    SyncStatus.PENDING_DELETE -> {
+                        // for a future feature
+                        hasError = true
+                        continue
+                    }
+
+                    SyncStatus.SYNCED -> {
+                        continue
+                    }
+                }
+
+                if (response.isSuccessful) {
                     activityDao.updateSyncStatus(activity.id, SyncStatus.SYNCED)
-                }else{
+                } else {
                     hasError = true
                 }
-            }
-            catch (e: Exception){
+            } catch (e: Exception) {
                 hasError = true
             }
         }
+
         return hasError
     }
 }
