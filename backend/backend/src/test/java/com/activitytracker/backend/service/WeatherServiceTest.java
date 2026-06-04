@@ -25,12 +25,13 @@ class WeatherServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(weatherService, "apiKey", "test_key");
-        ReflectionTestUtils.setField(weatherService, "city", "Berlin");
     }
 
     @Test
     void getWeatherDescription_ShouldReturnConditionText() {
-        String expectedUrl = "https://api.weatherapi.com/v1/current.json?key=test_key&q=Berlin";
+        double lat = 46.7;
+        double lon = 9.1;
+        String expectedUrl = "https://api.weatherapi.com/v1/current.json?key=test_key&q=46.7,9.1";
         String expectedCondition = "Sunny";
 
         WeatherResponse mockResponse = org.mockito.Mockito.mock(WeatherResponse.class);
@@ -44,7 +45,7 @@ class WeatherServiceTest {
         when(restTemplate.getForObject(expectedUrl, WeatherResponse.class))
                 .thenReturn(mockResponse);
 
-        String actualCondition = weatherService.getWeatherDescription();
+        String actualCondition = weatherService.getWeatherDescription(lat,lon);
 
         assertEquals(expectedCondition, actualCondition);
     }

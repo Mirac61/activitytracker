@@ -37,7 +37,6 @@ services:
       KEYCLOAK_ADMIN_USER: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       WEATHERAPI_KEY: ${weatherapi_key}
-      WEATHERAPI_CITY: ${weatherapi_city}
       SPRING_PROFILES_ACTIVE: server
     depends_on:
       - db

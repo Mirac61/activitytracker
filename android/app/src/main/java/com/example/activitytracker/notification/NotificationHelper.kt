@@ -15,6 +15,7 @@ import com.example.activitytracker.R
 import android.Manifest
 
 const val CHANNEL_ID = "activity_tracker_channel"
+const val CHANNEL_WEATHER_ID = "weather_api_channel"
 
 class NotificationHelper(private val context: Context) {
 
@@ -27,10 +28,23 @@ class NotificationHelper(private val context: Context) {
             )
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
+
+            val weatherChannel = NotificationChannel(
+                CHANNEL_WEATHER_ID, "Wetterbedingte Benachrichtigung", NotificationManager.IMPORTANCE_DEFAULT
+            )
+            manager.createNotificationChannel(weatherChannel)
         }
     }
 
-    fun sendNotification() {
+    fun sendActivityNotification() {
+        showNotification(1, CHANNEL_ID, "Zeit aktiv zu sein", "Vergiss deine Ziele heute nicht!")
+    }
+
+    fun sendWeatherNotification() {
+        showNotification(2, CHANNEL_WEATHER_ID, "Die Sonne scheint!", "Perfekte Voraussetzung für einen Spaziergang")
+    }
+
+    fun showNotification(id: Int, channelId: String, title: String, text: String) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -44,15 +58,15 @@ class NotificationHelper(private val context: Context) {
                 != PackageManager.PERMISSION_GRANTED) return
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Zeit aktiv zu sein")
-            .setContentText("Vergiss deine Ziele heute nicht!")
+            .setContentTitle(title)
+            .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
-        NotificationManagerCompat.from(context).notify(1, notification)
+        NotificationManagerCompat.from(context).notify(id, notification)
     }
 }

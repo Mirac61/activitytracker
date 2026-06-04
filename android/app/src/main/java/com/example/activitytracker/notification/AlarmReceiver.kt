@@ -8,6 +8,6 @@ class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val helper = NotificationHelper(context)
-        helper.sendNotification()
+        helper.sendActivityNotification()
     }
 }

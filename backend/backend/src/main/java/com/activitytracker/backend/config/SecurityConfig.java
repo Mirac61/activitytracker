@@ -28,6 +28,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/refresh").permitAll()
                         .requestMatchers("/activities/**").permitAll()
+                        .requestMatchers("/api/weather").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

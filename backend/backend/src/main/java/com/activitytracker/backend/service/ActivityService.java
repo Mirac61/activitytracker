@@ -7,6 +7,7 @@ import com.activitytracker.backend.exception.InvalidActivityException;
 import com.activitytracker.backend.mapper.ActivityMapper;
 import com.activitytracker.backend.repository.ActivityRepository;
 import com.activitytracker.backend.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
@@ -25,16 +27,6 @@ public class ActivityService {
 
     @Transactional
     public void uploadActivity(ActivityDto request, String userId) {
-
-        if (request.getId() == null || request.getId().isBlank()) {
-            throw new InvalidActivityException("Id must not be empty");
-        }
-        if (request.getActivityName() == null || request.getActivityName().isBlank()) {
-            throw new InvalidActivityException("Name can not be empty");
-        }
-        if (request.getActivityDate() == null) {
-            throw new InvalidActivityException("Date can not be empty");
-        }
 
         UUID activityId;
         try {
@@ -48,7 +40,7 @@ public class ActivityService {
             if (!existing.get().getUser().getUserId().toString().equals(userId)) {
                 throw new AccessDeniedException("Activity belongs to another user");
             }
-            // Activity already exists for this user
+            log.info("Activity {} already exists for user {}", activityId, userId);
             return;
         }
 
@@ -61,17 +53,7 @@ public class ActivityService {
 
     @Transactional
     public void updateActivity(String id, ActivityDto request, String userId) {
-
-        if (id == null || id.isBlank()) {
-            throw new InvalidActivityException("Id must not be empty");
-        }
-        if (request.getActivityName() == null || request.getActivityName().isBlank()) {
-            throw new InvalidActivityException("Name can not be empty");
-        }
-        if (request.getActivityDate() == null) {
-            throw new InvalidActivityException("Date can not be empty");
-        }
-
+        
         UUID activityId;
         try {
             activityId = UUID.fromString(id);
