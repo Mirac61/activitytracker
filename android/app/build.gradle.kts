@@ -84,6 +84,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.+")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.+")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
