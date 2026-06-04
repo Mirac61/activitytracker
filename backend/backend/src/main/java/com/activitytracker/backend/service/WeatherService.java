@@ -12,18 +12,15 @@ public class WeatherService {
     @Value("${weatherapi_key}")
     private String apiKey;
 
-    @Value("${weatherapi_city}")
-    private String city;
-
     @Autowired
     private RestTemplate restTemplate;
 
-    public String getWeatherDescription() {
+    public String getWeatherDescription(double lat, double lon) {
         try {
-        String url = "https://api.weatherapi.com/v1/current.json?key=" + apiKey + "&q=" + city;
+        String url = "https://api.weatherapi.com/v1/current.json?key=" + apiKey + "&q=" + lat + "," + lon;
         WeatherResponse response =  restTemplate.getForObject(url, WeatherResponse.class);
         return response.getCurrent().getCondition().getText();
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             return "Weather data not available";
         }
     }

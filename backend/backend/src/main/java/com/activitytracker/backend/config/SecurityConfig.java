@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register").permitAll()
                         // When login is implementer this has to be changed to .authenticated()
                         .requestMatchers("/activities/**").permitAll()
+                        .requestMatchers("/api/weather").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
