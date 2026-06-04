@@ -1,4 +1,5 @@
 package com.example.activitytracker.ui.screens.tracking
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -11,23 +12,37 @@ import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.window.PopupProperties
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit){
+fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: List<String>){
     var activityName by remember {mutableStateOf( "")}
     var showDatePicker by remember { mutableStateOf(false) }
+    val filtered: List<String> = activityNames.filter { it.contains(activityName, ignoreCase = true) }
+
+    var textFieldWidth by remember { mutableStateOf(0) }
+    var showSuggestions by remember { mutableStateOf(true) }
+
+
 
     // Stellt sicher, dass der heutige Datum (beim Popup) automatisch ausgewählt wird
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
 
     val dateTextForUI = datePickerState.selectedDateMillis?.let {
-        java.time.Instant.ofEpochMilli(it)
-            .atZone(java.time.ZoneId.systemDefault())
-            .format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+        Instant.ofEpochMilli(it)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
     } ?: ""
+
+
 
     Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding()) {
 
@@ -45,13 +60,29 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit){
         // Nameneintrag
         Text("Name", style = MaterialTheme.typography.labelMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = activityName,
-            onValueChange = { activityName = it },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true
-        )
+      Box{
+          OutlinedTextField(
+              value = activityName,
+              onValueChange = { activityName = it; showSuggestions = true },
+              modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width},
+              shape = RoundedCornerShape(12.dp),
+              singleLine = true
+          )
+          DropdownMenu(
+              expanded = filtered.isNotEmpty() && activityName.isNotBlank() && showSuggestions,
+              onDismissRequest = { },
+              properties = PopupProperties(focusable = false),
+              modifier =  Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp()}),
+          ) {
+              filtered.forEach{ suggestion ->
+                  DropdownMenuItem(
+                      text = { Text(suggestion) },
+                      onClick = {activityName = suggestion; showSuggestions = false
+                      }
+                  )
+              }
+          }
+      }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,8 +128,8 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit){
         Button(
             onClick = {
                 val millis = datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-                val localDate = java.time.Instant.ofEpochMilli(millis)
-                    .atZone(java.time.ZoneId.systemDefault())
+                val localDate = Instant.ofEpochMilli(millis)
+                    .atZone(ZoneId.systemDefault())
                     .toLocalDate()
 
                 onSave(activityName, localDate)

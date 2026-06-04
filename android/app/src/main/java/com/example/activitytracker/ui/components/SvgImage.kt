@@ -14,7 +14,9 @@ import com.caverock.androidsvg.SVG
  * Renders a raw SVG file from res/raw with full gradient support via AndroidSVG.
  *
  * Usage:
+ * ```kotlin
  *   SvgImage(rawResId = R.raw.noto_fire, modifier = Modifier.size(24.dp))
+ *   ```
  */
 @Composable
 fun SvgImage(

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncStatus
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +19,7 @@ interface ActivityDao {
     @Query("SELECT DISTINCT activityDate FROM activity_entries ORDER BY activityDate DESC")
     fun getDates(): Flow<List<LocalDate>>
 
-    @Query("SELECT * FROM activity_entries WHERE status IN ('PENDING') ORDER BY createdAt DESC")
+    @Query("SELECT * FROM activity_entries WHERE status IN ('PENDING_CREATE', 'PENDING_UPDATE') ORDER BY createdAt DESC")
     suspend fun getSyncWorkQue(): List<ActivityEntity>
 
     @Query("UPDATE activity_entries SET status = :status WHERE id = :id")
@@ -27,8 +28,14 @@ interface ActivityDao {
     @Query("SELECT * FROM activity_entries WHERE id = :id")
     suspend fun findById(id: String): ActivityEntity?
 
+    @Query("SELECT DISTINCT activityName FROM activity_entries ORDER BY activityName ASC")
+    fun getActivityNames(): Flow<List<String>>
+
     @Insert
     suspend fun insert(entry: ActivityEntity)
+
+    @Update
+    suspend fun update(activityEntity: ActivityEntity)
 
     @Delete
     suspend fun delete(activityEntity: ActivityEntity)

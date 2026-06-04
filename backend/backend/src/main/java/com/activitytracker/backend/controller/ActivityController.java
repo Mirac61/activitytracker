@@ -16,9 +16,17 @@ public class ActivityController {
 
     @PostMapping("/upload")
     public ResponseEntity<Void> upload(@Valid @RequestBody ActivityDto request) {
-        // SECURITY NOTE: userId comes from request body, not JWT.
-        // It should be extracted from JWT via @AuthenticationPrincipal.
         activityService.uploadActivity(request, request.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(
+            @PathVariable String id,
+            @Valid @RequestBody ActivityDto request
+    ) {
+        activityService.updateActivity(id, request, request.getUserId());
+
+        return ResponseEntity.noContent().build();
     }
 }
