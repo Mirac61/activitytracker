@@ -9,6 +9,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.data.ActivityApplication
 
+// White screen after splash screen with our logo
+// Checks auth state on app start and redirects to home or login
 @Composable
 fun SplashWatcher(
     onNavigateToHome: () -> Unit,

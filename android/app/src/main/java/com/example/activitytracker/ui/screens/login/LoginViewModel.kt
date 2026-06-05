@@ -43,7 +43,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
     var isLoading by mutableStateOf(false)
         private set
 
-    private val instance = RetrofitClient.logininstance
+    private val instance = RetrofitClient.api
 
     // process login data
     fun login() {
@@ -76,7 +76,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                     }
                 }
             } catch (e: Exception) {
-                Log.e("LoginViewModel", "Netzwerk- oder Serverfehler aufgetreten", e)
+                Log.e("LoginViewModel", "Network or Server failure occurred", e)
                 e.printStackTrace()
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
             } finally {

@@ -52,10 +52,6 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    fun clearErrorMessage() {
-        errorMessage = null
-    }
-
     fun resetRegistrationStatus() {
         registrationSuccess = false
     }
@@ -64,7 +60,7 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
         private set
 
     // Create Retrofit instance
-    private val instance = RetrofitClient.registerinstance
+    private val instance = RetrofitClient.api
 
     // sending the input Data to RegisterDto.kt
     fun register() {
@@ -84,7 +80,6 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                 if (response.isSuccessful) {
                     val userId = response.body()?.userId
                     if (userId != null) {
-                        // Alte Activities löschen bei neuem Account
                         val db = AppDatabase.getInstance(appContext)
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             db.clearAllTables()

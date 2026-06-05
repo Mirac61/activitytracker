@@ -23,7 +23,7 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
     var navigationState by mutableStateOf<NavigationState>(NavigationState.Loading)
         private set
 
-    private val instance = RetrofitClient.logininstance
+    private val instance = RetrofitClient.api
 
     init {
         checkSession()
@@ -58,7 +58,6 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("SplashViewModel", "Fehler beim Auto-Login", e)
-                // Bei Netzwerkfehlern offline trotzdem reinlassen (wenn Tokens da sind) oder zum Login zwingen:
                 navigationState = NavigationState.Unauthenticated
             }
         }

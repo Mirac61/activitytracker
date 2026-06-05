@@ -24,7 +24,7 @@ class SyncWorker(
         val app = applicationContext as? ActivityApplication ?: return Result.failure()
         val userId = app.authStorage.getUserId() ?: return Result.failure()
         val database = AppDatabase.getInstance(applicationContext)
-        val repository = ActivityRepository(database.activityDao(), RetrofitClient.instance)
+        val repository = ActivityRepository(database.activityDao(), RetrofitClient.api)
         val hasError = repository.syncPendingActivities(userId)
         return if (hasError) Result.retry() else Result.success()
     }
