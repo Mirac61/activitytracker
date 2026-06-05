@@ -45,13 +45,13 @@ object RetrofitClient {
         buildRetrofit().create(ApiService::class.java)
     }
 
-    val weatherApi: WeatherApi by lazy {
+    val weatherApi: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
-            .create(WeatherApi::class.java)
+            .create(ApiService::class.java)
     }
 }
