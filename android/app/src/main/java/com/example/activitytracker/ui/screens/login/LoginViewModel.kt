@@ -8,16 +8,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.LoginApi
-import com.example.activitytracker.data.network.LoginRequest
-import com.example.activitytracker.data.network.LoginResponse
-import com.example.activitytracker.data.network.RefreshRequest
+import com.example.activitytracker.data.remote.dto.LoginRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class LoginViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
 

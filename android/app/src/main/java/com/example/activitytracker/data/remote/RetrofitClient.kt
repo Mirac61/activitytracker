@@ -1,8 +1,6 @@
 package com.example.activitytracker.data.remote
 
 import com.example.activitytracker.BuildConfig
-import com.example.activitytracker.data.network.LoginApi
-import com.example.activitytracker.data.network.RegisterApi
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
@@ -13,9 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.time.LocalDate
 import java.time.OffsetDateTime
-
 object RetrofitClient {
-
+    //
     private val logging = HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor.Level.BODY
@@ -45,20 +42,20 @@ object RetrofitClient {
             .create(ApiService::class.java)
     }
 
-    val logininstance: LoginApi by lazy {
+    val logininstance: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(LoginApi::class.java)
+            .create(ApiService::class.java)
     }
 
-    val registerinstance: RegisterApi by lazy {
+    val registerinstance: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-            .create(RegisterApi::class.java)
+            .create(ApiService::class.java)
     }
     val weatherApi: WeatherApi by lazy {
         Retrofit.Builder()

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.RefreshRequest
+import com.example.activitytracker.data.remote.dto.RefreshRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 

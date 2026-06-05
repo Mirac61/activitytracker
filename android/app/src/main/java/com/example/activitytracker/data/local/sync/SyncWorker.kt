@@ -19,7 +19,7 @@ class SyncWorker(
     appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
-
+    // Gathers required dependencies and syncs activities to the remote DB
     override suspend fun doWork(): Result {
         val app = applicationContext as? ActivityApplication ?: return Result.failure()
         val userId = app.authStorage.getUserId() ?: return Result.failure()
@@ -30,6 +30,7 @@ class SyncWorker(
     }
 
     companion object {
+        // Builds a sync request that requires an active internet connection
         fun buildSyncRequest() = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(
                 Constraints.Builder()

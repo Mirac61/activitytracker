@@ -8,15 +8,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.RegisterApi
-import com.example.activitytracker.data.network.RegisterRequest
+import com.example.activitytracker.data.remote.dto.RegisterRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class RegisterViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
     var vorname by mutableStateOf("")
@@ -70,7 +66,7 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     // Create Retrofit instance
     private val instance = RetrofitClient.registerinstance
 
-    // sending the input Data to RegisterApi.kt
+    // sending the input Data to RegisterDto.kt
     fun register() {
         viewModelScope.launch {
             isLoading = true
