@@ -1,8 +1,6 @@
 package com.example.activitytracker.data.remote
 
 import com.example.activitytracker.BuildConfig
-import com.example.activitytracker.data.network.LoginApi
-import com.example.activitytracker.data.network.RegisterApi
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
@@ -14,8 +12,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.time.LocalDate
 import java.time.OffsetDateTime
 
+// Builds the Retrofit clients and calls the ApiService
 object RetrofitClient {
-
     private val logging = HttpLoggingInterceptor().apply {
         level = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor.Level.BODY
@@ -37,36 +35,23 @@ object RetrofitClient {
         })
         .create()
 
-    val instance: ApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(ApiService::class.java)
+    private fun buildRetrofit() = Retrofit.Builder()
+        .baseUrl(BuildConfig.BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .client(client)
+        .build()
+
+    val api: ApiService by lazy {
+        buildRetrofit().create(ApiService::class.java)
     }
 
-    val logininstance: LoginApi by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(LoginApi::class.java)
-    }
-
-    val registerinstance: RegisterApi by lazy {
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(RegisterApi::class.java)
-    }
-    val weatherApi: WeatherApi by lazy {
+    val weatherApi: ApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
-            .create(WeatherApi::class.java)
+            .create(ApiService::class.java)
     }
 }

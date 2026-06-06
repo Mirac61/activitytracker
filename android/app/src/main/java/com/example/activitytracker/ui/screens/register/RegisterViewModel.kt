@@ -8,32 +8,28 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.RegisterApi
-import com.example.activitytracker.data.network.RegisterRequest
+import com.example.activitytracker.data.remote.dto.RegisterRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class RegisterViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
-    var vorname by mutableStateOf("")
+    var firstName by mutableStateOf("")
         private set
-    var nachname by mutableStateOf("")
+    var lastName by mutableStateOf("")
         private set
     var email by mutableStateOf("")
         private set
     var password by mutableStateOf("")
         private set
 
-    fun onVornameChanged(newValue: String) {
-        vorname = newValue
+    fun onFirstNameChanged(newValue: String) {
+        firstName = newValue
     }
 
-    fun onNachnameChanged(newValue: String) {
-        nachname = newValue
+    fun onLastNameChanged(newValue: String) {
+        lastName = newValue
     }
 
     fun onEmailChanged(newValue: String) {
@@ -47,18 +43,14 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     }
 
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    val isFormValid: Boolean get() = vorname.isNotBlank() && nachname.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
+    val isFormValid: Boolean get() = firstName.isNotBlank() && lastName.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
 
-    // Variable that listens if the registration process is successful
+    // status variables
     var registrationSuccess by mutableStateOf(false)
         private set
 
     var errorMessage by mutableStateOf<String?>(null)
         private set
-
-    fun clearErrorMessage() {
-        errorMessage = null
-    }
 
     fun resetRegistrationStatus() {
         registrationSuccess = false
@@ -67,18 +59,17 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     var isLoading by mutableStateOf(false)
         private set
 
-    // Create Retrofit instance
-    private val instance = RetrofitClient.registerinstance
+    private val instance = RetrofitClient.api
 
-    // sending the input Data to RegisterApi.kt
+    // sending the input Data to RegisterDto.kt
     fun register() {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
                 val request = RegisterRequest(
-                    vorname = vorname,
-                    nachname = nachname,
+                    vorname = firstName,
+                    nachname = lastName,
                     email = email,
                     password = password
                 )
@@ -88,7 +79,6 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                 if (response.isSuccessful) {
                     val userId = response.body()?.userId
                     if (userId != null) {
-                        // Alte Activities löschen bei neuem Account
                         val db = AppDatabase.getInstance(appContext)
                         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             db.clearAllTables()
@@ -97,12 +87,12 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                         registrationSuccess = true
                     }
 
-                }else {
+                } else {
                     Log.e("RegisterViewModel", "Server Failure during registration: ${response.code()}")
                     errorMessage = "Registrierung fehlgeschlagen. E-Mail bereits vergeben."
                 }
             } catch (e: Exception) {
-                Log.e("RegisterViewModel", "Netzwerk- oder Serverfehler aufgetreten", e)
+                Log.e("RegisterViewModel", "Network or server error occurred", e)
                 e.printStackTrace()
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
             } finally {

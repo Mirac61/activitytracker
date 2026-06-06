@@ -17,6 +17,7 @@ import android.Manifest
 const val CHANNEL_ID = "activity_tracker_channel"
 const val CHANNEL_WEATHER_ID = "weather_api_channel"
 
+// contains the Android Notification setup
 class NotificationHelper(private val context: Context) {
 
     fun createNotificationChannel() {
@@ -59,7 +60,7 @@ class NotificationHelper(private val context: Context) {
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_running_man)
             .setContentTitle(title)
             .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

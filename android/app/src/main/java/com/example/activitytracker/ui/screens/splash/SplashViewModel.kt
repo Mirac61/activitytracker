@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.RefreshRequest
+import com.example.activitytracker.data.remote.dto.RefreshRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 
@@ -23,7 +23,7 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
     var navigationState by mutableStateOf<NavigationState>(NavigationState.Loading)
         private set
 
-    private val instance = RetrofitClient.logininstance
+    private val instance = RetrofitClient.api
 
     init {
         checkSession()
@@ -57,8 +57,7 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
                     navigationState = NavigationState.Unauthenticated
                 }
             } catch (e: Exception) {
-                Log.e("SplashViewModel", "Fehler beim Auto-Login", e)
-                // Bei Netzwerkfehlern offline trotzdem reinlassen (wenn Tokens da sind) oder zum Login zwingen:
+                Log.e("SplashViewModel", "Error with auto-login", e)
                 navigationState = NavigationState.Unauthenticated
             }
         }

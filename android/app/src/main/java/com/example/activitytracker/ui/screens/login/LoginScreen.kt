@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.activitytracker.Core.theme.PrimaryAccent
 import com.example.activitytracker.data.ActivityApplication
-import com.example.activitytracker.ui.components.CustomTextField
+import com.example.activitytracker.ui.components.AuthTextField
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import com.example.activitytracker.Core.theme.InputField
@@ -34,12 +34,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
     val application = LocalContext.current.applicationContext as ActivityApplication
     val viewModel: LoginViewModel = viewModel(
-        factory = LoginViewModelFactory(application.authStorage, application)
+        factory = LoginViewModelFactory(application.authStorage)
     )
 
     val scrollState = rememberScrollState()
 
-    // status-check for successful login
     LaunchedEffect(viewModel.loginSuccess) {
         if (viewModel.loginSuccess) {
             onLoginSuccess()
@@ -58,7 +57,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            //logo and title
+            // logo and title
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -79,7 +78,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            //Text above inputs
+            // Text above inputs
             Text(
                 text = "Anmeldung",
                 modifier = Modifier.fillMaxWidth(),
@@ -100,15 +99,15 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            //Input fields
-            CustomTextField(
+            // Input fields
+            AuthTextField(
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChanged(it) },
                 label = "E-Mail",
                 keyboardType = KeyboardType.Email,
             )
 
-            CustomTextField(
+            AuthTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
                 label = "Passwort",
@@ -128,7 +127,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 4. Google Login Button
+            // Google Login Button
             OutlinedButton(
                 onClick = { /* TODO: Google Login */ },
                 modifier = Modifier
@@ -162,7 +161,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Login button
+            // Login button
             Button(
                 onClick = { viewModel.login() },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -187,7 +186,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            //Link to Register Screen
+            // Link to Register Screen
             TextButton(
                 onClick = onNavigateToRegister,
                 modifier = Modifier.align(CenterHorizontally)

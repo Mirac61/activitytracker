@@ -112,11 +112,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                         currentDestination = AppDestinations.LOGIN
                     }
                 )
-
-                AppDestinations.HOME -> HomeScreen(activities = activities, streak = streak, onSettingsClick = {})
-                AppDestinations.FRIENDS -> FriendsScreen()
-                AppDestinations.TRACKING -> {}
-
             }
         }
     }

@@ -3,6 +3,7 @@ package com.activitytracker.backend.service;
 import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.exception.InvalidCredentialsException;
 import com.activitytracker.backend.exception.UserAlreadyExistsException;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.keycloak.admin.client.Keycloak;
@@ -49,7 +50,7 @@ public class KeycloakService {
     private String targetRealm;
 
 
-    @jakarta.annotation.PostConstruct
+    @PostConstruct
     public void initKeycloak() {
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
@@ -62,13 +63,11 @@ public class KeycloakService {
 
     public UUID createUserInKeycloak(UserRegistrationDto dto) {
 
-        //Set user information
         UserRepresentation user = getUserRepresentation(dto);
 
         //Create user
         UsersResource usersResource = keycloak.realm(targetRealm).users();
 
-        // Try-with-resources makes sure, that response.close() is always called
         try (Response response = usersResource.create(user)) {
 
             if (response.getStatus() == 201) {
@@ -94,7 +93,6 @@ public class KeycloakService {
         user.setFirstName(dto.getVorname());
         user.setLastName(dto.getNachname());
 
-        //set password information
         CredentialRepresentation passwordCred = new CredentialRepresentation();
         passwordCred.setTemporary(false);
         passwordCred.setType(CredentialRepresentation.PASSWORD);

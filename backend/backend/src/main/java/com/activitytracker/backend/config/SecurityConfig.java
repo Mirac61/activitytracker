@@ -17,7 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http){
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
@@ -27,7 +27,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/refresh").permitAll()
-                        .requestMatchers("/activities/**").permitAll()
+                        .requestMatchers("/activities/upload").permitAll()
+                        .requestMatchers("/activities/{id}").permitAll()
                         .requestMatchers("/api/weather").permitAll()
                         .anyRequest().authenticated()
                 )

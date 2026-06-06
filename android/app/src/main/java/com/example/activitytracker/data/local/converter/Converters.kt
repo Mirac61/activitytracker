@@ -6,7 +6,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 class Converters {
-    // Nutzt den internationalen Standard: "2026-04-30T16:45:00+02:00"
+    // Uses the international standard: "2026-04-30T16:45:00+02:00"
     private val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
     @TypeConverter

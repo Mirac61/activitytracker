@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.activitytracker.Core.theme.SecondaryAccent
 import com.example.activitytracker.data.local.entity.ActivityEntity
 
 @Composable
@@ -70,7 +71,7 @@ fun EditActivity(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5C7A50)),
+            colors = ButtonDefaults.buttonColors(containerColor = SecondaryAccent),
             enabled = activityName.isNotBlank()
         ) {
             Text("Speichern", color = Color.White)

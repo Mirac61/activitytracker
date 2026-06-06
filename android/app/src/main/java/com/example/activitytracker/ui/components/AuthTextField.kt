@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CustomTextField(
+fun AuthTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,

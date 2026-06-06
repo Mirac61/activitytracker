@@ -1,6 +1,5 @@
 package com.example.activitytracker.ui.screens.login
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,18 +7,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.activitytracker.BuildConfig
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.network.LoginApi
-import com.example.activitytracker.data.network.LoginRequest
-import com.example.activitytracker.data.network.LoginResponse
-import com.example.activitytracker.data.network.RefreshRequest
+import com.example.activitytracker.data.remote.dto.LoginRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class LoginViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
+class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
 
     var email by mutableStateOf("")
         private set
@@ -49,7 +42,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
     var isLoading by mutableStateOf(false)
         private set
 
-    private val instance = RetrofitClient.logininstance
+    private val instance = RetrofitClient.api
 
     // process login data
     fun login() {
@@ -82,7 +75,7 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
                     }
                 }
             } catch (e: Exception) {
-                Log.e("LoginViewModel", "Netzwerk- oder Serverfehler aufgetreten", e)
+                Log.e("LoginViewModel", "Network or Server failure occurred", e)
                 e.printStackTrace()
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
             } finally {
@@ -94,13 +87,12 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
 
 class LoginViewModelFactory(
     private val authStorage: AuthStorage,
-    private val appContext: Context
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LoginViewModel(authStorage, appContext) as T
+            return LoginViewModel(authStorage) as T
         }
         throw IllegalArgumentException("Unknown Class for View Model")
     }
