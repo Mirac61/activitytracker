@@ -57,7 +57,7 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
                     navigationState = NavigationState.Unauthenticated
                 }
             } catch (e: Exception) {
-                Log.e("SplashViewModel", "Fehler beim Auto-Login", e)
+                Log.e("SplashViewModel", "Error with auto-login", e)
                 navigationState = NavigationState.Unauthenticated
             }
         }

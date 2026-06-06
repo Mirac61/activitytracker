@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
 import android.content.Context
+import android.util.Log
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncWorker
 import com.example.activitytracker.data.repository.IActivityRepository
@@ -30,22 +31,18 @@ class TrackingViewModel(
 
     val activityEntity: LiveData<List<ActivityEntity>> = repository.getAll.asLiveData()
 
-
-    // List of existing activity names upon new entry
     val listOfActivityNames: LiveData<List<String>> = repository.getActivityNames.asLiveData()
 
-    // To be connected to the HomeScreen UI
     val dates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
+
     val streak: LiveData<Int> = dates.map { StreakLogic.calculateStreak(it) }
 
     fun saveActivity(activityName: String, activityDate: LocalDate) {
-        //If no activity name was given -> log the exception and cancel
         if (activityName.isBlank()) {
-            android.util.Log.e("TrackingViewModel", "Name ist leer")
+            Log.e("TrackingViewModel", "Empty name")
             return
         }
 
-        //Call repository with name, createdAt and userId
         viewModelScope.launch {
             repository.insert(
                 ActivityEntity(
@@ -56,7 +53,7 @@ class TrackingViewModel(
             )
             val currentDates = repository.getDates.first()
             ActivityWidgetUpdater.updateAllWidgets(appContext, currentDates)
-            android.util.Log.d("TRACKER_WIDGET", "Speichern für $activityDate abgeschlossen")
+            Log.d("TRACKER_WIDGET", "Saved for: $activityDate")
 
             WorkManager.getInstance(appContext).enqueueUniqueWork(
                 "sync",
@@ -68,7 +65,7 @@ class TrackingViewModel(
 
     fun updateActivity(activity: ActivityEntity) {
         if (activity.activityName.isBlank()) {
-            android.util.Log.e("TrackingViewModel", "Name ist leer")
+            Log.e("TrackingViewModel", "Empty name")
             return
         }
 
@@ -85,14 +82,13 @@ class TrackingViewModel(
                 SyncWorker.buildSyncRequest()
             )
 
-            android.util.Log.d(
+            Log.d(
                 "TrackingViewModel",
-                "Aktivität ${activity.id} wurde aktualisiert"
+                "Activity ${activity.id} got updated"
             )
         }
     }
 }
-
 
 class ActivityEntryModelFactory(
     private val repository: IActivityRepository,

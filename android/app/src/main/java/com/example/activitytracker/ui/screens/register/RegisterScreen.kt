@@ -25,7 +25,7 @@ import com.example.activitytracker.Core.theme.InputField
 import com.example.activitytracker.Core.theme.PrimaryAccent
 import com.example.activitytracker.Core.theme.TextDescription
 import com.example.activitytracker.data.ActivityApplication
-import com.example.activitytracker.ui.components.CustomTextField
+import com.example.activitytracker.ui.components.AuthTextField
 import kotlinx.coroutines.delay
 
 @Composable
@@ -58,7 +58,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
             horizontalAlignment = CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            //logo and title
+            // logo and title
             Spacer(modifier = Modifier.height(40.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -80,7 +80,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            //Text above inputs
+            // Text above inputs
             Text(
                 text = "Registrierung",
                 modifier = Modifier.fillMaxWidth(),
@@ -101,20 +101,20 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            //Input fields
-            CustomTextField(
-                value = viewModel.vorname,
-                onValueChange = { viewModel.onVornameChanged(it) },
+            // Input fields
+            AuthTextField(
+                value = viewModel.firstName,
+                onValueChange = { viewModel.onFirstNameChanged(it) },
                 label = "Vorname"
             )
 
-            CustomTextField(
-                value = viewModel.nachname,
-                onValueChange = { viewModel.onNachnameChanged(it) },
+            AuthTextField(
+                value = viewModel.lastName,
+                onValueChange = { viewModel.onLastNameChanged(it) },
                 label = "Nachname"
             )
 
-            CustomTextField(
+            AuthTextField(
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChanged(it) },
                 label = "E-Mail",
@@ -123,7 +123,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                 errorMessage = "Ungültige Emailadresse"
             )
 
-            CustomTextField(
+            AuthTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
                 label = "Passwort",
@@ -138,7 +138,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
                 )
             }
 
-            //show success message
+            // show success message
             if (showSuccessMessage) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -152,7 +152,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 4. Google Login Button
+            // Google Login Button
             OutlinedButton(
                 onClick = { /* TODO: Google Login */ },
                 modifier = Modifier
@@ -186,7 +186,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Register button
+            // Register button
             Button(
                 onClick = { viewModel.register() },
                 modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -211,6 +211,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Login button
             TextButton(
                 onClick = onNavigateToLogin,
                 modifier = Modifier.align(CenterHorizontally)

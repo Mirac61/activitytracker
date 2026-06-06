@@ -35,24 +35,18 @@ fun HomeScreen(
 ) {
     val today = LocalDate.now()
     var selectedDay by remember { mutableStateOf(today) }
-    // Passing only dates having activites in CalendarSlider
     val activeDays = activities.map{it.activityDate}.toSet()
-
     val filteredActivities = activities.filter { it.activityDate == selectedDay }
-
 
     val selectedDayFormatted = selectedDay.format(
         DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
     ).replaceFirstChar { it.uppercase() }
-
-
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 12.dp)
     ) {
-
         // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -74,7 +68,6 @@ fun HomeScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(2f)
             )
-
             // Settings
             Box(
                 modifier = Modifier
@@ -100,7 +93,6 @@ fun HomeScreen(
             onDaySelected = {selectedDay = it}
         )
         Spacer(modifier = Modifier.height(32.dp))
-
 
         if (filteredActivities.isEmpty()) {
             Box(
@@ -135,7 +127,6 @@ fun HomeScreen(
         }
     }
 }
-
 @Composable
 fun ActivityCard(name: String, onClick: () -> Unit = {}) {
     Box(

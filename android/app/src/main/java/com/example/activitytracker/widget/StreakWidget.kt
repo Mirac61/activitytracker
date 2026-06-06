@@ -41,6 +41,7 @@ import com.example.activitytracker.data.local.AppDatabase
 import kotlinx.coroutines.flow.first
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.layout.Box
+import com.example.activitytracker.Core.theme.Background
 
 
 class StreakWidget : GlanceAppWidget() {
@@ -102,7 +103,7 @@ private fun StreakWidgetContent(
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFFEDEDED))
+            .background(Background)
             .cornerRadius(12.dp)
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .clickable(
@@ -196,7 +197,6 @@ private fun StreakDaysRow(
     ) {
         days.forEach { day ->
             val hasActivity = activeDays.contains(day)
-            val isToday = day == today
 
             Column(
                 modifier = GlanceModifier.padding(horizontal = horizontalPadding),
@@ -204,16 +204,7 @@ private fun StreakDaysRow(
             ) {
                 Box(
                     modifier = GlanceModifier
-                        .size(dayBoxSize)
-                        .then(
-                            if (isToday) {
-                                GlanceModifier
-                                    .background(Color(0x33FF7043))
-                                    .cornerRadius(dayBoxSize / 2)
-                            } else {
-                                GlanceModifier
-                            }
-                        ),
+                        .size(dayBoxSize),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(

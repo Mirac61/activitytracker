@@ -1,6 +1,5 @@
 package com.example.activitytracker.ui.screens.login
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +12,7 @@ import com.example.activitytracker.data.remote.dto.LoginRequest
 import com.example.activitytracker.data.remote.RetrofitClient
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
+class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
 
     var email by mutableStateOf("")
         private set
@@ -88,13 +87,12 @@ class LoginViewModel(private val authStorage: AuthStorage, private val appContex
 
 class LoginViewModelFactory(
     private val authStorage: AuthStorage,
-    private val appContext: Context
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return LoginViewModel(authStorage, appContext) as T
+            return LoginViewModel(authStorage) as T
         }
         throw IllegalArgumentException("Unknown Class for View Model")
     }

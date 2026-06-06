@@ -26,8 +26,6 @@ import java.time.LocalDate
 import java.time.format.TextStyle as FormatStyle
 import java.util.Locale
 
-
-
 private const val BACKWARD_DAYS_COUNT = 365
 
 @Composable
@@ -58,7 +56,6 @@ fun CalendarSlider(
         items(daysList) { day ->
             DayItem(
                 day = day,
-                today = today,
                 selectedDay = selectedDay,
                 activeDays = activeDays,
                 itemWidth = itemWidth,
@@ -72,13 +69,11 @@ fun CalendarSlider(
 @Composable
 fun DayItem(
     day: LocalDate,
-    today: LocalDate,
     selectedDay: LocalDate,
     activeDays: Set<LocalDate>,
     itemWidth: androidx.compose.ui.unit.Dp,
     onDaySelected: (LocalDate) -> Unit
 ) {
-    val isToday = day == today
     val isSelected = day == selectedDay
     val hasActivity = activeDays.contains(day)
     val dayLabel = day.dayOfWeek.getDisplayName(FormatStyle.SHORT, Locale.GERMAN)
