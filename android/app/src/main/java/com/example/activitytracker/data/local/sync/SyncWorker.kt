@@ -19,17 +19,18 @@ class SyncWorker(
     appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
-
+    // Gathers required dependencies and syncs activities to the remote DB
     override suspend fun doWork(): Result {
         val app = applicationContext as? ActivityApplication ?: return Result.failure()
         val userId = app.authStorage.getUserId() ?: return Result.failure()
         val database = AppDatabase.getInstance(applicationContext)
-        val repository = ActivityRepository(database.activityDao(), RetrofitClient.instance)
+        val repository = ActivityRepository(database.activityDao(), RetrofitClient.api)
         val hasError = repository.syncPendingActivities(userId)
         return if (hasError) Result.retry() else Result.success()
     }
 
     companion object {
+        // Builds a sync request that requires an active internet connection
         fun buildSyncRequest() = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(
                 Constraints.Builder()

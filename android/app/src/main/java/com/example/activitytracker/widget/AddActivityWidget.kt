@@ -20,6 +20,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.layout.size
+import com.example.activitytracker.Core.theme.SecondaryAccent
 import com.example.activitytracker.MainActivity
 import com.example.activitytracker.R
 
@@ -34,8 +35,6 @@ class AddActivityWidget : GlanceAppWidget() {
             AddActivityWidgetContent()
         }
     }
-
-
 }
 
 @Composable
@@ -43,7 +42,7 @@ private fun AddActivityWidgetContent() {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(Color(0xFF5C7A50))
+            .background(SecondaryAccent)
             .cornerRadius(12.dp)
             .clickable(
                 actionStartActivity<MainActivity>(
