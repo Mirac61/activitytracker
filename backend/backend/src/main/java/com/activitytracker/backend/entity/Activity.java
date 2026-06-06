@@ -3,7 +3,6 @@ package com.activitytracker.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.jspecify.annotations.NonNull;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.time.OffsetDateTime;
