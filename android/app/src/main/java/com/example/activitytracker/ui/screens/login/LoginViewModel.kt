@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.remote.dto.LoginRequest
 import com.example.activitytracker.data.remote.RetrofitClient
+import com.example.activitytracker.data.remote.dto.GoogleLoginRequest
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
@@ -78,6 +79,37 @@ class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
                 Log.e("LoginViewModel", "Network or Server failure occurred", e)
                 e.printStackTrace()
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                Log.d("LoginViewModel", "Google ID Token received successfully: $idToken")
+
+                val response = RetrofitClient.api.loginWithGoogle(GoogleLoginRequest(idToken))
+
+                if (response.isSuccessful && response.body() != null) {
+                    val googleResponse = response.body()!!
+
+                    authStorage.saveAccessToken(googleResponse.accessToken)
+                    authStorage.saveRefreshToken(googleResponse.refreshToken)
+                    authStorage.saveUserId(googleResponse.userId)
+
+                    Log.d("LoginViewModel", "Google Sign-In successful. Tokens stored.")
+                    loginSuccess = true
+                } else {
+                    Log.e("LoginViewModel", "Google Login failed with status code: ${response.code()}")
+                    errorMessage = "Anmeldung via Google fehlgeschlagen."
+                }
+            } catch (e: Exception) {
+                Log.e("LoginViewModel", "Google Authentication failed", e)
+                errorMessage = "Google-Anmeldung fehlgeschlagen. Bitte erneut versuchen."
             } finally {
                 isLoading = false
             }

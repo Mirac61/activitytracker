@@ -1,5 +1,6 @@
 package com.example.activitytracker.ui.screens.login
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import com.example.activitytracker.R
 import androidx.compose.foundation.Image
@@ -26,8 +27,13 @@ import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.AuthTextField
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import com.example.activitytracker.Core.theme.InputField
 import com.example.activitytracker.Core.theme.TextDescription
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
@@ -37,6 +43,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
         factory = LoginViewModelFactory(application.authStorage)
     )
 
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     LaunchedEffect(viewModel.loginSuccess) {
@@ -129,7 +137,40 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             // Google Login Button
             OutlinedButton(
-                onClick = { /* TODO: Google Login */ },
+                onClick = {
+                    coroutineScope.launch {
+                        try {
+                            val credentialManager = CredentialManager.create(context)
+
+                            // Anfrage für das Google-ID-Token vorbereiten
+                            val googleIdTokenRequest = GetCredentialRequest.Builder()
+                                .addCredentialOption(
+                                    GetGoogleIdOption.Builder()
+                                        .setFilterByAuthorizedAccounts(false)
+                                        // HIER: Später eure Google-Web-Client-ID aus der Google Cloud Console hinterlegen
+                                        .setServerClientId("DEINE_GOOGLE_WEB_CLIENT_ID.apps.googleusercontent.com")
+                                        .build()
+                                )
+                                .build()
+
+                            // Google-Auswahldialog auf dem Smartphone öffnen
+                            val result = credentialManager.getCredential(
+                                context = context,
+                                request = googleIdTokenRequest
+                            )
+
+                            // Überprüfen und Token extrahieren
+                            val credential = result.credential
+                            if (credential is GoogleIdTokenCredential) {
+                                val idToken = credential.idToken
+                                // Token zur Weiterverarbeitung ins ViewModel werfen
+                                viewModel.loginWithGoogle(idToken)
+                            }
+                        } catch (e: Exception){
+                            Log.e("LoginScreen", "Google Sign-In flow interrupted or failed", e)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -138,7 +179,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
                     containerColor = Color.White,
                     contentColor = Color.Black
                 ),
-                border = BorderStroke(1.dp, Color.LightGray)
+                border = BorderStroke(1.dp, Color.LightGray),
+                enabled = !viewModel.isLoading
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
