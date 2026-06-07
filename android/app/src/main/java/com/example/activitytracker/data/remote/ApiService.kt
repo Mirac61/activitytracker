@@ -6,6 +6,8 @@ import com.example.activitytracker.data.remote.dto.LoginResponse
 import com.example.activitytracker.data.remote.dto.RefreshRequest
 import com.example.activitytracker.data.remote.dto.RegisterRequest
 import com.example.activitytracker.data.remote.dto.ActivityUploadDto
+import com.example.activitytracker.data.remote.dto.GoogleLoginRequest
+import com.example.activitytracker.data.remote.dto.GoogleLoginResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
@@ -42,4 +44,7 @@ interface ApiService {
 
     @GET("/api/weather")
     fun getWeather(@Query("lat") lat: Double, @Query("lon") lon: Double): Call<ResponseBody>
+
+    @POST("api/users/google")
+    suspend fun loginWithGoogle(@Body request: GoogleLoginRequest): Response<GoogleLoginResponse>
 }
