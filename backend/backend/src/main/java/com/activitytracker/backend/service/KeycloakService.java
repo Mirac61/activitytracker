@@ -1,6 +1,7 @@
 package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.InvalidCredentialsException;
 import com.activitytracker.backend.exception.UserAlreadyExistsException;
 import jakarta.annotation.PostConstruct;
@@ -172,6 +173,42 @@ public class KeycloakService {
         } catch (Exception e) {
             log.error("Error during token refresh via RestTemplate: {}", e.getMessage());
             throw new InvalidCredentialsException("Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.");
+        }
+    }
+
+    public AuthenticationResult authenticateWithGoogle(String googleIdToken) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            // Die Parameter für den OAuth2 Token Exchange Flow zusammenbauen
+            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            map.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
+            map.add("client_id", clientId); // Nutzt euer injected Klassenattribut
+            map.add("subject_token", googleIdToken);
+            map.add("subject_token_type", "urn:ietf:params:oauth:token-type:jwt");
+            map.add("subject_issuer", "google"); // Muss exakt mit dem Identity Provider Alias in Keycloak übereinstimmen
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+            String tokenEndpoint = serverUrl + "/realms/" + targetRealm + "/protocol/openid-connect/token";
+
+            // Keycloak via RestTemplate aufrufen
+            AccessTokenResponse tokenResponse = restTemplate.postForObject(tokenEndpoint, request, AccessTokenResponse.class);
+
+            if (tokenResponse == null) {
+                throw new GoogleAuthenticationException("Der Token-Austausch mit Keycloak lieferte keine Antwort.");
+            }
+
+            // Das empfangene JWT entschlüsseln, um die verknüpfte Keycloak-User-ID (Subject) zu extrahieren
+            AccessToken decryptedToken = TokenVerifier.create(tokenResponse.getToken(), AccessToken.class).getToken();
+            String verifiedUserId = decryptedToken.getSubject();
+
+            return new AuthenticationResult(verifiedUserId, tokenResponse);
+
+        } catch (Exception e) {
+            log.error("Kritischer Fehler beim Google Token Exchange im KeycloakService: {}", e.getMessage());
+            // Spezifische Exception für den GlobalExceptionHandler werfen
+            throw new GoogleAuthenticationException("Anmeldung über Google fehlgeschlagen. Token ungültig oder Keycloak-Verbindung abgebrochen.", e);
         }
     }
 
