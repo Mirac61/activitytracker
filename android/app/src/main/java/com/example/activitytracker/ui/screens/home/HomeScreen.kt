@@ -1,11 +1,16 @@
 package com.example.activitytracker.ui.screens.home
 
+import android.view.Choreographer
+import androidx.compose.animation.*
 import com.example.activitytracker.ui.components.StreakBadge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
@@ -14,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,8 +28,12 @@ import com.example.activitytracker.Core.theme.*
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import java.time.LocalDate
 import com.example.activitytracker.ui.components.CalendarSlider
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.abs
 
 
 @Composable
@@ -34,9 +44,12 @@ fun HomeScreen(
     onActivityClick: (ActivityEntity) -> Unit = {}
 ) {
     val today = LocalDate.now()
-    var selectedDay by remember { mutableStateOf(today) }
+    val totalDays = 366
+    val pagerState = rememberPagerState(initialPage = 365, pageCount = { totalDays })
+    val selectedDay = today.minusDays((totalDays - 1 - pagerState.currentPage).toLong())
     val activeDays = activities.map{it.activityDate}.toSet()
-    val filteredActivities = activities.filter { it.activityDate == selectedDay }
+
+    val coroutineScope = rememberCoroutineScope()
 
     val selectedDayFormatted = selectedDay.format(
         DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
@@ -90,38 +103,50 @@ fun HomeScreen(
         CalendarSlider(
             activeDays = activeDays,
             selectedDay = selectedDay,
-            onDaySelected = {selectedDay = it}
+            onDaySelected =  { day ->
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(totalDays - 1 - ChronoUnit.DAYS.between(day, today).toInt())
+                }
+            }
         )
         Spacer(modifier = Modifier.height(32.dp))
 
-        if (filteredActivities.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                Text(
-                    text = "Keine Aktivitäten an diesem Tag",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-                    modifier = Modifier.padding(top = 24.dp)
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(filteredActivities) { entity ->
-                    ActivityCard(
-                        name = entity.activityName,
-                        onClick = { onActivityClick(entity) }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ){ page ->
+            val dayForPage = today.minusDays((totalDays - 1 - page).toLong())
+            val filteredActivities = activities.filter { it.activityDate == dayForPage }
+
+            if (filteredActivities.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Text(
+                        text = "Keine Aktivitäten an diesem Tag",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                        modifier = Modifier.padding(top = 24.dp)
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxSize(   )
+                        .padding(horizontal = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(filteredActivities) { entity ->
+                        ActivityCard(
+                            name = entity.activityName,
+                            onClick = { onActivityClick(entity) }
+                        )
+                    }
                 }
             }
         }
