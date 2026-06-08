@@ -1,11 +1,8 @@
 package com.example.activitytracker.ui.screens.home
 
-import android.view.Choreographer
-import androidx.compose.animation.*
 import com.example.activitytracker.ui.components.StreakBadge
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,11 +25,9 @@ import com.example.activitytracker.data.local.entity.ActivityEntity
 import java.time.LocalDate
 import com.example.activitytracker.ui.components.CalendarSlider
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
-import kotlin.math.abs
 
 
 @Composable
@@ -160,7 +154,7 @@ fun ActivityCard(name: String, onClick: () -> Unit = {}) {
             .height(56.dp)
             .clip(RoundedCornerShape(35))
             .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35))
-            .clickable() { onClick() },
+            .clickable { onClick() },
         contentAlignment = Alignment.CenterStart
     ) {
         Text(

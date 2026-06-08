@@ -1,5 +1,6 @@
 package com.example.activitytracker.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import java.util.Locale
 
 private const val BACKWARD_DAYS_COUNT = 365
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun CalendarSlider(
     activeDays: Set<LocalDate>,
