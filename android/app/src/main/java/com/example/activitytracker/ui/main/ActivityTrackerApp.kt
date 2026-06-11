@@ -22,6 +22,7 @@ import com.example.activitytracker.ui.screens.login.LoginScreen
 import com.example.activitytracker.ui.screens.splash.SplashWatcher
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.ui.screens.tracking.EditActivity
+import java.time.LocalDate
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,10 +30,9 @@ import com.example.activitytracker.ui.screens.tracking.EditActivity
 fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SPLASH) }
     var showBottomSheet by remember { mutableStateOf(false) }
-
     var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
-
+    var selectedDay by remember { mutableStateOf(LocalDate.now()) }
 
     LaunchedEffect(openAddActivityRequestId) {
         if (openAddActivityRequestId > 0) {
@@ -55,7 +55,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
     val streak by trackingViewModel.streak.observeAsState(0)
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,6 +94,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 AppDestinations.HOME -> HomeScreen(
                     activities = activities,
                     streak = streak,
+                    selectedDay = selectedDay,
+                    onDaySelected = { selectedDay = it },
                     onSettingsClick = {},
                     onActivityClick = { activity ->
                         selectedActivity = activity
@@ -123,11 +124,12 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         ) {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
-                onSave = { activityName, activityDate ->
+                onSave = { activityName, activityDate, ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
                 },
-                activityNames = listOfActivityNames
+                activityNames = listOfActivityNames,
+                selectedDate = selectedDay
             )
         }
     }
