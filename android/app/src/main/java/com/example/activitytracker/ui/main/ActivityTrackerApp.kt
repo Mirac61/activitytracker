@@ -124,7 +124,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         ) {
             AddActivity(
                 onDismiss = { showBottomSheet = false },
-                onSave = { activityName, activityDate, ->
+                onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
                 },
