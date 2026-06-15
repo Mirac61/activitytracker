@@ -30,14 +30,13 @@ import java.util.Locale
 fun HomeScreen(
     activities: List<ActivityEntity> = emptyList(),
     streak: Int = 0,
+    selectedDay: LocalDate,
+    onDaySelected: (LocalDate) -> Unit,
     onSettingsClick: () -> Unit = {},
     onActivityClick: (ActivityEntity) -> Unit = {}
 ) {
-    val today = LocalDate.now()
-    var selectedDay by remember { mutableStateOf(today) }
     val activeDays = activities.map{it.activityDate}.toSet()
     val filteredActivities = activities.filter { it.activityDate == selectedDay }
-
     val selectedDayFormatted = selectedDay.format(
         DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
     ).replaceFirstChar { it.uppercase() }
@@ -90,7 +89,7 @@ fun HomeScreen(
         CalendarSlider(
             activeDays = activeDays,
             selectedDay = selectedDay,
-            onDaySelected = {selectedDay = it}
+            onDaySelected = onDaySelected
         )
         Spacer(modifier = Modifier.height(32.dp))
 
