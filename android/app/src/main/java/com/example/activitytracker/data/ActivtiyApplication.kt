@@ -12,4 +12,5 @@ class ActivityApplication : Application() {
     val authStorage by lazy { AuthStorage(this) }
     val repository by lazy { ActivityRepository(database.activityDao(),
         RetrofitClient.api) }
+
 }
