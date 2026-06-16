@@ -27,17 +27,27 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, activityNames: List<String>){
-    var activityName by remember {mutableStateOf( "")}
+fun AddActivity(
+    onDismiss: () -> Unit,
+    onSave: (String, LocalDate) -> Unit,
+    activityNames: List<String>,
+    selectedDate: LocalDate = LocalDate.now()
+) {
+    var activityName by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
-    val filtered: List<String> = if (activityName.isBlank()) {activityNames} else {activityNames.filter { it.contains(activityName, ignoreCase = true) }}
+    val filtered: List<String> = if (activityName.isBlank()) {
+        activityNames
+    } else {
+        activityNames.filter { it.contains(activityName, ignoreCase = true) }
+    }
 
     var textFieldWidth by remember { mutableStateOf(0) }
     var showSuggestions by remember { mutableStateOf(true) }
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    // Today as date picker
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+    )
 
     val dateTextForUI = datePickerState.selectedDateMillis?.let {
         Instant.ofEpochMilli(it)
@@ -46,10 +56,15 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
     } ?: ""
 
 
-
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9F).padding(24.dp).imePadding().pointerInput(Unit) {
-        detectTapGestures(onTap = { focusManager.clearFocus() })
-    }) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.9F)
+            .padding(24.dp)
+            .imePadding()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }) {
 
         // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -65,30 +80,37 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
 
         Text("Name", style = MaterialTheme.typography.labelMedium)
         Spacer(modifier = Modifier.height(8.dp))
-      Box{
-          OutlinedTextField(
-              value = activityName,
-              onValueChange = { activityName = it },
-              modifier = Modifier.fillMaxWidth().onSizeChanged{textFieldWidth = it.width}
-                  .onFocusChanged{isFocused = it.isFocused; if(it.isFocused){showSuggestions = true} },
-              shape = RoundedCornerShape(12.dp),
-              singleLine = true
-          )
-          DropdownMenu(
-              expanded = filtered.isNotEmpty() && (isFocused || activityName.isNotBlank()) && showSuggestions,
-              onDismissRequest = { showSuggestions = false },
-              properties = PopupProperties(focusable = false),
-              modifier =  Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp()}),
-          ) {
-              filtered.forEach{ suggestion ->
-                  DropdownMenuItem(
-                      text = { Text(suggestion) },
-                      onClick = {activityName = suggestion; showSuggestions = false
-                      }
-                  )
-              }
-          }
-      }
+        Box {
+            OutlinedTextField(
+                value = activityName,
+                onValueChange = { activityName = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onSizeChanged { textFieldWidth = it.width }
+                    .onFocusChanged {
+                        isFocused = it.isFocused; if (it.isFocused) {
+                        showSuggestions = true
+                    }
+                    },
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+            DropdownMenu(
+                expanded = filtered.isNotEmpty() && (isFocused || activityName.isNotBlank()) && showSuggestions,
+                onDismissRequest = { showSuggestions = false },
+                properties = PopupProperties(focusable = false),
+                modifier = Modifier.width(with(LocalDensity.current) { textFieldWidth.toDp() }),
+            ) {
+                filtered.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            activityName = suggestion; showSuggestions = false
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,7 +128,9 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
                 placeholder = { Text("TT.MM.JJJJ") }
             )
             Box(
-                modifier = Modifier.matchParentSize().clickable { showDatePicker = true }
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { showDatePicker = true }
             )
         }
 
@@ -140,7 +164,9 @@ fun AddActivity(onDismiss: () ->  Unit, onSave: (String, LocalDate) -> Unit, act
 
                 onSave(activityName, localDate)
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = SecondaryAccent),
             enabled = activityName.isNotBlank() && dateTextForUI.isNotBlank()

@@ -34,6 +34,8 @@ import java.util.Locale
 fun HomeScreen(
     activities: List<ActivityEntity> = emptyList(),
     streak: Int = 0,
+    selectedDay: LocalDate,
+    onDaySelected: (LocalDate) -> Unit,
     onSettingsClick: () -> Unit = {},
     onActivityClick: (ActivityEntity) -> Unit = {}
 ) {
