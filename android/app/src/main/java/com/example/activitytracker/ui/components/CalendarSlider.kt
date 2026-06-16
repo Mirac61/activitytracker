@@ -56,7 +56,7 @@ fun CalendarSlider(
         verticalAlignment = Alignment.CenterVertically
     ) {
         items(daysList) { day ->
-            DayOfWeek(
+            DayItem (
                 day = day,
                 selectedDay = selectedDay,
                 activeDays = activeDays,
@@ -69,7 +69,7 @@ fun CalendarSlider(
 
 
 @Composable
-fun DayOfWeek(
+fun DayItem(
     day: LocalDate,
     selectedDay: LocalDate,
     activeDays: Set<LocalDate>,
