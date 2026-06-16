@@ -12,12 +12,8 @@ import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.ui.main.ActivityTrackerApp
 import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
 import com.example.activitytracker.notification.AlarmScheduler
-import com.example.activitytracker.notification.NotificationHelper
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import com.example.activitytracker.notification.NotificationSetup
 import com.example.activitytracker.notification.StartWeatherWorker
-import com.example.activitytracker.notification.WeatherWorker
 import com.example.activitytracker.premission.PermissionHandler
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 ActivityTrackerApp(openAddActivityRequestId = openAddActivityRequestId)
             }
         }
-        NotificationHelper(this).createNotificationChannel()
+        NotificationSetup(this).createNotificationChannel()
         AlarmScheduler(this).scheduleDailyAlarm()
     }
 

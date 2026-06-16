@@ -10,7 +10,7 @@ class TimeChangeReceiver : BroadcastReceiver() {
             intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
             intent.action == "android.intent.action.TIMEZONE_OFFSET_CHANGED") {
 
-            NotificationHelper(context).createNotificationChannel()
+            NotificationSetup(context).createNotificationChannel()
             AlarmScheduler(context).scheduleDailyAlarm()
         }
     }

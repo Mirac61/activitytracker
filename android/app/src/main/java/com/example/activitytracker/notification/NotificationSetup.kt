@@ -14,16 +14,17 @@ import com.example.activitytracker.MainActivity
 import com.example.activitytracker.R
 import android.Manifest
 
-const val CHANNEL_ID = "activity_tracker_channel"
+const val CHANNEL_REMINDER_ID = "activity_tracker_channel"
 const val CHANNEL_WEATHER_ID = "weather_api_channel"
+const val NOTIFICATION_ID_WEATHER = 1
+const val NOTIFICATION_ID_REMINDER = 2
 
 // contains the Android Notification setup
-class NotificationHelper(private val context: Context) {
+class NotificationSetup(private val context: Context) {
 
     fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID,
+                CHANNEL_REMINDER_ID,
                 "Erinnerung",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
@@ -34,15 +35,14 @@ class NotificationHelper(private val context: Context) {
                 CHANNEL_WEATHER_ID, "Wetterbedingte Benachrichtigung", NotificationManager.IMPORTANCE_DEFAULT
             )
             manager.createNotificationChannel(weatherChannel)
-        }
     }
 
     fun sendActivityNotification() {
-        showNotification(1, CHANNEL_ID, "Zeit aktiv zu sein", "Vergiss deine Ziele heute nicht!")
+        showNotification(NOTIFICATION_ID_REMINDER, CHANNEL_REMINDER_ID, "Zeit aktiv zu sein", "Vergiss deine Ziele heute nicht!")
     }
 
     fun sendWeatherNotification() {
-        showNotification(2, CHANNEL_WEATHER_ID, "Die Sonne scheint!", "Perfekte Voraussetzung für einen Spaziergang")
+        showNotification(NOTIFICATION_ID_WEATHER, CHANNEL_WEATHER_ID, "Die Sonne scheint!", "Perfekte Voraussetzung für einen Spaziergang")
     }
 
     fun showNotification(id: Int, channelId: String, title: String, text: String) {
