@@ -1,6 +1,7 @@
 package com.activitytracker.backend.controller;
 
 import com.activitytracker.backend.dto.*;
+import com.activitytracker.backend.repository.UserRepository;
 import com.activitytracker.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody UserRegistrationDto dto) {
@@ -33,5 +35,12 @@ public class UserController {
     public ResponseEntity<LoginResponseDto> refresh(@Valid @RequestBody RefreshRequestDto dto) {
         LoginResponseDto response = userService.refreshUserToken(dto);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{userId}/friendcode")
+    public ResponseEntity<String> getFriendCode(@PathVariable UUID userId) {
+        return userRepository.findById(userId)
+                .map(user -> ResponseEntity.ok(user.getFriendCode()))
+                .orElse(ResponseEntity.notFound().build());
     }
 }   

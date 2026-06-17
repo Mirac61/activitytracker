@@ -14,10 +14,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
+    private final FriendService friendService;
 
-    public UserService(UserRepository userRepository, KeycloakService keycloakService) {
+    public UserService(UserRepository userRepository, KeycloakService keycloakService, FriendService friendService) {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
+        this.friendService = friendService;
     }
 
     public UUID registerUser(UserRegistrationDto dto) {
@@ -26,6 +28,10 @@ public class UserService {
         try {
             User user = new User();
             user.setUserId(keycloakId);
+
+            user.setUsername(dto.getVorname());
+            user.setFriendCode(friendService.generateFriendCode(dto.getVorname()));
+
             userRepository.save(user);
 
             return keycloakId;

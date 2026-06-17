@@ -12,7 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.MainNavBar
 import com.example.activitytracker.ui.screens.home.HomeScreen
-import com.example.activitytracker.ui.screens.friends.FriendsScreen
+import com.example.activitytracker.ui.screens.friends.FriendScreen
+import com.example.activitytracker.ui.screens.friends.FriendViewModel
+import com.example.activitytracker.ui.screens.friends.FriendViewModelFactory
 import com.example.activitytracker.ui.screens.tracking.AddActivity
 import com.example.activitytracker.ui.screens.tracking.TrackingViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -21,18 +23,30 @@ import com.example.activitytracker.ui.screens.register.RegistrationScreen
 import com.example.activitytracker.ui.screens.login.LoginScreen
 import com.example.activitytracker.ui.screens.splash.SplashWatcher
 import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.data.repository.FriendRepository
 import com.example.activitytracker.ui.screens.tracking.EditActivity
-
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.SPLASH) }
     var showBottomSheet by remember { mutableStateOf(false) }
-
     var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
 
+    // ✅ NEU — userId aus DataStore laden
+    val application = LocalContext.current.applicationContext as ActivityApplication
+    var userId by remember { mutableStateOf<UUID?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        val stored = application.authStorage.getUserId()
+        if (stored != null) {
+            userId = UUID.fromString(stored)
+        }
+    }
 
     LaunchedEffect(openAddActivityRequestId) {
         if (openAddActivityRequestId > 0) {
@@ -42,7 +56,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     val addSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val application = LocalContext.current.applicationContext as ActivityApplication
 
     val trackingViewModel: TrackingViewModel = viewModel(
         factory = ActivityEntryModelFactory(
@@ -51,24 +64,34 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
-    // Observe the activity List from Room
+    // ✅ NEU — FriendViewModel nur erstellen wenn userId vorhanden
+    val friendViewModel: FriendViewModel? = userId?.let {
+        viewModel(
+            factory = FriendViewModelFactory(
+                repository = FriendRepository(),
+                userId = it
+            )
+        )
+    }
+    val ownFriendCode by friendViewModel?.ownFriendCode?.observeAsState("") ?: remember { mutableStateOf("") }
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
     val streak by trackingViewModel.streak.observeAsState(0)
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
 
+    // ✅ NEU — FriendViewModel Daten beobachten
+    val friends by friendViewModel?.friends?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
+    val pendingRequests by friendViewModel?.pendingRequests?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.REGISTER && currentDestination != AppDestinations.SPLASH) {
+            if (currentDestination != AppDestinations.LOGIN &&
+                currentDestination != AppDestinations.REGISTER &&
+                currentDestination != AppDestinations.SPLASH) {
                 MainNavBar(
                     currentDestination = currentDestination,
-                    onNavigate = { selectedDestination ->
-                        currentDestination = selectedDestination
-                    },
-                    onPlusClicked = {
-                        showBottomSheet = true
-                    }
+                    onNavigate = { currentDestination = it },
+                    onPlusClicked = { showBottomSheet = true }
                 )
             }
         }
@@ -76,21 +99,19 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
                 AppDestinations.SPLASH -> SplashWatcher(
-                    onNavigateToHome = {
-                        currentDestination = AppDestinations.HOME
-                    },
-                    onNavigateToLogin = {
-                        currentDestination = AppDestinations.LOGIN
-                    }
+                    onNavigateToHome = { currentDestination = AppDestinations.HOME },
+                    onNavigateToLogin = { currentDestination = AppDestinations.LOGIN }
                 )
-
                 AppDestinations.LOGIN -> LoginScreen(
                     onLoginSuccess = {
+                        // userId neu laden nach Login
+                        scope.launch {
+                            val stored = application.authStorage.getUserId()
+                            if (stored != null) userId = UUID.fromString(stored)
+                        }
                         currentDestination = AppDestinations.HOME
                     },
-                    onNavigateToRegister = {
-                        currentDestination = AppDestinations.REGISTER
-                    }
+                    onNavigateToRegister = { currentDestination = AppDestinations.REGISTER }
                 )
                 AppDestinations.HOME -> HomeScreen(
                     activities = activities,
@@ -101,16 +122,30 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                         showEditBottomSheet = true
                     }
                 )
-                AppDestinations.FRIENDS -> FriendsScreen()
-                AppDestinations.TRACKING -> {}
 
-                AppDestinations.REGISTER -> RegistrationScreen(
-                    onRegistrationComplete = {
-                        currentDestination = AppDestinations.LOGIN
+                // ✅ NEU — FriendScreen verbunden
+                AppDestinations.FRIENDS -> FriendScreen(
+                    friends = friends,
+                    pendingRequests = pendingRequests,
+                    ownFriendCode = ownFriendCode,
+                    onSendRequest = { friendCode ->
+                        friendViewModel?.sendFriendRequest(friendCode)
                     },
-                    onNavigateToLogin = {
-                        currentDestination = AppDestinations.LOGIN
+                    onAcceptRequest = { requestId ->
+                        friendViewModel?.acceptRequest(requestId)
+                    },
+                    onDeclineRequest = { requestId ->
+                        friendViewModel?.declineRequest(requestId)
+                    },
+                    onRemoveFriend = { friendId ->
+                        friendViewModel?.removeFriend(friendId)
                     }
+                )
+
+                AppDestinations.TRACKING -> {}
+                AppDestinations.REGISTER -> RegistrationScreen(
+                    onRegistrationComplete = { currentDestination = AppDestinations.LOGIN },
+                    onNavigateToLogin = { currentDestination = AppDestinations.LOGIN }
                 )
             }
         }
