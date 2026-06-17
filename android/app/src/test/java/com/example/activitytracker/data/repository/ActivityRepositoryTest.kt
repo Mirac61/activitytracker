@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import retrofit2.Response
 import java.time.LocalDate
 import org.mockito.kotlin.eq
+import java.util.UUID
 
 class ActivityRepositoryTest {
 
@@ -29,25 +30,29 @@ class ActivityRepositoryTest {
     }
 
     @Test
-    fun syncPendingActivities() = runTest{
+    fun syncPendingActivities() = runTest {
+        val userId = UUID.fromString("bb60ec8e-0cea-49a9-b393-a0d70bd3bb24")
         val entity = ActivityEntity(
-            id = "550e8400-e29b-41d4-a716-446655440000",
+            id = UUID.fromString("11111111-1111-1111-1111-111111111111"),
             activityName = "Laufen",
             activityDate = LocalDate.of(2026, 5, 10),
             status = SyncStatus.PENDING_CREATE,
         )
 
         whenever(activityDao.getSyncWorkQue()).thenReturn(listOf(entity))
-        whenever(apiService.uploadActivity(
-            eq(ActivityUploadDto(
-                id = entity.id,
-                activityName = "Laufen",
-                activityDate = "2026-05-10",
-                createdAt = entity.createdAt.toString(),
-                userId = "test-user-123"
-            ))
-        )).thenReturn(Response.success(Unit))
-        repository.syncPendingActivities("test-user-123")
+        whenever(
+            apiService.saveActivity(
+                eq(entity.id),
+                eq(ActivityUploadDto(
+                    activityName = "Laufen",
+                    activityDate = "2026-05-10",
+                    createdAt = entity.createdAt.toString(),
+                    userId = userId
+                ))
+            )
+        ).thenReturn(Response.success(Unit))
+
+        repository.syncPendingActivities(userId)
         verify(activityDao).updateSyncStatus(eq(entity.id), eq(SyncStatus.SYNCED))
     }
 }

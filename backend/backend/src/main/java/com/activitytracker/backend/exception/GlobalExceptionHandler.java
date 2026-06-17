@@ -14,12 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // User error
-    @ExceptionHandler(InvalidActivityException.class)
-    public ResponseEntity<String> handleInvalidActivity(InvalidActivityException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
+    // TODO: All Exceptions should use ErrorResponseDto
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleBadRequest(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid argument: " + e.getMessage());
@@ -30,7 +25,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponseDto(400, "wrong JSON-Format"));
     }
 
-    // System error
+    // TODO: Why does the server Error give an Registration Error in German?
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleServerError(RuntimeException e) {
         log.error("Registrierung fehlgeschlagen: ", e);
@@ -69,5 +64,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest().body("Validation failed");
+    }
+
+    @ExceptionHandler(UserDoesNotExistException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserNotFound(UserDoesNotExistException e) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(status)
+                .body(new ErrorResponseDto(status.value(), e.getMessage()));
     }
 }

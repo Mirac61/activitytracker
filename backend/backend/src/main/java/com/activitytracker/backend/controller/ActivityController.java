@@ -16,19 +16,15 @@ import java.util.UUID;
 public class ActivityController {
     private final ActivityService activityService;
 
-    @PostMapping
-    public ResponseEntity<Void> upload(@Valid @RequestBody ActivityDto request) {
-        activityService.uploadActivity(request, request.userId());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(
+    public ResponseEntity<Void> save(
             @PathVariable UUID id,
             @Valid @RequestBody ActivityDto request
     ) {
-        activityService.updateActivity(id, request, request.userId());
+        boolean created = activityService.saveActivity(id, request, request.userId());
 
-        return ResponseEntity.noContent().build();
+        return created
+                ? ResponseEntity.status(HttpStatus.CREATED).build()
+                : ResponseEntity.noContent().build();
     }
 }

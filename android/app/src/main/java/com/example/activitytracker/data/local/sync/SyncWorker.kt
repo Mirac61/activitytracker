@@ -11,6 +11,7 @@ import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.remote.RetrofitClient
 import com.example.activitytracker.data.repository.ActivityRepository
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 // Inspiration from: https://developer.android.com/topic/architecture/data-layer/offline-first?hl=de
@@ -22,7 +23,7 @@ class SyncWorker(
     // Gathers required dependencies and syncs activities to the remote DB
     override suspend fun doWork(): Result {
         val app = applicationContext as? ActivityApplication ?: return Result.failure()
-        val userId = app.authStorage.getUserId() ?: return Result.failure()
+        val userId = app.authStorage.getUserId()?.let { UUID.fromString(it) } ?: return Result.failure()
         val database = AppDatabase.getInstance(applicationContext)
         val repository = ActivityRepository(database.activityDao(), RetrofitClient.api)
         val hasError = repository.syncPendingActivities(userId)

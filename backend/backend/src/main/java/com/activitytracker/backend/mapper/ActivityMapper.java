@@ -11,13 +11,13 @@ import java.util.UUID;
 @Component
 public class ActivityMapper {
 
-    public Activity toEntity(ActivityDto dto, User user) {
+    public Activity toEntity(ActivityDto dto, UUID id, User user) {
         return new Activity(
-                UUID.fromString(dto.getId()),
+                id,
                 user,
-                dto.getActivityName(),
-                dto.getActivityDate().atStartOfDay(),
-                dto.getCreatedAt() != null ? dto.getCreatedAt() : OffsetDateTime.now()
+                dto.activityName(),
+                dto.activityDate().atStartOfDay(),
+                dto.createdAt() != null ? dto.createdAt() : OffsetDateTime.now()
         );
     }
 }
