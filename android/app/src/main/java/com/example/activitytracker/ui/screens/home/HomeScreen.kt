@@ -42,9 +42,16 @@ fun HomeScreen(
     val today = LocalDate.now()
     val totalDays = 366
     val pagerState = rememberPagerState(initialPage = 365, pageCount = { totalDays })
-    val selectedDay = today.minusDays((totalDays - 1 - pagerState.currentPage).toLong())
-    val activeDays = activities.map{it.activityDate}.toSet()
 
+    // Notifies the parent of changes and makes the pager the single source of truth (doesn't matter if swipe or click)
+    LaunchedEffect(pagerState.currentPage) {
+        val newDay = today.minusDays((totalDays - 1 - pagerState.currentPage).toLong())
+        if (newDay != selectedDay) {
+            onDaySelected(newDay)
+        }
+    }
+
+    val activeDays = activities.map { it.activityDate }.toSet()
     val coroutineScope = rememberCoroutineScope()
 
     val selectedDayFormatted = selectedDay.format(
@@ -83,7 +90,8 @@ fun HomeScreen(
                     .weight(1f)
                     .padding(horizontal = 12.dp),
                 contentAlignment = Alignment
-                    .CenterEnd) {
+                    .CenterEnd
+            ) {
                 IconButton(onClick = onSettingsClick) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
@@ -99,9 +107,11 @@ fun HomeScreen(
         CalendarSlider(
             activeDays = activeDays,
             selectedDay = selectedDay,
-            onDaySelected =  { day ->
+            onDaySelected = { day ->
                 coroutineScope.launch {
-                    pagerState.animateScrollToPage(totalDays - 1 - ChronoUnit.DAYS.between(day, today).toInt())
+                    pagerState.animateScrollToPage(
+                        totalDays - 1 - ChronoUnit.DAYS.between(day, today).toInt()
+                    )
                 }
             }
         )
@@ -110,7 +120,7 @@ fun HomeScreen(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f)
-        ){ page ->
+        ) { page ->
             val dayForPage = today.minusDays((totalDays - 1 - page).toLong())
             val filteredActivities = activities.filter { it.activityDate == dayForPage }
 
@@ -133,7 +143,7 @@ fun HomeScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxSize(   )
+                        .fillMaxSize()
                         .padding(horizontal = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -148,6 +158,7 @@ fun HomeScreen(
         }
     }
 }
+
 @Composable
 fun ActivityCard(name: String, onClick: () -> Unit = {}) {
     Box(
