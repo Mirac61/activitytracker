@@ -17,15 +17,19 @@ import java.time.OffsetDateTime;
 public class Activity {
     @Id
     private UUID activityId;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @Column(nullable = false)
     @NonNull
     private String name;
+
     @Column(nullable = false)
     @NonNull
-    private LocalDateTime timestamp;
+    private LocalDateTime timestamp; //TODO: bessere name
+
     @Column(nullable = false)
     @NonNull
     private OffsetDateTime createdAt;

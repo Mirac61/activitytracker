@@ -7,18 +7,18 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
-@Getter
-@AllArgsConstructor
-public class ActivityDto {
+
+public record ActivityDto (
     @NotBlank
-    private String id;
+    UUID id,
     @NotBlank
-    private String activityName;
+    String activityName,
     @NotNull
-    private LocalDate activityDate;
+    LocalDate activityDate,
     @NotBlank
-    private String userId;
+    UUID userId,
     @NotNull
-    private OffsetDateTime createdAt;
-}
+    OffsetDateTime createdAt)
+{}

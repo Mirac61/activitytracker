@@ -26,25 +26,17 @@ public class ActivityService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void uploadActivity(ActivityDto request, String userId) {
+    public void uploadActivity(ActivityDto request, UUID userId) {
+// TODO:
 
-        UUID activityId;
-        try {
-            activityId = UUID.fromString(request.getId());
-        } catch (IllegalArgumentException e) {
-            throw new InvalidActivityException("Invalid UUID format for activity ID");
-        }
+        Optional<Activity> existing = activityRepository.findById(request.id());
 
-        Optional<Activity> existing = activityRepository.findById(activityId);
-        if (existing.isPresent()) {
-            if (!existing.get().getUser().getUserId().toString().equals(userId)) {
-                throw new AccessDeniedException("Activity belongs to another user");
-            }
-            log.info("Activity {} already exists for user {}", activityId, userId);
-            return;
-        }
+        existing
+                .filter(activity -> activity.getUser().getUserId().equals(userId))
+                .orElseThrow(()->new AccessDeniedException("Activity belongs to another user"));
 
-        User user = userRepository.findById(UUID.fromString(userId)).
+
+        User user = userRepository.findById(userId).
                 orElseThrow(() -> new RuntimeException("User not found"));
 
         var activity = activityMapper.toEntity(request, user);
@@ -52,24 +44,17 @@ public class ActivityService {
     }
 
     @Transactional
-    public void updateActivity(String id, ActivityDto request, String userId) {
-        
-        UUID activityId;
-        try {
-            activityId = UUID.fromString(id);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidActivityException("Invalid UUID format for activity ID");
-        }
+    public void updateActivity(UUID id, ActivityDto request, UUID userId) {
 
-        Activity existing = activityRepository.findById(activityId)
+        Activity existing = activityRepository.findById(request.id())
                 .orElseThrow(() -> new InvalidActivityException("Activity not found"));
 
         if (!existing.getUser().getUserId().toString().equals(userId)) {
             throw new AccessDeniedException("Activity belongs to another user");
         }
 
-        existing.setName(request.getActivityName());
-        existing.setTimestamp(request.getActivityDate().atStartOfDay());
+        existing.setName(request.activityName());
+        existing.setTimestamp(request.activityDate().atStartOfDay());
 
         activityRepository.save(existing);
     }
