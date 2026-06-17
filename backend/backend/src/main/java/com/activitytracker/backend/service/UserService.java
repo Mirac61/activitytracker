@@ -4,44 +4,30 @@ import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.exception.UserRegistrationException;
 import com.activitytracker.backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
 
-    public UserService(UserRepository userRepository, KeycloakService keycloakService) {
-        this.userRepository = userRepository;
-        this.keycloakService = keycloakService;
-    }
-
+    @Transactional
     public UUID registerUser(UserRegistrationDto dto) {
+
         UUID keycloakId = keycloakService.createUserInKeycloak(dto);
 
-        try {
             User user = new User();
             user.setUserId(keycloakId);
             userRepository.save(user);
 
             return keycloakId;
-
-        } catch (Exception e) {
-            log.error("Failed to save user to local database after Keycloak creation. Triggering Rollback... Error: {}", e.getMessage());
-
-            try {
-                keycloakService.deleteUserFromKeycloak(keycloakId);
-                log.info("Rollback successful: User {} removed from Keycloak to preserve data consistency.", keycloakId);
-            } catch (Exception rollbackException) {
-                log.error("CRITICAL: Rollback failed! Could not delete user {} from Keycloak: {}", keycloakId, rollbackException.getMessage());
-            }
-
-            throw new UserRegistrationException("Registrierung fehlgeschlagen. Interner Datenbankfehler.", e);
-        }
     }
 
     public LoginResponseDto loginUser(LoginRequestDto dto) {

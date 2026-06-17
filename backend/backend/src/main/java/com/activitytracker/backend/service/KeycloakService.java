@@ -25,6 +25,7 @@ import org.springframework.util.MultiValueMap;
 import org.keycloak.TokenVerifier;
 import org.keycloak.representations.AccessToken;
 
+
 import java.util.Collections;
 import java.util.UUID;
 
@@ -132,14 +133,11 @@ public class KeycloakService {
 
             return new AuthenticationResult(user.getId(), tokenResponse);
 
-        } catch (jakarta.ws.rs.NotAuthorizedException e) {
-            log.warn("Failed to login (wrong credentials) for: {}", email);
+        } catch (NotAuthorizedException e) {
+            log.warn("Failed to login (wrong credentials)");
             throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
-
-        } catch (InvalidCredentialsException e) {
-            throw e;
         } catch (Exception e) {
-            log.error("Critical system failure at Keycloak-Login for {}: ", email, e);
+            log.error("Critical system failure at Keycloak-Login", e);
 
             throw new RuntimeException("Keycloak service unavailable", e);
         }
