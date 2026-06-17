@@ -3,12 +3,11 @@ package com.activitytracker.backend.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import org.jspecify.annotations.NonNull;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WeatherResponse {
-    @NonNull
-    @JsonProperty("current")
-    private WeatherCurrentDto weatherCurrentDto;
+public class WeatherConditionDto {
+
+    @JsonProperty("text")
+    private String text;
 }
