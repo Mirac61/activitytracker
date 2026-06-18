@@ -70,4 +70,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest().body("Validation failed");
     }
+
+    @ExceptionHandler(GoogleAuthenticationException.class)
+    public ResponseEntity<String> handleGoogleAuthenticationError(GoogleAuthenticationException e) {
+        log.error("Google Authentifizierungsfehler abgefangen: ", e);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
 }

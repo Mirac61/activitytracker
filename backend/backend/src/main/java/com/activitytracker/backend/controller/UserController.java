@@ -34,4 +34,10 @@ public class UserController {
         LoginResponseDto response = userService.refreshUserToken(dto);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/google")
+    public ResponseEntity<GoogleLoginResponseDto> loginWithGoogle(@Valid @RequestBody GoogleLoginRequestDto dto) {
+        GoogleLoginResponseDto response = userService.loginUserWithGoogle(dto);
+        return ResponseEntity.ok(response);
+    }
 }   

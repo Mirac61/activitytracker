@@ -2,6 +2,7 @@ package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.entity.User;
+import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.UserRegistrationException;
 import com.activitytracker.backend.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,32 @@ public class UserService {
                 refreshResult.userId(),
                 refreshResult.tokenResponse().getToken(),
                 refreshResult.tokenResponse().getRefreshToken()
+        );
+    }
+
+    public GoogleLoginResponseDto loginUserWithGoogle(GoogleLoginRequestDto dto) {
+        // 1. Token-Exchange bei Keycloak anstoßen
+        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateWithGoogle(dto.getIdToken());
+
+        // 2. Prüfen, ob der Google-User bereits in unserer lokalen Datenbank existiert
+        UUID userId = UUID.fromString(authResult.userId());
+        if (!userRepository.existsById(userId)) {
+            try {
+                User user = new User();
+                user.setUserId(userId);
+                userRepository.save(user);
+                log.info("New Google user automatically synced to local database with ID: {}", userId);
+            } catch (Exception e) {
+                log.error("Failed to save new Google user {} to local database: {}", userId, e.getMessage());
+                throw new GoogleAuthenticationException("Interner Datenbankfehler bei der Google-Anmeldung.", e);
+            }
+        }
+
+        // 3. Tokens sauber in das spezifische Google-DTO verpacken
+        return new GoogleLoginResponseDto(
+                authResult.userId(),
+                authResult.tokenResponse().getToken(),
+                authResult.tokenResponse().getRefreshToken()
         );
     }
 }
