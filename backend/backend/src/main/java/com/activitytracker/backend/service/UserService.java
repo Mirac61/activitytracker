@@ -6,6 +6,7 @@ import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.UserRegistrationException;
 import com.activitytracker.backend.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -66,24 +67,24 @@ public class UserService {
     }
 
     public GoogleLoginResponseDto loginUserWithGoogle(GoogleLoginRequestDto dto) {
-        // 1. Token-Exchange bei Keycloak anstoßen
-        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateWithGoogle(dto.getIdToken());
-
-        // 2. Prüfen, ob der Google-User bereits in unserer lokalen Datenbank existiert
+        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateWithGoogle(dto.idToken());
         UUID userId = UUID.fromString(authResult.userId());
-        if (!userRepository.existsById(userId)) {
-            try {
-                User user = new User();
-                user.setUserId(userId);
-                userRepository.save(user);
-                log.info("New Google user automatically synced to local database with ID: {}", userId);
-            } catch (Exception e) {
-                log.error("Failed to save new Google user {} to local database: {}", userId, e.getMessage());
-                throw new GoogleAuthenticationException("Interner Datenbankfehler bei der Google-Anmeldung.", e);
-            }
+
+        try {
+            userRepository.findById(userId).ifPresentOrElse(
+                    user -> log.info("Google user login processed. User already existed in local database."),
+                    () -> {
+                        log.info("New Google user detected. Synchronizing new profile to local database.");
+                        User newUser = new User();
+                        newUser.setUserId(userId);
+                        userRepository.save(newUser);
+                    }
+            );
+        } catch (DataAccessException e) {
+            log.error("Database connectivity failure during Google user synchronization");
+            throw new GoogleAuthenticationException("Interner Datenbankfehler bei der Google-Anmeldung.", e);
         }
 
-        // 3. Tokens sauber in das spezifische Google-DTO verpacken
         return new GoogleLoginResponseDto(
                 authResult.userId(),
                 authResult.tokenResponse().getToken(),

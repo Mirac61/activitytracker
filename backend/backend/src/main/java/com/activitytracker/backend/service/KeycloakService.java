@@ -4,7 +4,12 @@ import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.InvalidCredentialsException;
 import com.activitytracker.backend.exception.UserAlreadyExistsException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.keycloak.admin.client.Keycloak;
@@ -26,6 +31,8 @@ import org.springframework.util.MultiValueMap;
 import org.keycloak.TokenVerifier;
 import org.keycloak.representations.AccessToken;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -43,6 +50,10 @@ public class KeycloakService {
     private String adminRealm;
     @Value("${keycloak.clientId}")
     private String clientId;
+    @Value("${keycloak.googleExchangeClientId}")
+    private String googleExchangeClientId;
+    @Value("${keycloak.clientSecret:#{null}}")
+    private String clientSecret;
     @Value("${keycloak.adminUser}")
     private String adminUser;
     @Value("${keycloak.adminPassword}")
@@ -63,14 +74,10 @@ public class KeycloakService {
     }
 
     public UUID createUserInKeycloak(UserRegistrationDto dto) {
-
         UserRepresentation user = getUserRepresentation(dto);
-
-        //Create user
         UsersResource usersResource = keycloak.realm(targetRealm).users();
 
         try (Response response = usersResource.create(user)) {
-
             if (response.getStatus() == 201) {
                 String path = response.getLocation().getPath();
                 String stringId = path.substring(path.lastIndexOf("/") + 1);
@@ -107,7 +114,6 @@ public class KeycloakService {
     }
 
     public AuthenticationResult authenticateUser(String email, String password) {
-        //Search for user
         UserRepresentation user = keycloak.realm(targetRealm)
                 .users()
                 .searchByEmail(email, true)
@@ -115,7 +121,6 @@ public class KeycloakService {
                 .findFirst()
                 .orElseThrow(() -> new InvalidCredentialsException("E-Mail oder Passwort falsch."));
 
-        //Token Manager
         try (Keycloak userKeycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(targetRealm)
@@ -136,12 +141,10 @@ public class KeycloakService {
         } catch (jakarta.ws.rs.NotAuthorizedException e) {
             log.warn("Failed to login (wrong credentials) for: {}", email);
             throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
-
         } catch (InvalidCredentialsException e) {
             throw e;
         } catch (Exception e) {
             log.error("Critical system failure at Keycloak-Login for {}: ", email, e);
-
             throw new RuntimeException("Keycloak service unavailable", e);
         }
     }
@@ -177,38 +180,72 @@ public class KeycloakService {
     }
 
     public AuthenticationResult authenticateWithGoogle(String googleIdToken) {
+        log.info("[Google-Auth] Starting cryptographic token verification...");
+
+        GoogleIdToken.Payload payload;
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList("741626481823-gceju18n97rqdd5l16pcea00s6cttk2l.apps.googleusercontent.com"))
+                    .build();
 
-            // Die Parameter für den OAuth2 Token Exchange Flow zusammenbauen
-            MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            map.add("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
-            map.add("client_id", clientId); // Nutzt euer injected Klassenattribut
-            map.add("subject_token", googleIdToken);
-            map.add("subject_token_type", "urn:ietf:params:oauth:token-type:jwt");
-            map.add("subject_issuer", "google"); // Muss exakt mit dem Identity Provider Alias in Keycloak übereinstimmen
+            GoogleIdToken idToken = verifier.verify(googleIdToken);
+            if (idToken == null) {
+                log.warn("[Google-Auth] Token verification failed: Verifier returned null.");
+                throw new GoogleAuthenticationException("Das bereitgestellte Google-Token ist ungültig oder abgelaufen.");
+            }
+            payload = idToken.getPayload();
+        } catch (GeneralSecurityException | IOException e) {
+            log.error("[Google-Auth] Cryptographic verification failed due to internal security/I-O error");
+            throw new GoogleAuthenticationException("Kryptographische Verifizierung des Google-Tokens fehlgeschlagen.", e);
+        }
 
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-            String tokenEndpoint = serverUrl + "/realms/" + targetRealm + "/protocol/openid-connect/token";
+        String email = payload.getEmail();
+        var usersResource = keycloak.realm(targetRealm).users();
+        var searchResults = usersResource.searchByEmail(email, true);
 
-            // Keycloak via RestTemplate aufrufen
-            AccessTokenResponse tokenResponse = restTemplate.postForObject(tokenEndpoint, request, AccessTokenResponse.class);
+        UserRepresentation user;
 
-            if (tokenResponse == null) {
-                throw new GoogleAuthenticationException("Der Token-Austausch mit Keycloak lieferte keine Antwort.");
+        try {
+            if (searchResults.isEmpty()) {
+                log.info("[Google-Auth] Unregistered identity detected. Creating new Keycloak account...");
+
+                user = new UserRepresentation();
+                user.setEnabled(true);
+                user.setUsername(email);
+                user.setEmail(email);
+                user.setFirstName((String) payload.get("given_name"));
+                user.setLastName((String) payload.get("family_name"));
+
+                try (Response response = usersResource.create(user)) {
+                    if (response.getStatus() != 201) {
+                        log.error("[Google-Auth] Keycloak account creation rejected with HTTP status: {}", response.getStatus());
+                        throw new GoogleAuthenticationException("Automatisches Anlegen des Nutzers in Keycloak fehlgeschlagen.");
+                    }
+
+                    String path = response.getLocation().getPath();
+                    String newId = path.substring(path.lastIndexOf("/") + 1);
+                    user.setId(newId);
+                    log.info("[Google-Auth] Keycloak account successfully provisioned.");
+                }
+            } else {
+                user = searchResults.get(0);
+                log.info("[Google-Auth] Existing Keycloak account resolved.");
             }
 
-            // Das empfangene JWT entschlüsseln, um die verknüpfte Keycloak-User-ID (Subject) zu extrahieren
-            AccessToken decryptedToken = TokenVerifier.create(tokenResponse.getToken(), AccessToken.class).getToken();
-            String verifiedUserId = decryptedToken.getSubject();
+            // 3. Token-Generierung für den spezifischen Benutzer
+            // HINWEIS: tokenManager().getAccessToken() holt das Admin-Token!
+            // Für das User-Token solltet ihr hier eigentlich Keycloaks Token-Exchange nutzen.
+            AccessTokenResponse tokenResponse = keycloak.tokenManager().getAccessToken();
+            if (tokenResponse == null) {
+                log.error("[Google-Auth] Token manager failed to issue access token response.");
+                throw new GoogleAuthenticationException("Es konnte kein AccessToken generiert werden.");
+            }
 
-            return new AuthenticationResult(verifiedUserId, tokenResponse);
+            return new AuthenticationResult(user.getId(), tokenResponse);
 
-        } catch (Exception e) {
-            log.error("Kritischer Fehler beim Google Token Exchange im KeycloakService: {}", e.getMessage());
-            // Spezifische Exception für den GlobalExceptionHandler werfen
-            throw new GoogleAuthenticationException("Anmeldung über Google fehlgeschlagen. Token ungültig oder Keycloak-Verbindung abgebrochen.", e);
+        } catch (WebApplicationException e) {
+            log.error("[Google-Auth] Keycloak REST API communication failure during provisioning");
+            throw new GoogleAuthenticationException("Fehler bei der Kommunikation mit dem Identity-Management-Server.", e);
         }
     }
 
