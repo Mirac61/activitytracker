@@ -21,6 +21,9 @@ import com.example.activitytracker.ui.screens.register.RegistrationScreen
 import com.example.activitytracker.ui.screens.login.LoginScreen
 import com.example.activitytracker.ui.screens.splash.SplashWatcher
 import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.ui.screens.statistics.StatisticsScreen
+import com.example.activitytracker.ui.screens.statistics.StatisticsViewModel
+import com.example.activitytracker.ui.screens.statistics.StatisticsViewModelFactory
 import com.example.activitytracker.ui.screens.tracking.EditActivity
 import java.time.LocalDate
 
@@ -51,9 +54,18 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
+    val statisticsViewModel: StatisticsViewModel = viewModel(
+        factory = StatisticsViewModelFactory(repository = application.repository)
+    )
+
     // Observe the activity List from Room
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
     val streak by trackingViewModel.streak.observeAsState(0)
+    val longestStreak by statisticsViewModel.longestStreak.observeAsState(0)
+    val averagePerDay by statisticsViewModel.averagePerDay.observeAsState(0.0)
+    val mostActiveWeekday by statisticsViewModel.mostActiveWeekday.observeAsState(null)
+    val sumByWeekday by statisticsViewModel.sumByWeekday.observeAsState(emptyMap())
+    val averageByWeekday by statisticsViewModel.averageByWeekday.observeAsState(emptyMap())
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
 
     Scaffold(
@@ -104,6 +116,14 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 )
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
+                AppDestinations.STATISTICS -> StatisticsScreen(
+                    longestStreak = longestStreak,
+                    averagePerDay = averagePerDay,
+                    mostActiveWeekday = mostActiveWeekday,
+                    sumByWeekday = sumByWeekday,
+                    averageByWeekday = averageByWeekday,
+                    onMonthSelected = { statisticsViewModel.selectMonth(it) }
+                )
 
                 AppDestinations.REGISTER -> RegistrationScreen(
                     onRegistrationComplete = {
