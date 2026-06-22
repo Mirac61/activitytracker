@@ -27,6 +27,8 @@ import com.example.activitytracker.data.repository.FriendRepository
 import com.example.activitytracker.ui.screens.tracking.EditActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
+import java.time.LocalDate
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,6 +116,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 AppDestinations.HOME -> HomeScreen(
                     activities = activities,
                     streak = streak,
+                    selectedDay = selectedDay,
+                    onDaySelected = { selectedDay = it },
                     onSettingsClick = {},
                     onActivityClick = { activity ->
                         selectedActivity = activity
@@ -159,7 +163,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
                 },
-                activityNames = listOfActivityNames
+                activityNames = listOfActivityNames,
+                selectedDate = selectedDay
             )
         }
     }

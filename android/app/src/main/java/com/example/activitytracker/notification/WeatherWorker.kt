@@ -53,7 +53,7 @@ class WeatherWorker(context: Context, params: WorkerParameters) : CoroutineWorke
                 val weather = response.body()?.string() ?: ""
 
                 if (weather.contains("Sunny", ignoreCase = true)) {
-                    val helper = NotificationHelper(applicationContext)
+                    val helper = NotificationSetup(applicationContext)
                     helper.sendWeatherNotification()
 
                     prefs.edit { putString("last_success_date", today) }
