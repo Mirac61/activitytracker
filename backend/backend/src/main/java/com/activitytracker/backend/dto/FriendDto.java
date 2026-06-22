@@ -11,4 +11,5 @@ public class FriendDto {
     private UUID friendId;
     private String username;
     private String friendCode;
+    private int streak;
 }

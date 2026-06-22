@@ -36,13 +36,13 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
 
-    // ✅ NEU — userId aus DataStore laden
     val application = LocalContext.current.applicationContext as ActivityApplication
     var userId by remember { mutableStateOf<UUID?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         val stored = application.authStorage.getUserId()
+        android.util.Log.d("AppDebug", "userId geladen: $stored")
         if (stored != null) {
             userId = UUID.fromString(stored)
         }
@@ -64,7 +64,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
-    // ✅ NEU — FriendViewModel nur erstellen wenn userId vorhanden
     val friendViewModel: FriendViewModel? = userId?.let {
         viewModel(
             factory = FriendViewModelFactory(
@@ -78,7 +77,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val streak by trackingViewModel.streak.observeAsState(0)
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
 
-    // ✅ NEU — FriendViewModel Daten beobachten
     val friends by friendViewModel?.friends?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
     val pendingRequests by friendViewModel?.pendingRequests?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
 
@@ -123,7 +121,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     }
                 )
 
-                // ✅ NEU — FriendScreen verbunden
                 AppDestinations.FRIENDS -> FriendScreen(
                     friends = friends,
                     pendingRequests = pendingRequests,

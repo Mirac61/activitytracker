@@ -5,7 +5,8 @@ import java.util.UUID
 data class FriendDto(
     val friendId: UUID,
     val username: String,
-    val friendCode: String
+    val friendCode: String,
+    val streak: Int = 0
 )
 
 data class FriendRequestDto(

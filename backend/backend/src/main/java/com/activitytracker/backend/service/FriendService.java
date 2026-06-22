@@ -1,7 +1,11 @@
 package com.activitytracker.backend.service;
 
+import com.activitytracker.backend.dto.FriendDto;
 import com.activitytracker.backend.entity.*;
+import com.activitytracker.backend.exception.FriendshipException;
+import com.activitytracker.backend.exception.NotFoundException;
 import com.activitytracker.backend.repository.*;
+import com.activitytracker.backend.entity.Activity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,8 +20,8 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
     private final FriendRequestRepository friendRequestRepository;
+    private final ActivityRepository activityRepository;
 
-    // ─── friendCode ───────────────────────────────────────────────
 
     public String generateFriendCode(String username) {
         String code;
@@ -37,25 +41,24 @@ public class FriendService {
         return sb.toString();
     }
 
-    // ─── Anfrage senden ───────────────────────────────────────────
 
     public void sendFriendRequest(UUID senderId, String friendCode) {
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() -> new RuntimeException("Sender nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("Sender nicht gefunden"));
 
         User receiver = userRepository.findByFriendCode(friendCode)
-                .orElseThrow(() -> new RuntimeException("Kein User mit diesem friendCode gefunden"));
+                .orElseThrow(() -> new NotFoundException("Kein User mit diesem friendCode gefunden"));
 
         if (sender.getUserId().equals(receiver.getUserId())) {
-            throw new RuntimeException("Du kannst dir selbst keine Anfrage schicken");
+            throw new FriendshipException("Du kannst dir selbst keine Anfrage schicken");
         }
 
         if (friendshipRepository.existsByUserAndFriend(sender, receiver)) {
-            throw new RuntimeException("Ihr seid bereits befreundet");
+            throw new FriendshipException("Ihr seid bereits befreundet");
         }
 
         if (friendRequestRepository.existsBySenderAndReceiver(sender, receiver)) {
-            throw new RuntimeException("Anfrage wurde bereits gesendet");
+            throw new FriendshipException("Anfrage wurde bereits gesendet");
         }
 
         FriendRequest request = new FriendRequest();
@@ -65,20 +68,18 @@ public class FriendService {
         friendRequestRepository.save(request);
     }
 
-    // ─── Anfragen laden ───────────────────────────────────────────
 
     public List<FriendRequest> getPendingRequests(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("User nicht gefunden"));
         return friendRequestRepository.findByReceiverAndStatus(user, FriendRequestStatus.PENDING);
     }
 
-    // ─── Anfrage annehmen ─────────────────────────────────────────
 
     @Transactional
     public void acceptFriendRequest(UUID requestId) {
         FriendRequest request = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Anfrage nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("Anfrage nicht gefunden"));
 
         request.setStatus(FriendRequestStatus.ACCEPTED);
         friendRequestRepository.save(request);
@@ -95,34 +96,42 @@ public class FriendService {
         friendshipRepository.save(f2);
     }
 
-    // ─── Anfrage ablehnen ─────────────────────────────────────────
 
     public void declineFriendRequest(UUID requestId) {
         FriendRequest request = friendRequestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Anfrage nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("Anfrage nicht gefunden"));
 
         request.setStatus(FriendRequestStatus.DECLINED);
         friendRequestRepository.save(request);
     }
 
-    // ─── Freund entfernen ─────────────────────────────────────────
 
     @Transactional
     public void removeFriend(UUID userId, UUID friendId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("User nicht gefunden"));
         User friend = userRepository.findById(friendId)
-                .orElseThrow(() -> new RuntimeException("Freund nicht gefunden"));
+                .orElseThrow(() -> new NotFoundException("Freund nicht gefunden"));
 
         friendshipRepository.deleteByUserAndFriend(user, friend);
         friendshipRepository.deleteByUserAndFriend(friend, user);
     }
 
-    // ─── Freundesliste laden ──────────────────────────────────────
 
-    public List<Friendship> getFriends(UUID userId) {
+    public List<FriendDto> getFriends(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User nicht gefunden"));
-        return friendshipRepository.findByUser(user);
+                .orElseThrow(() -> new NotFoundException("User nicht gefunden"));
+        return friendshipRepository.findByUser(user).stream()
+                .map(friendship -> {
+                    User friend = friendship.getFriend();
+                    List<Activity> activities = activityRepository.findByUserUserId(friend.getUserId());                    int streak = StreakCalculator.calculate(activities);
+                    return new FriendDto(
+                            friend.getUserId(),
+                            friend.getUsername(),
+                            friend.getFriendCode(),
+                            streak
+                    );
+                })
+                .toList();
     }
 }
