@@ -9,7 +9,7 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            NotificationHelper(context).createNotificationChannel()
+            NotificationSetup(context).createNotificationChannel()
             AlarmScheduler(context).scheduleDailyAlarm()
         }
     }
