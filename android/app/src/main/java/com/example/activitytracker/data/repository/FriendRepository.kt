@@ -9,7 +9,6 @@ class FriendRepository {
 
     private val api = RetrofitClient.friendApi
 
-    // ─── Freundesliste laden ──────────────────────────────────────
 
     suspend fun getFriends(userId: UUID): Result<List<FriendDto>> {
         return try {
@@ -20,7 +19,6 @@ class FriendRepository {
         }
     }
 
-    // ─── Anfrage senden ───────────────────────────────────────────
 
     suspend fun sendFriendRequest(userId: UUID, friendCode: String): Result<Unit> {
         return try {
@@ -40,7 +38,6 @@ class FriendRepository {
         }
     }
 
-    // ─── Offene Anfragen laden ────────────────────────────────────
 
     suspend fun getPendingRequests(userId: UUID): Result<List<FriendRequestDto>> {
         return try {
@@ -51,7 +48,6 @@ class FriendRepository {
         }
     }
 
-    // ─── Anfrage annehmen ─────────────────────────────────────────
 
     suspend fun acceptRequest(requestId: UUID): Result<Unit> {
         return try {
@@ -62,7 +58,6 @@ class FriendRepository {
         }
     }
 
-    // ─── Anfrage ablehnen ─────────────────────────────────────────
 
     suspend fun declineRequest(requestId: UUID): Result<Unit> {
         return try {
@@ -73,7 +68,6 @@ class FriendRepository {
         }
     }
 
-    // ─── Freund entfernen ─────────────────────────────────────────
 
     suspend fun removeFriend(userId: UUID, friendId: UUID): Result<Unit> {
         return try {

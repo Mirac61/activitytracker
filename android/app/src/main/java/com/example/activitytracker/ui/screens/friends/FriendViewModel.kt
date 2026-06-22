@@ -16,7 +16,6 @@ class FriendViewModel(
     private val userId: UUID
 ) : ViewModel() {
 
-    // ─── State ────────────────────────────────────────────────────
 
     private val _friends = MutableLiveData<List<FriendDto>>(emptyList())
     val friends: LiveData<List<FriendDto>> = _friends
@@ -33,7 +32,6 @@ class FriendViewModel(
     private val _ownFriendCode = MutableLiveData<String>("")
     val ownFriendCode: LiveData<String> = _ownFriendCode
 
-    // ─── Init ─────────────────────────────────────────────────────
 
     init {
         loadFriends()
@@ -41,7 +39,6 @@ class FriendViewModel(
         loadOwnFriendCode()
     }
 
-    // ─── Freundesliste laden ──────────────────────────────────────
 
     fun loadFriends() {
         viewModelScope.launch {
@@ -67,7 +64,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Offene Anfragen laden ────────────────────────────────────
 
     fun loadPendingRequests() {
         viewModelScope.launch {
@@ -82,7 +78,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Anfrage senden ───────────────────────────────────────────
 
     fun sendFriendRequest(friendCode: String) {
         viewModelScope.launch {
@@ -95,7 +90,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Anfrage annehmen ─────────────────────────────────────────
 
     fun acceptRequest(requestId: UUID) {
         viewModelScope.launch {
@@ -110,7 +104,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Anfrage ablehnen ─────────────────────────────────────────
 
     fun declineRequest(requestId: UUID) {
         viewModelScope.launch {
@@ -123,7 +116,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Freund entfernen ─────────────────────────────────────────
 
     fun removeFriend(friendId: UUID) {
         viewModelScope.launch {
@@ -137,7 +129,6 @@ class FriendViewModel(
         }
     }
 
-    // ─── Messages zurücksetzen ────────────────────────────────────
 
     fun clearMessages() {
         _errorMessage.value = null
@@ -145,7 +136,6 @@ class FriendViewModel(
     }
 }
 
-// ─── Factory ──────────────────────────────────────────────────────
 
 class FriendViewModelFactory(
     private val repository: FriendRepository,

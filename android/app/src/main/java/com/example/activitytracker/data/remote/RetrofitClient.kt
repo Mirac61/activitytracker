@@ -32,14 +32,12 @@ object RetrofitClient {
         })
         .create()
 
-    // ✅ wird in ActivityApplication gesetzt
     private lateinit var authStorage: AuthStorage
 
     fun initialize(authStorage: AuthStorage) {
         this.authStorage = authStorage
     }
 
-    // ✅ baut den Client frisch mit Auth Interceptor
     private fun buildClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(logging)
