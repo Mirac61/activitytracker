@@ -43,8 +43,8 @@ public class ActivityService {
 
         Activity activity = existing
                 .map(a -> {
-                    a.setName(request.activityName());
-                    a.setTimestamp(request.activityDate().atStartOfDay());
+                    a.setActivityName(request.activityName());
+                    a.setActivityDate(request.activityDate().atStartOfDay());
                     return a;
                 })
                 .orElseGet(() -> activityMapper.toEntity(request, id, user));

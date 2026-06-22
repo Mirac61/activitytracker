@@ -3,6 +3,7 @@ package com.activitytracker.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.jspecify.annotations.NonNull;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.time.OffsetDateTime;
@@ -24,11 +25,11 @@ public class Activity {
 
     @Column(nullable = false)
     @NonNull
-    private String name;
+    private String activityName;
 
     @Column(nullable = false)
     @NonNull
-    private LocalDateTime timestamp; //TODO: bessere name
+    private LocalDateTime activityDate;
 
     @Column(nullable = false)
     @NonNull
