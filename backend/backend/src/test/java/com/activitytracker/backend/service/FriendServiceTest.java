@@ -2,7 +2,6 @@ package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.entity.*;
 import com.activitytracker.backend.exception.FriendshipException;
-import com.activitytracker.backend.exception.NotFoundException;
 import com.activitytracker.backend.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +47,6 @@ class FriendServiceTest {
         receiver.setFriendCode("Maria-B3KP11X9");
     }
 
-    // ─── generateFriendCode ───────────────────────────────────────
 
     @Test
     void generateFriendCode_noCollision_returnsCode() {
@@ -72,7 +70,6 @@ class FriendServiceTest {
         verify(userRepository, times(2)).existsByFriendCode(anyString());
     }
 
-    // ─── sendFriendRequest ────────────────────────────────────────
 
     @Test
     void sendFriendRequest_success() {
@@ -104,7 +101,7 @@ class FriendServiceTest {
         when(userRepository.findByFriendCode(receiver.getFriendCode())).thenReturn(Optional.of(receiver));
         when(friendshipRepository.existsByUserAndFriend(sender, receiver)).thenReturn(true);
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(FriendshipException.class, () ->
                 friendService.sendFriendRequest(sender.getUserId(), receiver.getFriendCode())
         );
 
@@ -118,14 +115,13 @@ class FriendServiceTest {
         when(friendshipRepository.existsByUserAndFriend(sender, receiver)).thenReturn(false);
         when(friendRequestRepository.existsBySenderAndReceiver(sender, receiver)).thenReturn(true);
 
-        assertThrows(NotFoundException.class, () ->
+        assertThrows(FriendshipException.class, () ->
                 friendService.sendFriendRequest(sender.getUserId(), receiver.getFriendCode())
         );
 
         verify(friendRequestRepository, never()).save(any());
     }
 
-    // ─── acceptFriendRequest ──────────────────────────────────────
 
     @Test
     void acceptFriendRequest_createsTwoFriendships() {
@@ -144,7 +140,6 @@ class FriendServiceTest {
         assertEquals(FriendRequestStatus.ACCEPTED, request.getStatus());
     }
 
-    // ─── declineFriendRequest ─────────────────────────────────────
 
     @Test
     void declineFriendRequest_setsStatusToDeclined() {
@@ -163,7 +158,6 @@ class FriendServiceTest {
         verify(friendRequestRepository).save(request);
     }
 
-    // ─── removeFriend ─────────────────────────────────────────────
 
     @Test
     void removeFriend_deletesBothEntries() {
