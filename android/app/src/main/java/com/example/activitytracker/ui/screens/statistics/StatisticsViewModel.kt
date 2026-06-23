@@ -18,9 +18,10 @@ class StatisticsViewModel(
     private val repository: IActivityRepository,
 ) : ViewModel() {
 
-    private val allDates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
+    private val streakDates: LiveData<List<LocalDate>> = repository.getDates.asLiveData()
+    private val allDates: LiveData<List<LocalDate>> = repository.getStatistics.asLiveData()
 
-    val longestStreak: LiveData<Int> = allDates.map { dates -> StreakLogic.calculateLongestStreak(dates) }
+    val longestStreak: LiveData<Int> = streakDates.map { StreakLogic.calculateLongestStreak(it) }
 
     private val selectedMonth = MutableLiveData(YearMonth.now())
 

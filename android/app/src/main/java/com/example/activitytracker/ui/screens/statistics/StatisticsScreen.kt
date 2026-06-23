@@ -11,28 +11,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.activitytracker.R
+import com.example.activitytracker.ui.components.FilterDropdown
+import com.example.activitytracker.ui.components.WeekdayBarChart
 import java.time.DayOfWeek
 import java.time.YearMonth
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.example.activitytracker.R
-import androidx.compose.ui.res.painterResource
-import androidx.compose.material3.Icon
-import com.example.activitytracker.ui.components.FilterDropdown
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -53,6 +56,7 @@ fun StatisticsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         Text(
             text = "Dein Fortschritt",
@@ -84,12 +88,6 @@ fun StatisticsScreen(
                 onMonthSelected(YearMonth.of(newYear, selectedMonth))
             }
         )
-
-        // TODO: remove this after everything is tested
-//        Text("Durchschnitt/Tag: $averagePerDay")
-//        Text("Aktivster Tag: $mostActiveWeekday")
-//        Text("Summe pro Wochentag: $sumByWeekday")
-//        Text("Durchschnitt pro Wochentag: $averageByWeekday")
     }
 }
 
@@ -125,7 +123,6 @@ fun LongestStreakCard(longestStreak: Int) {
                     text = "$longestStreak",
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Bold,
-                    // TODO: Colors einheitlich machen per Color.kt
                     color = Color(0xFF33691E)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -133,7 +130,6 @@ fun LongestStreakCard(longestStreak: Int) {
                     text = "Tage",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    // TODO: Colors einheitlich machen per Color.kt
                     color = Color(0xFF9E9E9E),
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
@@ -176,7 +172,6 @@ fun ActivityStatsCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Dropdown
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 FilterDropdown(
                     label = "Monat",
@@ -201,7 +196,6 @@ fun ActivityStatsCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Info Kacheln
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Card(
                     modifier = Modifier.weight(1f),
@@ -234,7 +228,6 @@ fun ActivityStatsCard(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F5F7))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-
                         Text(
                             text = "Durchschn./Tag",
                             fontSize = 14.sp,
@@ -254,13 +247,25 @@ fun ActivityStatsCard(
                 }
             }
 
-            /* TODO: Die bar charts rechachieren ob selber implementieren oder lieber
-                eine Libraby benutzen besser ist. Danach hier implementieren
-             */
+            Text("Durchschnittliche Aktivitäten im Monat", fontSize = 14.sp)
+            Spacer(Modifier.height(8.dp))
+            WeekdayBarChart(
+                values = averageByWeekday.mapValues { (_, avg) -> avg.toFloat() },
+                yMax = 4,
+                step = 1,
+                barColor = Color(0xFF33691E)
+            )
 
+            Spacer(Modifier.height(16.dp))
 
-
-            
+            Text("Aufsummierte Aktivitäten im Monat", fontSize = 14.sp)
+            Spacer(Modifier.height(8.dp))
+            WeekdayBarChart(
+                values = sumByWeekday.mapValues { (_, count) -> count.toFloat() },
+                yMax = 20,
+                step = 5,
+                barColor = Color(0xFF9CC79B)
+            )
         }
     }
 }

@@ -7,7 +7,6 @@ import java.time.YearMonth
 object StatisticsLogic {
 
     fun sumByWeekday(dates: List<LocalDate>): Map<DayOfWeek, Int> {
-
         return dates.groupingBy { it.dayOfWeek }.eachCount()
     }
 
@@ -32,5 +31,4 @@ object StatisticsLogic {
             it.value / occurrences.toDouble()
         }
     }
-
 }
