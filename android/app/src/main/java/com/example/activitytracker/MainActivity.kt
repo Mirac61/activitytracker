@@ -11,7 +11,6 @@ import androidx.compose.runtime.setValue
 import com.example.activitytracker.Core.theme.ActivityTrackerTheme
 import com.example.activitytracker.ui.main.ActivityTrackerApp
 import com.example.activitytracker.widget.AddActivityWidgetIntentHandler
-import com.example.activitytracker.notification.AlarmScheduler
 import com.example.activitytracker.notification.NotificationSetup
 import com.example.activitytracker.notification.StartWeatherWorker
 import com.example.activitytracker.premission.PermissionHandler
@@ -36,7 +35,6 @@ class MainActivity : ComponentActivity() {
             }
         }
         NotificationSetup(this).createNotificationChannel()
-        AlarmScheduler(this).scheduleDailyAlarm()
     }
 
     override fun onNewIntent(intent: Intent) {
