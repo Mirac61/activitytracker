@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
+                        .requestMatchers("/api/users/google").permitAll()
                         .requestMatchers("/api/users/refresh").permitAll()
                         .requestMatchers("/activities/upload").permitAll()
                         .requestMatchers("/activities/{id}").permitAll()

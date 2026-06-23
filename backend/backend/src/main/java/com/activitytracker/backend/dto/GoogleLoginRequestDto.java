@@ -1,12 +1,9 @@
 package com.activitytracker.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@Getter
-@AllArgsConstructor
-public class GoogleLoginRequestDto {
+
+public record GoogleLoginRequestDto (
     @NotBlank
-    private String idToken;
-}
+    String idToken
+) {}
