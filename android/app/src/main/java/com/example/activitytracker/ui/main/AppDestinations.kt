@@ -9,6 +9,7 @@ enum class AppDestinations(
     FRIENDS("Freunde", R.drawable.ic_friends),
     HOME("Home", R.drawable.round_home_24),
     TRACKING("Tracking", R.drawable.ic_add),
+    SETTINGS("Settings", 0),
     REGISTER("Register", 0),
     LOGIN("Login", 0),
     SPLASH("Splash", 0)
