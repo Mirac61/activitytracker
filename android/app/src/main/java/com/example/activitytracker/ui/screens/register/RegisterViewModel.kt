@@ -92,8 +92,8 @@ class RegisterViewModel(
                         // Clear database on an IO thread safely using the injected database instance
                         withContext(Dispatchers.IO) {
                             database.clearAllTables()
+                            authStorage.saveUserId(userId)
                         }
-                        authStorage.saveUserId(userId)
                         registrationSuccess = true
                     } else {
                         Log.e(tag, "Registration succeeded but server returned an empty user ID response body.")

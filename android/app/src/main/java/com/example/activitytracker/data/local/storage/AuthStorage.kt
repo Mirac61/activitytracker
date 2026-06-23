@@ -2,12 +2,10 @@ package com.example.activitytracker.data.local.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 // Inspiration from: https://blog.kinto-technologies.com/posts/2025-06-16-encrypted-shared-preferences-migration-en/
@@ -38,24 +36,30 @@ class AuthStorage(context: Context) {
         sharedPreferences.edit().putString(USER_ID_KEY, userId).apply()
     }
 
-    fun getUserId(): String? {
-        return sharedPreferences.getString(USER_ID_KEY, null)
+    suspend fun getUserId(): String? {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.getString("user_id", null)
+        }
     }
 
     fun saveAccessToken(token: String) {
         sharedPreferences.edit().putString(ACCESS_TOKEN_KEY, token).apply()
     }
 
-    fun getAccessToken(): String? {
-        return sharedPreferences.getString(ACCESS_TOKEN_KEY, null)
+    suspend fun getAccessToken(): String? {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.getString("access_token", null)
+        }
     }
 
     fun saveRefreshToken(token: String) {
         sharedPreferences.edit().putString(REFRESH_TOKEN_KEY, token).apply()
     }
 
-    fun getRefreshToken(): String? {
-        return sharedPreferences.getString(REFRESH_TOKEN_KEY, null)
+    suspend fun getRefreshToken(): String? {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.getString("refresh_token", null)
+        }
     }
 
     fun clearAll() {
