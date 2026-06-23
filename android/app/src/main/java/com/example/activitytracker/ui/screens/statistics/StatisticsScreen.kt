@@ -31,6 +31,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.activitytracker.Core.theme.CardSurface
+import com.example.activitytracker.Core.theme.ChartGreen
+import com.example.activitytracker.Core.theme.ChartGreenLight
 import com.example.activitytracker.R
 import com.example.activitytracker.ui.components.FilterDropdown
 import com.example.activitytracker.ui.components.WeekdayBarChart
@@ -38,6 +41,7 @@ import java.time.DayOfWeek
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.ceil
 
 @Composable
 fun StatisticsScreen(
@@ -60,9 +64,8 @@ fun StatisticsScreen(
     ) {
         Text(
             text = "Dein Fortschritt",
-            fontSize = 30.sp,
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 48.dp, bottom = 32.dp)
@@ -95,11 +98,11 @@ fun StatisticsScreen(
 fun LongestStreakCard(longestStreak: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.ic_flame_medal),
@@ -110,28 +113,26 @@ fun LongestStreakCard(longestStreak: Int) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Längster Streak",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = "$longestStreak",
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF33691E)
+                    color = ChartGreen
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "Tage",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF9E9E9E),
-                    modifier = Modifier.padding(bottom = 6.dp)
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
         }
@@ -149,13 +150,16 @@ fun ActivityStatsCard(
     onMonthChange: (Int) -> Unit,
     onYearChange: (Int) -> Unit
 ) {
+    val avgMax = ceil(averageByWeekday.values.maxOrNull() ?: 1.0).toInt().coerceAtLeast(2)
+    val sumMax = (sumByWeekday.values.maxOrNull() ?: 5).let { ((it + 4) / 5) * 5 }.coerceAtLeast(5)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(R.drawable.ic_running_man),
@@ -163,10 +167,11 @@ fun ActivityStatsCard(
                     tint = Color.Unspecified,
                     modifier = Modifier.size(20.dp)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Deine Aktivitäten im Tag",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -187,7 +192,7 @@ fun ActivityStatsCard(
                 FilterDropdown(
                     label = "Jahr",
                     selected = selectedYear,
-                    options = (2024..2026).toList(),
+                    options = (2024..YearMonth.now().year).toList(),
                     optionLabel = { it.toString() },
                     onSelected = { onYearChange(it) },
                     modifier = Modifier.weight(1f)
@@ -199,72 +204,86 @@ fun ActivityStatsCard(
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F5F7))
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardSurface)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
                         Text(
                             text = "Aktivster Tag",
-                            fontSize = 15.sp,
-                            color = Color.Black
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = mostActiveWeekday?.getDisplayName(TextStyle.SHORT, Locale.GERMAN) ?: "–",
-                            fontSize = 24.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         val avgForActiveDay = mostActiveWeekday?.let { averageByWeekday[it] } ?: 0.0
                         Text(
                             text = "${String.format(Locale.GERMAN, "%.1f", avgForActiveDay)} Aktivitäten im Schnitt",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }
 
                 Card(
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F5F7))
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardSurface)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
                         Text(
                             text = "Durchschn./Tag",
-                            fontSize = 14.sp,
-                            color = Color.Black
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = String.format(Locale.GERMAN, "%.1f", averagePerDay),
-                            fontSize = 22.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "Aktivitäten",
-                            fontSize = 12.sp,
-                            color = Color.Gray
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }
             }
 
-            Text("Durchschnittliche Aktivitäten im Monat", fontSize = 14.sp)
-            Spacer(Modifier.height(8.dp))
-            WeekdayBarChart(
-                values = averageByWeekday.mapValues { (_, avg) -> avg.toFloat() },
-                yMax = 4,
-                step = 1,
-                barColor = Color(0xFF33691E)
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Durchschnittliche Aktivitäten im Monat",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
             )
 
             Spacer(Modifier.height(16.dp))
 
-            Text("Aufsummierte Aktivitäten im Monat", fontSize = 14.sp)
-            Spacer(Modifier.height(8.dp))
+            WeekdayBarChart(
+                values = averageByWeekday.mapValues { (_, avg) -> avg.toFloat() },
+                yMax = avgMax,
+                step = 1,
+                barColor = ChartGreen
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                text = "Aufsummierte Aktivitäten im Monat",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(Modifier.height(16.dp))
+
             WeekdayBarChart(
                 values = sumByWeekday.mapValues { (_, count) -> count.toFloat() },
-                yMax = 20,
-                step = 5,
-                barColor = Color(0xFF9CC79B)
+                yMax = sumMax,
+                step = (sumMax / 4).coerceAtLeast(1),
+                barColor = ChartGreenLight
             )
         }
     }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.activitytracker.Core.theme.GridlineGray
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
@@ -47,7 +49,7 @@ fun WeekdayBarChart(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.End
             ) {
-                ticks.forEach { Text("$it", fontSize = 12.sp, color = Color.Gray) }
+                ticks.forEach { Text("$it", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline) }
             }
 
             Spacer(Modifier.width(8.dp))
@@ -59,7 +61,7 @@ fun WeekdayBarChart(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     ticks.forEach { _ ->
-                        HorizontalDivider(color = Color(0xFFE0E0E0))
+                        HorizontalDivider(color = GridlineGray)
                     }
                 }
 
@@ -93,7 +95,7 @@ fun WeekdayBarChart(
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.outline
                     )
                 }
             }
