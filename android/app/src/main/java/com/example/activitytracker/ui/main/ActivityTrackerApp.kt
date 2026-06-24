@@ -70,6 +70,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     val friendViewModel: FriendViewModel? = userId?.let {
         viewModel(
+            key = it.toString(),
             factory = FriendViewModelFactory(
                 repository = FriendRepository(),
                 userId = it
@@ -106,12 +107,13 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 )
                 AppDestinations.LOGIN -> LoginScreen(
                     onLoginSuccess = {
-                        // userId neu laden nach Login
                         scope.launch {
                             val stored = application.authStorage.getUserId()
-                            if (stored != null) userId = UUID.fromString(stored)
+                            if (stored != null) {
+                                userId = UUID.fromString(stored)
+                            }
+                            currentDestination = AppDestinations.HOME
                         }
-                        currentDestination = AppDestinations.HOME
                     },
                     onNavigateToRegister = { currentDestination = AppDestinations.REGISTER }
                 )
