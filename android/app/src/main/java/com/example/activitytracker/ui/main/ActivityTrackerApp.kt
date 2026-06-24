@@ -38,6 +38,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
 
+    var selectedDay by remember { mutableStateOf(LocalDate.now()) }
+
     val application = LocalContext.current.applicationContext as ActivityApplication
     var userId by remember { mutableStateOf<UUID?>(null) }
     val scope = rememberCoroutineScope()
