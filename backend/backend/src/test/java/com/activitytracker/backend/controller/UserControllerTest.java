@@ -1,10 +1,8 @@
 package com.activitytracker.backend.controller;
 
 import com.activitytracker.backend.service.KeycloakService;
-import com.activitytracker.backend.service.WeatherService; // <-- IMPORT HINZUFÜGEN
+import com.activitytracker.backend.service.WeatherService;
 import com.activitytracker.backend.repository.UserRepository;
-import com.activitytracker.backend.entity.User;
-import com.activitytracker.backend.dto.UserRegistrationDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -87,7 +85,7 @@ class UserControllerTest {
     @Test
     void login() throws Exception {
         KeycloakService.AuthenticationResult mockResult =
-                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse);
+                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse, "TestUser", "test@test.de");
 
         Mockito.when(keycloakService.authenticateUser(anyString(), anyString())).thenReturn(mockResult);
 
@@ -110,7 +108,7 @@ class UserControllerTest {
     @Test
     void refresh() throws Exception {
         KeycloakService.AuthenticationResult mockResult =
-                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse);
+                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse, "TestUser", "test@test.de");
 
         Mockito.when(keycloakService.refreshTokens(anyString())).thenReturn(mockResult);
 
@@ -131,7 +129,7 @@ class UserControllerTest {
     @Test
     void loginWithGoogle() throws Exception {
         KeycloakService.AuthenticationResult mockResult =
-                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse);
+                new KeycloakService.AuthenticationResult(TEST_USER_ID.toString(), mockTokenResponse, "TestUser", "test@test.de");
 
         Mockito.when(keycloakService.authenticateWithGoogle(anyString())).thenReturn(mockResult);
 

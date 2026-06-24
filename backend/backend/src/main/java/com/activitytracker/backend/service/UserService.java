@@ -83,6 +83,8 @@ public class UserService {
                         log.info("New Google user detected. Synchronizing new profile to local database.");
                         User newUser = new User();
                         newUser.setUserId(userId);
+                        newUser.setUsername(authResult.username());
+                        newUser.setFriendCode(friendService.generateFriendCode(authResult.username()));
                         userRepository.save(newUser);
                     }
             );

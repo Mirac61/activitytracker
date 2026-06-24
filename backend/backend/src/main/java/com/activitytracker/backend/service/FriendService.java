@@ -24,9 +24,10 @@ public class FriendService {
 
 
     public String generateFriendCode(String username) {
+        String cleanUsername = username.replaceAll("\\s+", "");
         String code;
         do {
-            code = username + "-" + randomPart();
+            code = cleanUsername + "-" + randomPart();
         } while (userRepository.existsByFriendCode(code));
         return code;
     }

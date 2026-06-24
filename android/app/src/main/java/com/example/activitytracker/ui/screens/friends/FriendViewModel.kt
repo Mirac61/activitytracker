@@ -32,6 +32,9 @@ class FriendViewModel(
     private val _ownFriendCode = MutableLiveData<String>("")
     val ownFriendCode: LiveData<String> = _ownFriendCode
 
+    private val _isRefreshing = MutableLiveData<Boolean>(false)
+    val isRefreshing: LiveData<Boolean> = _isRefreshing
+
 
     init {
         loadFriends()
@@ -42,12 +45,14 @@ class FriendViewModel(
 
     fun loadFriends() {
         viewModelScope.launch {
+            _isRefreshing.value = true
             val result = repository.getFriends(userId)
             if (result.isSuccess) {
                 _friends.value = result.getOrNull() ?: emptyList()
             } else {
                 _errorMessage.value = "Freunde konnten nicht geladen werden"
             }
+            _isRefreshing.value = false
         }
     }
 
@@ -127,6 +132,12 @@ class FriendViewModel(
                 _errorMessage.value = "Freund konnte nicht entfernt werden"
             }
         }
+    }
+
+    fun refresh() {
+        loadFriends()
+        loadPendingRequests()
+        loadOwnFriendCode()
     }
 
 

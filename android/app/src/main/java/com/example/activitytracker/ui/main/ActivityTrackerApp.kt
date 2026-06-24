@@ -45,6 +45,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     val application = LocalContext.current.applicationContext as ActivityApplication
     var userId by remember { mutableStateOf<UUID?>(null) }
+    var tokenReady by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -71,15 +72,15 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
-    val friendViewModel: FriendViewModel? = userId?.let {
+    val friendViewModel: FriendViewModel? = if (userId != null) {
         viewModel(
-            //key = it.toString(),
             factory = FriendViewModelFactory(
                 repository = FriendRepository(),
-                userId = it
+                userId = userId!!
             )
         )
-    }
+    } else null
+
     val ownFriendCode by friendViewModel?.ownFriendCode?.observeAsState("") ?: remember { mutableStateOf("") }
     val settingsViewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModelFactory(
@@ -93,6 +94,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val streak by trackingViewModel.streak.observeAsState(0)
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
     val reminders by settingsViewModel.reminders.collectAsState()
+    val isRefreshing by friendViewModel?.isRefreshing?.observeAsState(false) ?: remember { mutableStateOf(false) }
+
 
     val friends by friendViewModel?.friends?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
     val pendingRequests by friendViewModel?.pendingRequests?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
@@ -118,6 +121,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 AppDestinations.LOGIN -> LoginScreen(
                     onLoginSuccess = {
                         scope.launch {
+                            kotlinx.coroutines.delay(200)
                             val stored = application.authStorage.getUserId()
                             if (stored != null) {
                                 userId = UUID.fromString(stored)
@@ -152,6 +156,8 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     friends = friends,
                     pendingRequests = pendingRequests,
                     ownFriendCode = ownFriendCode,
+                    isRefreshing = isRefreshing,
+                    onRefresh = { friendViewModel?.refresh() },
                     onSendRequest = { friendCode ->
                         friendViewModel?.sendFriendRequest(friendCode)
                     },

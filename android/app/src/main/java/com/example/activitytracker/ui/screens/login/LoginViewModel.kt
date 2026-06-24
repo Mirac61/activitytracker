@@ -19,7 +19,9 @@ import com.example.activitytracker.data.remote.dto.GoogleLoginRequest
 import com.example.activitytracker.data.remote.dto.LoginRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -151,10 +153,11 @@ class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
 
                 if (response.isSuccessful) {
                     response.body()?.let { googleResponse ->
-                        authStorage.saveAccessToken(googleResponse.accessToken)
-                        authStorage.saveRefreshToken(googleResponse.refreshToken)
-                        authStorage.saveUserId(googleResponse.userId)
-
+                        withContext(Dispatchers.IO) {
+                            authStorage.saveAccessToken(googleResponse.accessToken)
+                            authStorage.saveRefreshToken(googleResponse.refreshToken)
+                            authStorage.saveUserId(googleResponse.userId)
+                        }
                         Log.d(tag, "Google authentication verified by backend. Session tokens securely saved.")
                         loginSuccess = true
                     } ?: run {

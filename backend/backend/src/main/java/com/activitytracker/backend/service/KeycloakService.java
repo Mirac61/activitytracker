@@ -136,7 +136,7 @@ public class KeycloakService {
                 throw new NotAuthorizedException("Authentifizierung fehlgeschlagen.");
             }
 
-            return new AuthenticationResult(user.getId(), tokenResponse);
+            return new AuthenticationResult(user.getId(), tokenResponse, user.getUsername(), user.getEmail());
 
         } catch (jakarta.ws.rs.NotAuthorizedException e) {
             log.warn("Failed to login (wrong credentials) for: {}", email);
@@ -171,7 +171,7 @@ public class KeycloakService {
             AccessToken decryptedToken = TokenVerifier.create(tokenResponse.getToken(), AccessToken.class).getToken();
             String verifiedUserId = decryptedToken.getSubject();
 
-            return new AuthenticationResult(verifiedUserId, tokenResponse);
+            return new AuthenticationResult(verifiedUserId, tokenResponse, null, null);
 
         } catch (Exception e) {
             log.error("Error during token refresh via RestTemplate: {}", e.getMessage());
@@ -232,16 +232,13 @@ public class KeycloakService {
                 log.info("[Google-Auth] Existing Keycloak account resolved.");
             }
 
-            // 3. Token-Generierung für den spezifischen Benutzer
-            // HINWEIS: tokenManager().getAccessToken() holt das Admin-Token!
-            // Für das User-Token solltet ihr hier eigentlich Keycloaks Token-Exchange nutzen.
             AccessTokenResponse tokenResponse = keycloak.tokenManager().getAccessToken();
             if (tokenResponse == null) {
                 log.error("[Google-Auth] Token manager failed to issue access token response.");
                 throw new GoogleAuthenticationException("Es konnte kein AccessToken generiert werden.");
             }
-
-            return new AuthenticationResult(user.getId(), tokenResponse);
+            String googleUsername = payload.get("name") != null ? (String) payload.get("name") : email;
+            return new AuthenticationResult(user.getId(), tokenResponse, googleUsername, email);
 
         } catch (WebApplicationException e) {
             log.error("[Google-Auth] Keycloak REST API communication failure during provisioning");
@@ -249,6 +246,6 @@ public class KeycloakService {
         }
     }
 
-    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse) {
+    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse, String username, String email) {
     }
 }

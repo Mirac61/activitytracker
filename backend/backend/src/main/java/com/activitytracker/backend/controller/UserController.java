@@ -42,4 +42,11 @@ public class UserController {
         GoogleLoginResponseDto response = userService.loginUserWithGoogle(dto);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{userId}/friendcode")
+    public ResponseEntity<String> getFriendCode(@PathVariable UUID userId) {
+        return userRepository.findById(userId)
+                .map(user -> ResponseEntity.ok(user.getFriendCode()))
+                .orElse(ResponseEntity.notFound().build());
+    }
 }   

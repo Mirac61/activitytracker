@@ -44,10 +44,16 @@ class SplashViewModel(private val authStorage: AuthStorage) : ViewModel() {
                 if (response.isSuccessful) {
                     val loginResponse = response.body()
                     if (loginResponse != null) {
-                        authStorage.saveUserId(loginResponse.userId)
-                        authStorage.saveAccessToken(loginResponse.accessToken)
-                        authStorage.saveRefreshToken(loginResponse.refreshToken)
+                        android.util.Log.d("SplashViewModel", "userId from refresh: ${loginResponse.userId}")
+                        android.util.Log.d("SplashViewModel", "accessToken: ${loginResponse.accessToken?.take(20)}")
 
+                        val userId = loginResponse.userId ?: authStorage.getUserId()
+                        if (userId != null) {
+                            authStorage.saveUserId(userId)
+                        }
+                        authStorage.saveAccessToken(loginResponse.accessToken)
+                        RetrofitClient.setToken(loginResponse.accessToken)
+                        authStorage.saveRefreshToken(loginResponse.refreshToken)
                         navigationState = NavigationState.Authenticated
                     } else {
                         navigationState = NavigationState.Unauthenticated

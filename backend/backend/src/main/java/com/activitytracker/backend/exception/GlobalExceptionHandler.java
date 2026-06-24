@@ -31,6 +31,17 @@ public class GlobalExceptionHandler {
     }
 
     // System error
+
+    @ExceptionHandler(FriendshipException.class)
+    public ResponseEntity<String> handleFriendship(FriendshipException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFound(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleServerError(RuntimeException e) {
         log.error("Registrierung fehlgeschlagen: ", e);

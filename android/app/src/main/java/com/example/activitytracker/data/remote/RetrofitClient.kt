@@ -68,4 +68,11 @@ object RetrofitClient {
     val friendApi: FriendApiService by lazy {
         buildRetrofit().create(FriendApiService::class.java)
     }
+
+    var accessToken: String? = null
+        private set
+
+    fun setToken(token: String?) {
+        accessToken = token
+    }
 }

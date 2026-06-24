@@ -120,4 +120,5 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.google.identity.googleid)
+    implementation("androidx.compose.material:material-icons-extended")
 }
