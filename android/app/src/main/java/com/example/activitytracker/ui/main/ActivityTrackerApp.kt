@@ -41,7 +41,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedActivity by remember { mutableStateOf<ActivityEntity?>(null) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
-
     var selectedDay by remember { mutableStateOf(LocalDate.now()) }
 
     val application = LocalContext.current.applicationContext as ActivityApplication
@@ -139,7 +138,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                         showEditBottomSheet = true
                     }
                 )
-                AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
                 AppDestinations.SETTINGS -> SettingsScreen(
                     reminders = reminders,
@@ -168,7 +166,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     }
                 )
 
-                AppDestinations.TRACKING -> {}
                 AppDestinations.REGISTER -> RegistrationScreen(
                     onRegistrationComplete = { currentDestination = AppDestinations.LOGIN },
                     onNavigateToLogin = { currentDestination = AppDestinations.LOGIN }
