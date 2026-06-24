@@ -1,6 +1,7 @@
 package com.example.activitytracker.ui.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,17 +57,16 @@ fun AddReminderTile(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35))
+            .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(onClick = onClick) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = "Erinnerung hinzufügen",
-                tint = PrimaryAccent
-            )
-        }
+        Icon(
+            Icons.Filled.Add,
+            contentDescription = "Erinnerung hinzufügen",
+            tint = PrimaryAccent
+        )
     }
 }
 
