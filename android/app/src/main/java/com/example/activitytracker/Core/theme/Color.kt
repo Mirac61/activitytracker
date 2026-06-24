@@ -19,7 +19,7 @@ val TertiaryAccent = Color(0xFF8DB688)
 val InputField = Color(0xFFFFFFFF)
 val AlertError = Color(0xFFD62828)
 val TextStroke = Color(0xFF000000)
-val TextDescription = Color(0xFFAEAEAE)
+val TextDescription = Color(0xFF717171)
 val Background = Color(0xFFF8F9FA)
 
 // Misc, bzw Streaks

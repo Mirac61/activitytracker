@@ -54,6 +54,8 @@ class ActivityControllerTest {
         if (userRepository.findById(USER_ID).isEmpty()) {
             User user = new User();
             user.setUserId(USER_ID);
+            user.setUsername("TestUser");
+            user.setFriendCode("TestUser-AAAAAAAA");
             userRepository.save(user);
         }
     }

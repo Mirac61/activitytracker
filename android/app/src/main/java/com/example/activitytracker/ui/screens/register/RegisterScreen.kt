@@ -1,6 +1,5 @@
 package com.example.activitytracker.ui.screens.register
 
-import androidx.compose.foundation.BorderStroke
 import com.example.activitytracker.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -25,6 +24,7 @@ import com.example.activitytracker.Core.theme.InputField
 import com.example.activitytracker.Core.theme.PrimaryAccent
 import com.example.activitytracker.Core.theme.TextDescription
 import com.example.activitytracker.data.ActivityApplication
+import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.ui.components.AuthTextField
 import kotlinx.coroutines.delay
 
@@ -33,7 +33,10 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
 
     val application = LocalContext.current.applicationContext as ActivityApplication
     val viewModel: RegisterViewModel = viewModel(
-        factory = RegisterViewModelFactory(application.authStorage, application)
+        factory = RegisterViewModelFactory(
+            authStorage = application.authStorage,
+            database = AppDatabase.getInstance(application)
+        )
     )
 
     val scrollState = rememberScrollState()
@@ -151,40 +154,6 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onNavigateToLogin: ()
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            // Google Login Button
-            OutlinedButton(
-                onClick = { /* TODO: Google Login */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                ),
-                border = BorderStroke(1.dp, Color.LightGray)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google_logo),
-                        modifier = Modifier.size(24.dp),
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Mit Google anmelden",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Register button
             Button(

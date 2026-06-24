@@ -24,7 +24,18 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "Malformed JSON request");
     }
 
-    // TODO: Why does the server Error give an Registration Error in German?
+    // System error
+
+    @ExceptionHandler(FriendshipException.class)
+    public ResponseEntity<String> handleFriendship(FriendshipException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFound(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto> handleServerError(RuntimeException e) {
         log.error("Registrierung fehlgeschlagen: ", e);
@@ -70,5 +81,11 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponseDto> build(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(new ErrorResponseDto(status.value(), message));
+    }
+
+    @ExceptionHandler(GoogleAuthenticationException.class)
+    public ResponseEntity<String> handleGoogleAuthenticationError(GoogleAuthenticationException e) {
+        log.error("Google Authentifizierungsfehler abgefangen: ", e);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 }
