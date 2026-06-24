@@ -17,7 +17,6 @@ import android.Manifest
 const val CHANNEL_REMINDER_ID = "activity_tracker_channel"
 const val CHANNEL_WEATHER_ID = "weather_api_channel"
 const val NOTIFICATION_ID_WEATHER = 1
-const val NOTIFICATION_ID_REMINDER = 2
 
 // contains the Android Notification setup
 class NotificationSetup(private val context: Context) {
@@ -36,11 +35,6 @@ class NotificationSetup(private val context: Context) {
             )
             manager.createNotificationChannel(weatherChannel)
     }
-
-    fun sendActivityNotification() {
-        showNotification(NOTIFICATION_ID_REMINDER, CHANNEL_REMINDER_ID, "Zeit aktiv zu sein", "Vergiss deine Ziele heute nicht!")
-    }
-
     fun sendWeatherNotification() {
         showNotification(NOTIFICATION_ID_WEATHER, CHANNEL_WEATHER_ID, "Die Sonne scheint!", "Perfekte Voraussetzung für einen Spaziergang")
     }

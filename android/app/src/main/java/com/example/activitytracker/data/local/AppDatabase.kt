@@ -4,16 +4,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.activitytracker.data.local.dao.ActivityDao
+import com.example.activitytracker.data.local.dao.ReminderDao
 import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.data.local.entity.ReminderEntity
 import android.content.Context
 import androidx.room.TypeConverters
 import com.example.activitytracker.data.local.converter.Converters
 import com.example.activitytracker.data.local.converter.SyncStatusConverter
 
-@Database(entities = [ActivityEntity::class], version = 7)
+@Database(entities = [ActivityEntity::class, ReminderEntity::class], version = 11)
 @TypeConverters(Converters::class, SyncStatusConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun activityDao(): ActivityDao
+    abstract fun reminderDao(): ReminderDao
     // Refactoring to Singleton
     // Inspiration from https://medium.com/@stephenmuindi241/singleton-pattern-in-room-database-566c250196aa
     companion object{

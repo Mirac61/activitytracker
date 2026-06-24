@@ -20,8 +20,12 @@ import com.example.activitytracker.ui.screens.tracking.ActivityEntryModelFactory
 import com.example.activitytracker.ui.screens.register.RegistrationScreen
 import com.example.activitytracker.ui.screens.login.LoginScreen
 import com.example.activitytracker.ui.screens.splash.SplashWatcher
+import com.example.activitytracker.ui.screens.settings.SettingsScreen
+import com.example.activitytracker.ui.screens.settings.SettingsViewModel
+import com.example.activitytracker.ui.screens.settings.SettingsViewModelFactory
 import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.ui.screens.tracking.EditActivity
+import androidx.compose.runtime.collectAsState
 import java.time.LocalDate
 
 
@@ -51,15 +55,23 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(
+            application = application,
+            repository = application.reminderRepository
+        )
+    )
+
     // Observe the activity List from Room
     val activities by trackingViewModel.activityEntity.observeAsState(emptyList())
     val streak by trackingViewModel.streak.observeAsState(0)
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
+    val reminders by settingsViewModel.reminders.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.REGISTER && currentDestination != AppDestinations.SPLASH) {
+            if (currentDestination != AppDestinations.LOGIN && currentDestination != AppDestinations.REGISTER && currentDestination != AppDestinations.SPLASH && currentDestination != AppDestinations.SETTINGS) {
                 MainNavBar(
                     currentDestination = currentDestination,
                     onNavigate = { selectedDestination ->
@@ -96,7 +108,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     streak = streak,
                     selectedDay = selectedDay,
                     onDaySelected = { selectedDay = it },
-                    onSettingsClick = {},
+                    onSettingsClick = { currentDestination = AppDestinations.SETTINGS },
                     onActivityClick = { activity ->
                         selectedActivity = activity
                         showEditBottomSheet = true
@@ -104,6 +116,14 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 )
                 AppDestinations.FRIENDS -> FriendsScreen()
                 AppDestinations.TRACKING -> {}
+                AppDestinations.SETTINGS -> SettingsScreen(
+                    reminders = reminders,
+                    onBack = { currentDestination = AppDestinations.HOME },
+                    onAddReminder = { day, hour, minute, title, text, isDaily ->
+                        settingsViewModel.addReminder(day, hour, minute, title, text, isDaily)
+                    },
+                    onDeleteReminder = { settingsViewModel.deleteReminder(it) }
+                )
 
                 AppDestinations.REGISTER -> RegistrationScreen(
                     onRegistrationComplete = {

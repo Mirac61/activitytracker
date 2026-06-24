@@ -5,6 +5,7 @@ import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
 import com.example.activitytracker.data.remote.RetrofitClient
 import com.example.activitytracker.data.repository.ActivityRepository
+import com.example.activitytracker.data.repository.ReminderRepository
 
 /* Provides app-wide dependencies. */
 class ActivityApplication : Application() {
@@ -12,5 +13,6 @@ class ActivityApplication : Application() {
     val authStorage by lazy { AuthStorage(this) }
     val repository by lazy { ActivityRepository(database.activityDao(),
         RetrofitClient.api) }
+    val reminderRepository by lazy { ReminderRepository(database.reminderDao()) }
 
 }
