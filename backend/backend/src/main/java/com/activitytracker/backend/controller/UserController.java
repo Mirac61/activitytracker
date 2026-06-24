@@ -7,7 +7,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -39,10 +38,10 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friendcode")
-    @PreAuthorize("authentication.name == #userId.toString()")
+    //@PreAuthorize("authentication.name == #userId.toString()")
     public ResponseEntity<String> getFriendCode(@PathVariable UUID userId) {
         return userRepository.findById(userId)
                 .map(user -> ResponseEntity.ok(user.getFriendCode()))
                 .orElse(ResponseEntity.notFound().build());
     }
-}   
+}

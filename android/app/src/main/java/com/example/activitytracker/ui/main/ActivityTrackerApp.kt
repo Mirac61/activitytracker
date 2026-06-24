@@ -70,7 +70,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     val friendViewModel: FriendViewModel? = userId?.let {
         viewModel(
-            key = it.toString(),
+            //key = it.toString(),
             factory = FriendViewModelFactory(
                 repository = FriendRepository(),
                 userId = it
