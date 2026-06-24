@@ -3,6 +3,7 @@ package com.activitytracker.backend;
 import com.activitytracker.backend.dto.UserRegistrationDto;
 import com.activitytracker.backend.entity.User;
 import com.activitytracker.backend.repository.UserRepository;
+import com.activitytracker.backend.service.FriendService;
 import com.activitytracker.backend.service.KeycloakService;
 import com.activitytracker.backend.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,9 @@ public class UserServiceTest {
     @Mock
     private KeycloakService keycloakService;
 
+    @Mock
+    private FriendService friendService;
+
     @InjectMocks
     private UserService userService;
 
@@ -37,6 +41,8 @@ public class UserServiceTest {
 
         // simulate keycloak with fake UUID
         when(keycloakService.createUserInKeycloak(dto)).thenReturn(fakeKeycloakId);
+
+        when(friendService.generateFriendCode("Max")).thenReturn("Max-AAAAAAAA");
 
         // 2. Act
         userService.registerUser(dto);
@@ -54,6 +60,8 @@ public class UserServiceTest {
         UUID fakeKeycloakId = UUID.randomUUID();
 
         when(keycloakService.createUserInKeycloak(dto)).thenReturn(fakeKeycloakId);
+
+        when(friendService.generateFriendCode("Max")).thenReturn("Max-AAAAAAAA");
 
         // Simulate database error
         doThrow(new RuntimeException("DB Error")).when(userRepository).save(any(User.class));

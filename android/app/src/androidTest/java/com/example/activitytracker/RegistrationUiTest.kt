@@ -15,7 +15,10 @@ class RegistrationUiTest {
     fun testInvalidEmailShowsError() {
         //Load registration screen
         composeTestRule.setContent {
-            RegistrationScreen(onRegistrationComplete = {})
+            RegistrationScreen(
+                onRegistrationComplete = {},
+                onNavigateToLogin = {}
+            )
         }
 
         //Input invalid email

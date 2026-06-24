@@ -1,6 +1,7 @@
 package com.activitytracker.backend.controller;
 
 import com.activitytracker.backend.dto.*;
+import com.activitytracker.backend.repository.UserRepository;
 import com.activitytracker.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody UserRegistrationDto dto) {

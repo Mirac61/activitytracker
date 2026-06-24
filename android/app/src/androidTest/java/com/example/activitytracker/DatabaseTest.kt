@@ -13,6 +13,13 @@ import com.example.activitytracker.data.local.sync.SyncStatus
 import com.example.activitytracker.data.repository.ActivityRepository
 import com.example.activitytracker.data.remote.ApiService
 import com.example.activitytracker.data.remote.dto.ActivityUploadDto
+import com.example.activitytracker.data.remote.dto.AuthResponse
+import com.example.activitytracker.data.remote.dto.LoginRequest
+import com.example.activitytracker.data.remote.dto.LoginResponse
+import com.example.activitytracker.data.remote.dto.RefreshRequest
+import com.example.activitytracker.data.remote.dto.RegisterRequest
+import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.Response
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -50,11 +57,24 @@ class DatabaseTest {
             return Response.success(Unit)
         }
 
-        override suspend fun updateActivity(
-            id: String,
-            activity: ActivityUploadDto
-        ): Response<Unit> {
+        override suspend fun updateActivity(id: String, activity: ActivityUploadDto): Response<Unit> {
             return Response.success(Unit)
+        }
+
+        override suspend fun loginUser(request: LoginRequest): Response<LoginResponse> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun refreshToken(request: RefreshRequest): Response<LoginResponse> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun registerUser(request: RegisterRequest): Response<AuthResponse> {
+            throw NotImplementedError()
+        }
+
+        override fun getWeather(lat: Double, lon: Double): Call<ResponseBody> {
+            throw NotImplementedError()
         }
     }
 
@@ -227,6 +247,7 @@ class DatabaseTest {
         val fakeRepository = object : IActivityRepository {
             override val getAll: Flow<List<ActivityEntity>> = flowOf(emptyList())
             override val getDates: Flow<List<LocalDate>> = flowOf(emptyList())
+            override val getActivityNames: Flow<List<String>> = flowOf(emptyList())
 
             override suspend fun insert(entity: ActivityEntity) {
                 insertCount++
