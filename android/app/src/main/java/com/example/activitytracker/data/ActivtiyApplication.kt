@@ -15,4 +15,8 @@ class ActivityApplication : Application() {
         RetrofitClient.api) }
     val reminderRepository by lazy { ReminderRepository(database.reminderDao()) }
 
+    override fun onCreate() {
+        super.onCreate()
+        RetrofitClient.initialize(authStorage)
+    }
 }

@@ -116,4 +116,5 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation(libs.androidx.activity.compose)
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.compose.material:material-icons-extended")
 }

@@ -2,6 +2,7 @@ package com.activitytracker.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Order(2)
 public class SecurityConfig {
 
     @Bean
@@ -30,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/activities/upload").permitAll()
                         .requestMatchers("/activities/{id}").permitAll()
                         .requestMatchers("/api/weather").permitAll()
+                        .requestMatchers("/friends/**").authenticated()
+                        .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
