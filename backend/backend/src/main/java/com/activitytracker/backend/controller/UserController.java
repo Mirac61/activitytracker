@@ -37,11 +37,9 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}/friendcode")
-    //@PreAuthorize("authentication.name == #userId.toString()")
-    public ResponseEntity<String> getFriendCode(@PathVariable UUID userId) {
-        return userRepository.findById(userId)
-                .map(user -> ResponseEntity.ok(user.getFriendCode()))
-                .orElse(ResponseEntity.notFound().build());
+    @PostMapping("/google")
+    public ResponseEntity<GoogleLoginResponseDto> loginWithGoogle(@Valid @RequestBody GoogleLoginRequestDto dto) {
+        GoogleLoginResponseDto response = userService.loginUserWithGoogle(dto);
+        return ResponseEntity.ok(response);
     }
-}
+}   

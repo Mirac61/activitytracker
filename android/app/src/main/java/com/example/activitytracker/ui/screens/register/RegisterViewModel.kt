@@ -1,6 +1,5 @@
 package com.example.activitytracker.ui.screens.register
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,11 +9,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.activitytracker.data.local.AppDatabase
 import com.example.activitytracker.data.local.storage.AuthStorage
-import com.example.activitytracker.data.remote.dto.RegisterRequest
 import com.example.activitytracker.data.remote.RetrofitClient
+import com.example.activitytracker.data.remote.dto.RegisterRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.HttpException
+import java.io.IOException
 
-class RegisterViewModel(private val authStorage: AuthStorage, private val appContext: Context) : ViewModel() {
+class RegisterViewModel(
+    private val authStorage: AuthStorage,
+    private val database: AppDatabase
+) : ViewModel() {
+
     var firstName by mutableStateOf("")
         private set
     var lastName by mutableStateOf("")
@@ -45,24 +52,27 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
     val isEmailValid: Boolean get() = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     val isFormValid: Boolean get() = firstName.isNotBlank() && lastName.isNotBlank() && isEmailValid && password.isNotBlank() && password.length >= 6
 
-    // status variables
+    // Status variables
     var registrationSuccess by mutableStateOf(false)
         private set
 
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     fun resetRegistrationStatus() {
         registrationSuccess = false
     }
 
-    var isLoading by mutableStateOf(false)
-        private set
-
     private val instance = RetrofitClient.api
+    private val tag = "RegisterViewModel"
 
-    // sending the input Data to RegisterDto.kt
+    // Sending the input data to backend api
     fun register() {
+        if (!isFormValid) return
+
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
@@ -79,22 +89,26 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
                 if (response.isSuccessful) {
                     val userId = response.body()?.userId
                     if (userId != null) {
-                        val db = AppDatabase.getInstance(appContext)
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            db.clearAllTables()
+                        // Clear database on an IO thread safely using the injected database instance
+                        withContext(Dispatchers.IO) {
+                            database.clearAllTables()
+                            authStorage.saveUserId(userId)
                         }
-                        authStorage.saveUserId(userId)
                         registrationSuccess = true
+                    } else {
+                        Log.e(tag, "Registration succeeded but server returned an empty user ID response body.")
+                        errorMessage = "Unerwarteter Fehler: Server-Antwort war unvollständig."
                     }
-
                 } else {
-                    Log.e("RegisterViewModel", "Server Failure during registration: ${response.code()}")
+                    Log.e(tag, "Server rejected registration request with HTTP status code: ${response.code()}")
                     errorMessage = "Registrierung fehlgeschlagen. E-Mail bereits vergeben."
                 }
-            } catch (e: Exception) {
-                Log.e("RegisterViewModel", "Network or server error occurred", e)
-                e.printStackTrace()
+            } catch (e: IOException) {
+                Log.e(tag, "Network connectivity failure occurred during user registration", e)
                 errorMessage = "Netzwerkfehler. Bitte überprüfe deine Verbindung."
+            } catch (e: HttpException) {
+                Log.e(tag, "Unexpected HTTP status error received during user registration", e)
+                errorMessage = "Serverfehler. Bitte versuche es später erneut."
             } finally {
                 isLoading = false
             }
@@ -104,14 +118,14 @@ class RegisterViewModel(private val authStorage: AuthStorage, private val appCon
 
 class RegisterViewModelFactory(
     private val authStorage: AuthStorage,
-    private val appContext: Context
+    private val database: AppDatabase
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RegisterViewModel(authStorage, appContext) as T
+            return RegisterViewModel(authStorage, database) as T
         }
-        throw IllegalArgumentException("Unknown Class for View Model")
+        throw IllegalArgumentException("Unknown Class for View Model specification: ${modelClass.name}")
     }
 }
