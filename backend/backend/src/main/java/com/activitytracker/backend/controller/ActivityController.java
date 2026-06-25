@@ -8,25 +8,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.activitytracker.backend.service.ActivityService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/activities")
 @RequiredArgsConstructor
 public class ActivityController {
     private final ActivityService activityService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<Void> upload(@Valid @RequestBody ActivityDto request) {
-        activityService.uploadActivity(request, request.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<Void> update(
-            @PathVariable String id,
+    public ResponseEntity<Void> save(
+            @PathVariable UUID id,
             @Valid @RequestBody ActivityDto request
     ) {
-        activityService.updateActivity(id, request, request.getUserId());
+        boolean created = activityService.saveActivity(id, request, request.userId());
 
-        return ResponseEntity.noContent().build();
+        return created
+                ? ResponseEntity.status(HttpStatus.CREATED).build()
+                : ResponseEntity.noContent().build();
     }
 }

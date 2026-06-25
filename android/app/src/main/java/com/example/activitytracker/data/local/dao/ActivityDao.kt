@@ -9,6 +9,7 @@ import com.example.activitytracker.data.local.entity.ActivityEntity
 import com.example.activitytracker.data.local.sync.SyncStatus
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import java.util.UUID
 
 // Inspiration from https://developer.android.com/training/data-storage/room?hl=de
 @Dao
@@ -23,10 +24,10 @@ interface ActivityDao {
     suspend fun getSyncWorkQue(): List<ActivityEntity>
 
     @Query("UPDATE activity_entries SET status = :status WHERE id = :id")
-    suspend fun updateSyncStatus(id: String, status: SyncStatus)
+    suspend fun updateSyncStatus(id: UUID, status: SyncStatus)
 
     @Query("SELECT * FROM activity_entries WHERE id = :id")
-    suspend fun findById(id: String): ActivityEntity?
+    suspend fun findById(id: UUID): ActivityEntity?
 
     @Query("SELECT DISTINCT activityName FROM activity_entries ORDER BY activityName ASC")
     fun getActivityNames(): Flow<List<String>>

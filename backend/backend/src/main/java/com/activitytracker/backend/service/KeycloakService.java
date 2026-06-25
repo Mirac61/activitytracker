@@ -138,8 +138,8 @@ public class KeycloakService {
 
             return new AuthenticationResult(user.getId(), tokenResponse, user.getUsername(), user.getEmail());
 
-        } catch (jakarta.ws.rs.NotAuthorizedException e) {
-            log.warn("Failed to login (wrong credentials) for: {}", email);
+        } catch (NotAuthorizedException e) {
+            log.warn("Failed to login (wrong credentials)");
             throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
         } catch (InvalidCredentialsException e) {
             throw e;

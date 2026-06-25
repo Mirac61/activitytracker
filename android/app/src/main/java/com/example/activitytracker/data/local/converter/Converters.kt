@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 class Converters {
     // Uses the international standard: "2026-04-30T16:45:00+02:00"
@@ -27,5 +28,15 @@ class Converters {
     @TypeConverter
     fun localDateToString(date: LocalDate?): String? {
         return date?.toString()
+    }
+
+    @TypeConverter
+    fun fromUuid(value: String?): UUID? {
+        return value?.let { UUID.fromString(it) }
+    }
+
+    @TypeConverter
+    fun uuidToString(uuid: UUID?): String? {
+        return uuid?.toString()
     }
 }

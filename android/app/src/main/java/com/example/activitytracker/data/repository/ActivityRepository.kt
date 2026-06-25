@@ -8,11 +8,12 @@ import com.example.activitytracker.data.remote.ApiService
 import com.example.activitytracker.data.remote.dto.toUploadDto
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+import java.util.UUID
 
 interface IActivityRepository {
     suspend fun insert(entity: ActivityEntity)
 
-    suspend fun syncPendingActivities(userId: String): Boolean
+    suspend fun syncPendingActivities(userId: UUID): Boolean
 
     suspend fun update(entity: ActivityEntity)
 
@@ -46,7 +47,7 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
         )
     }
 
-    override suspend fun syncPendingActivities(userId: String): Boolean {
+    override suspend fun syncPendingActivities(userId: UUID): Boolean {
 
         val que = activityDao.getSyncWorkQue()
         var hasError = false
@@ -54,12 +55,8 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
         for (activity in que) {
             try {
                 val response = when (activity.status) {
-                    SyncStatus.PENDING_CREATE -> {
-                        apiService.uploadActivity(activity.toUploadDto(userId))
-                    }
-
-                    SyncStatus.PENDING_UPDATE -> {
-                        apiService.updateActivity(
+                    SyncStatus.PENDING_CREATE, SyncStatus.PENDING_UPDATE -> {
+                        apiService.saveActivity(
                             id = activity.id,
                             activity = activity.toUploadDto(userId)
                         )
@@ -81,7 +78,7 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
                 } else {
                     hasError = true
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 hasError = true
             }
         }

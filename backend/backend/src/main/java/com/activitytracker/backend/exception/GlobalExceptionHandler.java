@@ -14,23 +14,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // User error
-    @ExceptionHandler(InvalidActivityException.class)
-    public ResponseEntity<String> handleInvalidActivity(InvalidActivityException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleBadRequest(IllegalArgumentException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid argument: " + e.getMessage());
+    public ResponseEntity<ErrorResponseDto> handleBadRequest(IllegalArgumentException e) {
+        return build(HttpStatus.BAD_REQUEST, "Invalid argument: " + e.getMessage());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body(new ErrorResponseDto(400, "wrong JSON-Format"));
+    public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        return build(HttpStatus.BAD_REQUEST, "Malformed JSON request");
     }
-
-    // System error
 
     @ExceptionHandler(FriendshipException.class)
     public ResponseEntity<String> handleFriendship(FriendshipException e) {
@@ -43,43 +35,50 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleServerError(RuntimeException e) {
-        log.error("Registrierung fehlgeschlagen: ", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An unexpected error occurred. Please try again later.");
+    public ResponseEntity<ErrorResponseDto> handleServerError(RuntimeException e) {
+        log.error("Unhandled runtime exception: ", e);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Please try again later.");
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneral(Exception e) {
-        return ResponseEntity.internalServerError().body("a Unknown error happened.");
+    public ResponseEntity<ErrorResponseDto> handleGeneral(Exception e) {
+        log.error("Unhandled exception: ", e);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Please try again later.");
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleForbidden(AccessDeniedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    public ResponseEntity<ErrorResponseDto> handleForbidden(AccessDeniedException e) {
+        return build(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<String> handleDuplicateUser(UserAlreadyExistsException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    public ResponseEntity<ErrorResponseDto> handleDuplicateUser(UserAlreadyExistsException e) {
+        return build(HttpStatus.CONFLICT, e.getMessage());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<String> handleUnauthorized(InvalidCredentialsException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("E-Mail oder Passwort falsch.");
+    public ResponseEntity<ErrorResponseDto> handleUnauthorized(InvalidCredentialsException e) {
+        return build(HttpStatus.UNAUTHORIZED, "E-Mail oder Passwort falsch.");
     }
 
     @ExceptionHandler(UserRegistrationException.class)
     public ResponseEntity<ErrorResponseDto> handleUserRegistrationError(UserRegistrationException e) {
         log.error("Abgefangener Fehler bei der User-Registrierung: ", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDto(500, e.getMessage()));
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
-        return ResponseEntity.badRequest().body("Validation failed");
+    public ResponseEntity<ErrorResponseDto> handleValidation(MethodArgumentNotValidException e) {
+        return build(HttpStatus.BAD_REQUEST, "Validation failed");
+    }
+
+    @ExceptionHandler(UserDoesNotExistException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserNotFound(UserDoesNotExistException e) {
+        return build(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    private ResponseEntity<ErrorResponseDto> build(HttpStatus status, String message) {
+        return ResponseEntity.status(status).body(new ErrorResponseDto(status.value(), message));
     }
 
     @ExceptionHandler(GoogleAuthenticationException.class)

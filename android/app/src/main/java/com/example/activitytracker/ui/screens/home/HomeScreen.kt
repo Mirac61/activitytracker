@@ -1,27 +1,25 @@
 package com.example.activitytracker.ui.screens.home
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import com.example.activitytracker.ui.components.StreakBadge
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.activitytracker.Core.theme.*
 import com.example.activitytracker.data.local.entity.ActivityEntity
+import com.example.activitytracker.ui.components.ActivityCard
 import java.time.LocalDate
 import com.example.activitytracker.ui.components.CalendarSlider
 import kotlinx.coroutines.launch
@@ -34,7 +32,6 @@ import java.util.Locale
 fun HomeScreen(
     activities: List<ActivityEntity> = emptyList(),
     streak: Int = 0,
-    selectedDay: LocalDate,
     onDaySelected: (LocalDate) -> Unit,
     onSettingsClick: () -> Unit = {},
     onActivityClick: (ActivityEntity) -> Unit = {}
@@ -42,9 +39,15 @@ fun HomeScreen(
     val today = LocalDate.now()
     val totalDays = 366
     val pagerState = rememberPagerState(initialPage = 365, pageCount = { totalDays })
-    val selectedDay = today.minusDays((totalDays - 1 - pagerState.currentPage).toLong())
-    val activeDays = activities.map{it.activityDate}.toSet()
 
+    val selectedDay = today.minusDays((totalDays - 1 - pagerState.currentPage).toLong())
+
+    // Notifies the parent of changes and makes the pager the single source of truth (doesn't matter if swipe or click)
+    LaunchedEffect(pagerState.currentPage) {
+       onDaySelected(selectedDay)
+    }
+
+    val activeDays = activities.map { it.activityDate }.toSet()
     val coroutineScope = rememberCoroutineScope()
 
     val selectedDayFormatted = selectedDay.format(
@@ -109,15 +112,21 @@ fun HomeScreen(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            beyondViewportPageCount = 1,
+            flingBehavior = PagerDefaults.flingBehavior(
+                    state = pagerState,
+                    snapAnimationSpec = spring(stiffness = Spring.StiffnessMedium)
+            )
         ){ page ->
             val dayForPage = today.minusDays((totalDays - 1 - page).toLong())
-            val filteredActivities = activities.filter { it.activityDate == dayForPage }
+            val filteredActivities = remember(activities, dayForPage) {
+                activities.filter { it.activityDate == dayForPage }
+            }
 
             if (filteredActivities.isEmpty()) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
                         .fillMaxSize()
                         .padding(horizontal = 12.dp),
                     contentAlignment = Alignment.TopCenter
@@ -146,23 +155,5 @@ fun HomeScreen(
                 }
             }
         }
-    }
-}
-@Composable
-fun ActivityCard(name: String, onClick: () -> Unit = {}) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clip(RoundedCornerShape(35))
-            .border(1.5.dp, PrimaryAccent, RoundedCornerShape(35))
-            .clickable { onClick() },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
     }
 }

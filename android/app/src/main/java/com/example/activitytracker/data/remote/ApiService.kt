@@ -17,19 +17,15 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.util.UUID
 
 // Echo API Calls
 
 interface ApiService {
 
-    @POST("activities/upload")
-    suspend fun uploadActivity(
-        @Body activity: ActivityUploadDto
-    ): Response<Unit>
-
     @PUT("activities/{id}")
-    suspend fun updateActivity(
-        @Path("id") id: String,
+    suspend fun saveActivity(
+        @Path("id") id: UUID,
         @Body activity: ActivityUploadDto
     ): Response<Unit>
 

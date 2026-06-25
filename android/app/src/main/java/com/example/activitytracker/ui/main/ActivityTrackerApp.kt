@@ -134,7 +134,6 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 AppDestinations.HOME -> HomeScreen(
                     activities = activities,
                     streak = streak,
-                    selectedDay = selectedDay,
                     onDaySelected = { selectedDay = it },
                     onSettingsClick = { currentDestination = AppDestinations.SETTINGS },
                     onActivityClick = { activity ->
@@ -182,11 +181,11 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     if (showBottomSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
+            onDismissRequest = { },
             sheetState = addSheetState
         ) {
             AddActivity(
-                onDismiss = { showBottomSheet = false },
+                onDismiss = { showBottomSheet = false},
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
                     showBottomSheet = false
@@ -197,23 +196,20 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         }
     }
 
-    if (showEditBottomSheet && selectedActivity != null) {
+    val currentActivity = selectedActivity
+    if (showEditBottomSheet && currentActivity != null) {
         ModalBottomSheet(
             onDismissRequest = {
-                showEditBottomSheet = false
-                selectedActivity = null
             },
             sheetState = editSheetState
         ) {
             EditActivity(
-                activity = selectedActivity!!,
+                activity = currentActivity,
                 onDismiss = {
-                    showEditBottomSheet = false
                     selectedActivity = null
                 },
                 onSave = { updatedActivity ->
                     trackingViewModel.updateActivity(updatedActivity)
-                    showEditBottomSheet = false
                     selectedActivity = null
                 }
             )

@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.UUID
 
 // Inspiration from https://developer.android.com/training/data-storage/room/testing-db?hl=de
 
@@ -52,12 +53,13 @@ class DatabaseTest {
         db.close()
     }
 
-    private class FakeApiService : ApiService {
-        override suspend fun uploadActivity(activity: ActivityUploadDto): Response<Unit> {
-            return Response.success(Unit)
-        }
+    companion object {
+        private val USER_ID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000001")
+        private val ACTIVITY_ID: UUID = UUID.fromString("11111111-1111-1111-1111-111111111111")
+    }
 
-        override suspend fun updateActivity(id: String, activity: ActivityUploadDto): Response<Unit> {
+    private class FakeApiService : ApiService {
+        override suspend fun saveActivity(id: UUID, activity: ActivityUploadDto): Response<Unit> {
             return Response.success(Unit)
         }
 
@@ -114,7 +116,7 @@ class DatabaseTest {
 
         activityDao.insert(activity)
 
-        repository.syncPendingActivities("mock_user_1")
+        repository.syncPendingActivities(USER_ID)
 
         val synced = activityDao.findById(activity.id)
 
@@ -134,7 +136,7 @@ class DatabaseTest {
 
         activityDao.insert(activity)
 
-        repository.syncPendingActivities("mock_user_1")
+        repository.syncPendingActivities(USER_ID)
 
         val synced = activityDao.findById(activity.id)
 
@@ -198,7 +200,7 @@ class DatabaseTest {
         val result = activityDao.getAll().first()
         assert(result.isEmpty())
 
-        val found = activityDao.findById("99")
+        val found = activityDao.findById(ACTIVITY_ID)
         assert(found == null)
     }
 
@@ -227,7 +229,7 @@ class DatabaseTest {
     fun deleteNonExistentDoesNotCrash() = runBlocking{
 
         val fakeActivity = ActivityEntity(
-            id="999",
+            id=ACTIVITY_ID,
             activityName = "Jogging",
             activityDate = LocalDate.of(2021, 8, 21),
             createdAt = OffsetDateTime.parse("2026-08-21T10:00:00Z")
@@ -257,7 +259,7 @@ class DatabaseTest {
 
             }
 
-            override suspend fun syncPendingActivities(userId: String): Boolean {
+            override suspend fun syncPendingActivities(userId: UUID): Boolean {
                 return true
             }
         }

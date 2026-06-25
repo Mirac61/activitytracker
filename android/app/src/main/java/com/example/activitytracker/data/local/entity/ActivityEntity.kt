@@ -11,7 +11,7 @@ import java.util.UUID
 @Entity(tableName = "activity_entries")
 data class ActivityEntity(
     @PrimaryKey
-    val id: String = UUID.randomUUID().toString(),
+    val id: UUID = UUID.randomUUID(),
     val activityName: String,
     val activityDate: LocalDate,
     val createdAt: OffsetDateTime = OffsetDateTime.now(),

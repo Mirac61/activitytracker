@@ -1,5 +1,7 @@
 package com.activitytracker.backend.service;
 
+import com.activitytracker.backend.dto.WeatherConditionDto;
+import com.activitytracker.backend.dto.WeatherCurrentDto;
 import com.activitytracker.backend.dto.WeatherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,12 +37,12 @@ class WeatherServiceTest {
         String expectedCondition = "Sunny";
 
         WeatherResponse mockResponse = org.mockito.Mockito.mock(WeatherResponse.class);
-        WeatherResponse.Current mockCurrent = org.mockito.Mockito.mock(WeatherResponse.Current.class);
-        WeatherResponse.Condition mockCondition = org.mockito.Mockito.mock(WeatherResponse.Condition.class);
+        WeatherCurrentDto mockWeatherCurrentDto = org.mockito.Mockito.mock(WeatherCurrentDto.class);
+        WeatherConditionDto mockWeatherConditionDto = org.mockito.Mockito.mock(WeatherConditionDto.class);
 
-        when(mockResponse.getCurrent()).thenReturn(mockCurrent);
-        when(mockCurrent.getCondition()).thenReturn(mockCondition);
-        when(mockCondition.getText()).thenReturn(expectedCondition);
+        when(mockResponse.getWeatherCurrentDto()).thenReturn(mockWeatherCurrentDto);
+        when(mockWeatherCurrentDto.getWeatherConditionDto()).thenReturn(mockWeatherConditionDto);
+        when(mockWeatherConditionDto.getText()).thenReturn(expectedCondition);
 
         when(restTemplate.getForObject(expectedUrl, WeatherResponse.class))
                 .thenReturn(mockResponse);
