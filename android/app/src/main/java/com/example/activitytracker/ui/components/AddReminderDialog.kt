@@ -1,13 +1,16 @@
 package com.example.activitytracker.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.example.activitytracker.Core.theme.AlertError
+import com.example.activitytracker.Core.theme.SecondaryAccent
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,11 +31,60 @@ fun AddReminderDialog(
     var selectedDay by remember { mutableStateOf(dayOptions[0]) }
     var expanded by remember { mutableStateOf(false) }
     var isDaily by remember { mutableStateOf(false) }
-    var hourText by remember { mutableStateOf("12") }
-    var minuteText by remember { mutableStateOf("00") }
+    val timePickerState = rememberTimePickerState(initialHour = 12, initialMinute = 0, is24Hour = true)
+    var showTimePicker by remember { mutableStateOf(false) }
     var titleText by remember { mutableStateOf("") }
     var reminderText by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+
+    val canSave = titleText.isNotBlank() && reminderText.isNotBlank()
+
+    if (showTimePicker) {
+        Dialog(onDismissRequest = { showTimePicker = false }) {
+            Surface(
+                shape = MaterialTheme.shapes.extraLarge,
+                color = AlertDialogDefaults.containerColor,
+                tonalElevation = 0.dp,
+                modifier = Modifier
+                    .width(IntrinsicSize.Min)
+                    .wrapContentHeight()
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Uhrzeit wählen",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp)
+                    )
+                    TimePicker(
+                        state = timePickerState,
+                        colors = TimePickerDefaults.colors(
+                            selectorColor = SecondaryAccent,
+                            clockDialSelectedContentColor = Color.White,
+                            timeSelectorSelectedContainerColor = SecondaryAccent,
+                            timeSelectorSelectedContentColor = Color.White,
+                        )
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+                    ) {
+                        TextButton(onClick = { showTimePicker = false }) {
+                            Text("Abbrechen", color = AlertError)
+                        }
+                        Button(
+                            onClick = { showTimePicker = false },
+                            shape = RoundedCornerShape(50),
+                            colors = ButtonDefaults.buttonColors(containerColor = SecondaryAccent)
+                        ) { Text("OK", color = Color.White) }
+                    }
+                }
+            }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -70,20 +122,13 @@ fun AddReminderDialog(
                         }
                     }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = hourText,
-                        onValueChange = { if (it.length <= 2) hourText = it.filter { c -> c.isDigit() } },
-                        label = { Text("Stunde") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = minuteText,
-                        onValueChange = { if (it.length <= 2) minuteText = it.filter { c -> c.isDigit() } },
-                        label = { Text("Minute") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+                OutlinedButton(
+                    onClick = { showTimePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "%02d:%02d Uhr".format(timePickerState.hour, timePickerState.minute),
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
                 OutlinedTextField(
@@ -112,32 +157,31 @@ fun AddReminderDialog(
                         modifier = Modifier.padding(start = 4.dp)
                     )
                 }
-                if (error != null) {
-                    Text(
-                        text = error!!,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val hour = hourText.toIntOrNull()
-                val minute = minuteText.toIntOrNull()
-                when {
-                    hour == null || hour !in 0..23 -> error = "Stunde muss zwischen 0 und 23 liegen"
-                    minute == null || minute !in 0..59 -> error = "Minute muss zwischen 0 und 59 liegen"
-                    titleText.isBlank() -> error = "Bitte einen Titel eingeben"
-                    reminderText.isBlank() -> error = "Bitte einen Text eingeben"
-                    else -> onConfirm(selectedDay.second, hour, minute, titleText.trim(), reminderText.trim(), isDaily)
-                }
-            }) {
-                Text("Speichern")
+            Button(
+                onClick = {
+                    onConfirm(
+                        selectedDay.second,
+                        timePickerState.hour,
+                        timePickerState.minute,
+                        titleText.trim(),
+                        reminderText.trim(),
+                        isDaily
+                    )
+                },
+                enabled = canSave,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(containerColor = SecondaryAccent)
+            ) {
+                Text("Speichern", color = Color.White)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Abbrechen") }
+            TextButton(onClick = onDismiss) {
+                Text("Abbrechen", color = AlertError)
+            }
         }
     )
 }
