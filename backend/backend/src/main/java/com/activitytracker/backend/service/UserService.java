@@ -2,9 +2,11 @@ package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.*;
 import com.activitytracker.backend.entity.User;
+import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.UserRegistrationException;
 import com.activitytracker.backend.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -14,10 +16,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
+    private final FriendService friendService;
 
-    public UserService(UserRepository userRepository, KeycloakService keycloakService) {
+    public UserService(UserRepository userRepository, KeycloakService keycloakService, FriendService friendService) {
         this.userRepository = userRepository;
         this.keycloakService = keycloakService;
+        this.friendService = friendService;
     }
 
     public UUID registerUser(UserRegistrationDto dto) {
@@ -26,6 +30,10 @@ public class UserService {
         try {
             User user = new User();
             user.setUserId(keycloakId);
+
+            user.setUsername(dto.getVorname());
+            user.setFriendCode(friendService.generateFriendCode(dto.getVorname()));
+
             userRepository.save(user);
 
             return keycloakId;
@@ -61,6 +69,34 @@ public class UserService {
                 refreshResult.userId(),
                 refreshResult.tokenResponse().getToken(),
                 refreshResult.tokenResponse().getRefreshToken()
+        );
+    }
+
+    public GoogleLoginResponseDto loginUserWithGoogle(GoogleLoginRequestDto dto) {
+        KeycloakService.AuthenticationResult authResult = keycloakService.authenticateWithGoogle(dto.idToken());
+        UUID userId = UUID.fromString(authResult.userId());
+
+        try {
+            userRepository.findById(userId).ifPresentOrElse(
+                    user -> log.info("Google user login processed. User already existed in local database."),
+                    () -> {
+                        log.info("New Google user detected. Synchronizing new profile to local database.");
+                        User newUser = new User();
+                        newUser.setUserId(userId);
+                        newUser.setUsername(authResult.username());
+                        newUser.setFriendCode(friendService.generateFriendCode(authResult.username()));
+                        userRepository.save(newUser);
+                    }
+            );
+        } catch (DataAccessException e) {
+            log.error("Database connectivity failure during Google user synchronization");
+            throw new GoogleAuthenticationException("Interner Datenbankfehler bei der Google-Anmeldung.", e);
+        }
+
+        return new GoogleLoginResponseDto(
+                authResult.userId(),
+                authResult.tokenResponse().getToken(),
+                authResult.tokenResponse().getRefreshToken()
         );
     }
 }

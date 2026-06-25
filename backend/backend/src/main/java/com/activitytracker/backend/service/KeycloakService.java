@@ -1,9 +1,15 @@
 package com.activitytracker.backend.service;
 
 import com.activitytracker.backend.dto.UserRegistrationDto;
+import com.activitytracker.backend.exception.GoogleAuthenticationException;
 import com.activitytracker.backend.exception.InvalidCredentialsException;
 import com.activitytracker.backend.exception.UserAlreadyExistsException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import jakarta.annotation.PostConstruct;
+import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.keycloak.admin.client.Keycloak;
@@ -25,6 +31,8 @@ import org.springframework.util.MultiValueMap;
 import org.keycloak.TokenVerifier;
 import org.keycloak.representations.AccessToken;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -42,6 +50,10 @@ public class KeycloakService {
     private String adminRealm;
     @Value("${keycloak.clientId}")
     private String clientId;
+    @Value("${keycloak.googleExchangeClientId}")
+    private String googleExchangeClientId;
+    @Value("${keycloak.clientSecret:#{null}}")
+    private String clientSecret;
     @Value("${keycloak.adminUser}")
     private String adminUser;
     @Value("${keycloak.adminPassword}")
@@ -62,14 +74,10 @@ public class KeycloakService {
     }
 
     public UUID createUserInKeycloak(UserRegistrationDto dto) {
-
         UserRepresentation user = getUserRepresentation(dto);
-
-        //Create user
         UsersResource usersResource = keycloak.realm(targetRealm).users();
 
         try (Response response = usersResource.create(user)) {
-
             if (response.getStatus() == 201) {
                 String path = response.getLocation().getPath();
                 String stringId = path.substring(path.lastIndexOf("/") + 1);
@@ -106,7 +114,6 @@ public class KeycloakService {
     }
 
     public AuthenticationResult authenticateUser(String email, String password) {
-        //Search for user
         UserRepresentation user = keycloak.realm(targetRealm)
                 .users()
                 .searchByEmail(email, true)
@@ -114,7 +121,6 @@ public class KeycloakService {
                 .findFirst()
                 .orElseThrow(() -> new InvalidCredentialsException("E-Mail oder Passwort falsch."));
 
-        //Token Manager
         try (Keycloak userKeycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm(targetRealm)
@@ -130,17 +136,15 @@ public class KeycloakService {
                 throw new NotAuthorizedException("Authentifizierung fehlgeschlagen.");
             }
 
-            return new AuthenticationResult(user.getId(), tokenResponse);
+            return new AuthenticationResult(user.getId(), tokenResponse, user.getUsername(), user.getEmail());
 
         } catch (jakarta.ws.rs.NotAuthorizedException e) {
             log.warn("Failed to login (wrong credentials) for: {}", email);
             throw new InvalidCredentialsException("E-Mail oder Passwort falsch.");
-
         } catch (InvalidCredentialsException e) {
             throw e;
         } catch (Exception e) {
             log.error("Critical system failure at Keycloak-Login for {}: ", email, e);
-
             throw new RuntimeException("Keycloak service unavailable", e);
         }
     }
@@ -167,7 +171,7 @@ public class KeycloakService {
             AccessToken decryptedToken = TokenVerifier.create(tokenResponse.getToken(), AccessToken.class).getToken();
             String verifiedUserId = decryptedToken.getSubject();
 
-            return new AuthenticationResult(verifiedUserId, tokenResponse);
+            return new AuthenticationResult(verifiedUserId, tokenResponse, null, null);
 
         } catch (Exception e) {
             log.error("Error during token refresh via RestTemplate: {}", e.getMessage());
@@ -175,6 +179,73 @@ public class KeycloakService {
         }
     }
 
-    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse) {
+    public AuthenticationResult authenticateWithGoogle(String googleIdToken) {
+        log.info("[Google-Auth] Starting cryptographic token verification...");
+
+        GoogleIdToken.Payload payload;
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                    .setAudience(Collections.singletonList("741626481823-gceju18n97rqdd5l16pcea00s6cttk2l.apps.googleusercontent.com"))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(googleIdToken);
+            if (idToken == null) {
+                log.warn("[Google-Auth] Token verification failed: Verifier returned null.");
+                throw new GoogleAuthenticationException("Das bereitgestellte Google-Token ist ungültig oder abgelaufen.");
+            }
+            payload = idToken.getPayload();
+        } catch (GeneralSecurityException | IOException e) {
+            log.error("[Google-Auth] Cryptographic verification failed due to internal security/I-O error");
+            throw new GoogleAuthenticationException("Kryptographische Verifizierung des Google-Tokens fehlgeschlagen.", e);
+        }
+
+        String email = payload.getEmail();
+        var usersResource = keycloak.realm(targetRealm).users();
+        var searchResults = usersResource.searchByEmail(email, true);
+
+        UserRepresentation user;
+
+        try {
+            if (searchResults.isEmpty()) {
+                log.info("[Google-Auth] Unregistered identity detected. Creating new Keycloak account...");
+
+                user = new UserRepresentation();
+                user.setEnabled(true);
+                user.setUsername(email);
+                user.setEmail(email);
+                user.setFirstName((String) payload.get("given_name"));
+                user.setLastName((String) payload.get("family_name"));
+
+                try (Response response = usersResource.create(user)) {
+                    if (response.getStatus() != 201) {
+                        log.error("[Google-Auth] Keycloak account creation rejected with HTTP status: {}", response.getStatus());
+                        throw new GoogleAuthenticationException("Automatisches Anlegen des Nutzers in Keycloak fehlgeschlagen.");
+                    }
+
+                    String path = response.getLocation().getPath();
+                    String newId = path.substring(path.lastIndexOf("/") + 1);
+                    user.setId(newId);
+                    log.info("[Google-Auth] Keycloak account successfully provisioned.");
+                }
+            } else {
+                user = searchResults.get(0);
+                log.info("[Google-Auth] Existing Keycloak account resolved.");
+            }
+
+            AccessTokenResponse tokenResponse = keycloak.tokenManager().getAccessToken();
+            if (tokenResponse == null) {
+                log.error("[Google-Auth] Token manager failed to issue access token response.");
+                throw new GoogleAuthenticationException("Es konnte kein AccessToken generiert werden.");
+            }
+            String googleUsername = payload.get("name") != null ? (String) payload.get("name") : email;
+            return new AuthenticationResult(user.getId(), tokenResponse, googleUsername, email);
+
+        } catch (WebApplicationException e) {
+            log.error("[Google-Auth] Keycloak REST API communication failure during provisioning");
+            throw new GoogleAuthenticationException("Fehler bei der Kommunikation mit dem Identity-Management-Server.", e);
+        }
+    }
+
+    public record AuthenticationResult(String userId, AccessTokenResponse tokenResponse, String username, String email) {
     }
 }

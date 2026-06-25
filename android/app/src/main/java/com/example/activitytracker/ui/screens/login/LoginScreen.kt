@@ -26,8 +26,10 @@ import com.example.activitytracker.data.ActivityApplication
 import com.example.activitytracker.ui.components.AuthTextField
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.credentials.CredentialManager
 import com.example.activitytracker.Core.theme.InputField
 import com.example.activitytracker.Core.theme.TextDescription
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
@@ -37,7 +39,11 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
         factory = LoginViewModelFactory(application.authStorage)
     )
 
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
+
+    val credentialManager = remember { CredentialManager.create(context) }
 
     LaunchedEffect(viewModel.loginSuccess) {
         if (viewModel.loginSuccess) {
@@ -129,7 +135,16 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
 
             // Google Login Button
             OutlinedButton(
-                onClick = { /* TODO: Google Login */ },
+                onClick = {
+                    coroutineScope.launch {
+                        // The ViewModel coordinates the request, execution, and type-specific error handling
+                        val request = viewModel.buildGoogleCredentialRequest()
+                        val result = viewModel.executeGetCredential(credentialManager, context, request)
+                        if (result != null) {
+                            viewModel.onGoogleCredentialReceived(result.credential.data)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -138,7 +153,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
                     containerColor = Color.White,
                     contentColor = Color.Black
                 ),
-                border = BorderStroke(1.dp, Color.LightGray)
+                border = BorderStroke(1.dp, Color.LightGray),
+                enabled = !viewModel.isLoading
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -148,7 +164,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_google_logo),
                         modifier = Modifier.size(24.dp),
-                        contentDescription = null
+                        contentDescription = "Google Logo"
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(

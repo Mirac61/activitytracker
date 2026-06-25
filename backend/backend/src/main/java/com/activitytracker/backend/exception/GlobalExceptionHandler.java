@@ -31,6 +31,17 @@ public class GlobalExceptionHandler {
     }
 
     // System error
+
+    @ExceptionHandler(FriendshipException.class)
+    public ResponseEntity<String> handleFriendship(FriendshipException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<String> handleNotFound(NotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleServerError(RuntimeException e) {
         log.error("Registrierung fehlgeschlagen: ", e);
@@ -69,5 +80,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidation(MethodArgumentNotValidException e) {
         return ResponseEntity.badRequest().body("Validation failed");
+    }
+
+    @ExceptionHandler(GoogleAuthenticationException.class)
+    public ResponseEntity<String> handleGoogleAuthenticationError(GoogleAuthenticationException e) {
+        log.error("Google Authentifizierungsfehler abgefangen: ", e);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 }

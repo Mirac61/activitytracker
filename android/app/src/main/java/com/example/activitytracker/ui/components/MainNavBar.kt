@@ -15,7 +15,10 @@ fun MainNavBar(
 ) {
     NavigationBar {
         AppDestinations.entries
-            .filter { it != AppDestinations.LOGIN && it != AppDestinations.REGISTER && it != AppDestinations.SPLASH }
+            .filter { it != AppDestinations.LOGIN
+                    && it != AppDestinations.REGISTER
+                    && it != AppDestinations.SPLASH
+                    && it != AppDestinations.SETTINGS }
             .forEach { destination ->
                 NavigationBarItem(
                     selected = destination == currentDestination,
