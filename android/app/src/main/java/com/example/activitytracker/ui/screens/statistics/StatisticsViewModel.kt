@@ -25,6 +25,12 @@ class StatisticsViewModel(
 
     private val selectedMonth = MutableLiveData(YearMonth.now())
 
+    val availableYears: LiveData<List<Int>> = allDates.map { dates ->
+        val currentYear = YearMonth.now().year
+        val minYear = dates.minOfOrNull { it.year } ?: currentYear
+        (minYear..currentYear).toList()
+    }
+
     private val filteredDates: LiveData<List<LocalDate>> =
         selectedMonth.switchMap { month ->
             allDates.map { dates ->

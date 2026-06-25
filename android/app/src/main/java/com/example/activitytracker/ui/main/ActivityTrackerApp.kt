@@ -107,7 +107,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val listOfActivityNames by trackingViewModel.listOfActivityNames.observeAsState(emptyList())
     val reminders by settingsViewModel.reminders.collectAsState()
     val isRefreshing by friendViewModel?.isRefreshing?.observeAsState(false) ?: remember { mutableStateOf(false) }
-
+    val availableYears by statisticsViewModel.availableYears.observeAsState(listOf(java.time.YearMonth.now().year))
 
     val friends by friendViewModel?.friends?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
     val pendingRequests by friendViewModel?.pendingRequests?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
@@ -161,6 +161,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                     mostActiveWeekday = mostActiveWeekday,
                     sumByWeekday = sumByWeekday,
                     averageByWeekday = averageByWeekday,
+                    availableYears = availableYears,
                     onMonthSelected = { statisticsViewModel.selectMonth(it) }
                 )
                 AppDestinations.SETTINGS -> SettingsScreen(
