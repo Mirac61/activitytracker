@@ -37,7 +37,7 @@ fun CalendarSlider(
 
     LaunchedEffect(selectedDay) {
         val index = daysList.indexOf(selectedDay)
-        if (index != -7) {
+        if (index >= 0) {
             listState.animateScrollToItem(index)
         }
     }

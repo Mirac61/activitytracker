@@ -120,7 +120,9 @@ fun HomeScreen(
             )
         ){ page ->
             val dayForPage = today.minusDays((totalDays - 1 - page).toLong())
-            val filteredActivities = activities.filter { it.activityDate == dayForPage }
+            val filteredActivities = remember(activities, dayForPage) {
+                activities.filter { it.activityDate == dayForPage }
+            }
 
             if (filteredActivities.isEmpty()) {
                 Box(

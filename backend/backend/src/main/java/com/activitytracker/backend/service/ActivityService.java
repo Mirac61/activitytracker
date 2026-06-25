@@ -28,29 +28,25 @@ public class ActivityService {
     @Transactional
     public boolean saveActivity(UUID id, ActivityDto request, UUID userId) {
 
-        Optional<Activity> existing = activityRepository.findById(id);
-
-        existing.ifPresent(activity -> {
-            if (!activity.getUser().getUserId().equals(userId)) {
-                throw new AccessDeniedException("Activity belongs to another user");
-            }
-        });
+        Activity existing = activityRepository.findById(id).orElse(null);
+        if (existing != null && !existing.getUser().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Activity belongs to another user");
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserDoesNotExistException("User not found"));
 
-        boolean isNew = existing.isEmpty();
+        boolean isNew = existing == null;
+        Activity activity;
 
-        Activity activity = existing
-                .map(a -> {
-                    a.setActivityName(request.activityName());
-                    a.setActivityDate(request.activityDate().atStartOfDay());
-                    return a;
-                })
-                .orElseGet(() -> activityMapper.toEntity(request, id, user));
-
+        if (isNew) {
+            activity = activityMapper.toEntity(request, id, user);
+        } else {
+            existing.setActivityName(request.activityName());
+            existing.setActivityDate(request.activityDate().atStartOfDay());
+            activity = existing;
+        }
         activityRepository.save(activity);
-
         return isNew;
     }
 }

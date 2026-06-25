@@ -196,14 +196,15 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         }
     }
 
-    if (showEditBottomSheet && selectedActivity != null) {
+    val currentActivity = selectedActivity
+    if (showEditBottomSheet && currentActivity != null) {
         ModalBottomSheet(
             onDismissRequest = {
             },
             sheetState = editSheetState
         ) {
             EditActivity(
-                activity = selectedActivity!!,
+                activity = currentActivity,
                 onDismiss = {
                     selectedActivity = null
                 },

@@ -3,6 +3,7 @@ package com.example.activitytracker.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,21 +46,23 @@ fun DayLabels(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .width(itemWidth)
-            .clickable { onDaySelected(day) }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onDaySelected(day) }
     ) {
         Box(
-            modifier = Modifier.size(42.dp)
+            modifier = Modifier
+                .size(if (isSelected) 42.dp else 24.dp)
                 .then(
-                    when {
-                        isSelected -> Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
-                            .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), CircleShape)
-                        else -> Modifier.size(24.dp)
-                    }
+                    if (isSelected) Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        .border(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), CircleShape)
+                    else Modifier
                 ),
             contentAlignment = Alignment.Center
-        ) {
+        ){
             when {
                 hasActivity && isSelected ->
                     SvgImage(

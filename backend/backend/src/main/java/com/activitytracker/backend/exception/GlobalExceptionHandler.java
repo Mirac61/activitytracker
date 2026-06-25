@@ -24,8 +24,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "Malformed JSON request");
     }
 
-    // System error
-
     @ExceptionHandler(FriendshipException.class)
     public ResponseEntity<String> handleFriendship(FriendshipException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -38,7 +36,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponseDto> handleServerError(RuntimeException e) {
-        log.error("Registrierung fehlgeschlagen: ", e);
+        log.error("Unhandled runtime exception: ", e);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Please try again later.");
     }
 
