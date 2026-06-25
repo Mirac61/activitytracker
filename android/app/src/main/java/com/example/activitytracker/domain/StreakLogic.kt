@@ -30,4 +30,32 @@ object StreakLogic {
         }
         return streak
     }
+
+    fun calculateLongestStreak(dates: List<LocalDate>): Int {
+        val sortedDays = dates.distinct().sorted()
+        if (dates.isEmpty()) return 0
+
+        var longestStreak = 1
+        var currentStreak = 1
+
+        // Start at 1 as each day is compared to its predecessor (i - 1), so the first day is skipped.
+        for (i in 1 until sortedDays.size) {
+
+            val previousDay = sortedDays[i - 1]
+            val currentDay = sortedDays[i]
+
+            if (isNextDay(previousDay, currentDay)) {
+                currentStreak++
+            } else {
+                currentStreak = 1
+            }
+
+            longestStreak = maxOf(longestStreak, currentStreak)
+        }
+        return longestStreak
+    }
+
+    private fun isNextDay(day: LocalDate, nextDay: LocalDate): Boolean {
+        return nextDay == day.plusDays(1)
+    }
 }

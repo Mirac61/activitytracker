@@ -152,4 +152,50 @@ class StreakLogicTest {
         val result = StreakLogic.calculateStreak(dates = dates, clock = nextDayClock)
         assertEquals(2, result)
     }
+
+    @Test
+    fun whenNoEntriesThenLongestStreakIsZero() {
+        val result = StreakLogic.calculateLongestStreak(dates = emptyList())
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun whenSingleEntryThenLongestStreakIsOne() {
+        val result = StreakLogic.calculateLongestStreak(dates = listOf(today))
+        assertEquals(1, result)
+    }
+
+    @Test
+    fun whenThreeConsecutiveDaysThenLongestStreakIsThree() {
+        val twoDaysAgo = today.minusDays(2)
+        val yesterday = today.minusDays(1)
+
+        val dates = listOf(twoDaysAgo, yesterday, today)
+        val result = StreakLogic.calculateLongestStreak(dates = dates)
+        assertEquals(3, result)
+    }
+
+    @Test
+    fun whenGapBetweenDaysThenLongestStreakIsTheLongerBlock() {
+        val tenDaysAgo = today.minusDays(10)
+        val nineDaysAgo = today.minusDays(9)
+        val eightDaysAgo = today.minusDays(8)
+        val yesterday = today.minusDays(1)
+
+        val dates = listOf(
+            tenDaysAgo, nineDaysAgo, eightDaysAgo,
+            yesterday, today
+        )
+        val result = StreakLogic.calculateLongestStreak(dates = dates)
+        assertEquals(3, result)
+    }
+
+    @Test
+    fun whenDuplicateDaysThenCountedOnce() {
+        val yesterday = today.minusDays(1)
+
+        val dates = listOf(today, today, yesterday)
+        val result = StreakLogic.calculateLongestStreak(dates = dates)
+        assertEquals(2, result)
+    }
 }

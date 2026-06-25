@@ -7,6 +7,7 @@ enum class AppDestinations(
     val icon: Int
 ) {
     FRIENDS("Freunde", R.drawable.ic_friends),
+    STATISTICS(label = "Statistiken", R.drawable.ic_statistics),
     HOME("Home", R.drawable.round_home_24),
     TRACKING("Tracking", R.drawable.ic_add),
     SETTINGS("Settings", 0),

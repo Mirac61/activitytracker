@@ -22,6 +22,8 @@ interface IActivityRepository {
     val getDates: Flow<List<LocalDate>>
 
     val getActivityNames: Flow<List<String>>
+
+    val getStatistics: Flow<List<LocalDate>>
 }
 
 
@@ -31,6 +33,7 @@ class ActivityRepository(private val activityDao: ActivityDao, private val apiSe
     override val getAll: Flow<List<ActivityEntity>> = activityDao.getAll()
     override val getDates: Flow<List<LocalDate>> = activityDao.getDates()
     override val getActivityNames: Flow<List<String>> = activityDao.getActivityNames()
+    override val getStatistics: Flow<List<LocalDate>> = activityDao.getStatistics()
 
 
     @WorkerThread

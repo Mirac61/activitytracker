@@ -25,3 +25,7 @@ val Background = Color(0xFFF8F9FA)
 // Misc, bzw Streaks
 val Outline = Color(0xFFEE5943)
 val StreakFill = Color(0xFFFFCB50)
+
+// Statistics
+val CardSurface = Color(0xFFF4F5F7)
+val GridlineGray = Color(0xFFE0E0E0)
