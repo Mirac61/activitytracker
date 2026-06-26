@@ -6,7 +6,20 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 class AuthInterceptor(private val authStorage: AuthStorage?) : Interceptor {
+    private val noAuthPaths = listOf(
+        "/api/users/login",
+        "/api/users/register",
+        "/api/users/refresh",
+        "/api/users/google",
+    )
+
     override fun intercept(chain: Interceptor.Chain): Response {
+        val path = chain.request().url.encodedPath
+
+        if (noAuthPaths.any { path.endsWith(it) }) {
+            return chain.proceed(chain.request())
+        }
+
         val tokenFromRetrofit = RetrofitClient.accessToken
         val tokenFromStorage = runBlocking { authStorage?.getAccessToken() }
         val token = tokenFromRetrofit ?: tokenFromStorage
