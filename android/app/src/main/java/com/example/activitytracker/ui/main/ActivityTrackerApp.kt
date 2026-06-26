@@ -53,9 +53,11 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     LaunchedEffect(Unit) {
         val stored = application.authStorage.getUserId()
+        val token = application.authStorage.getAccessToken()
         android.util.Log.d("AppDebug", "userId geladen: $stored")
-        if (stored != null) {
+        if (stored != null && token != null) {
             userId = UUID.fromString(stored)
+            tokenReady = true
         }
     }
 
@@ -88,7 +90,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         )
     )
 
-    val friendViewModel: FriendViewModel? = if (userId != null) {
+    val friendViewModel: FriendViewModel? = if (userId != null && tokenReady) {
         viewModel(
             factory = FriendViewModelFactory(
                 repository = FriendRepository(),
@@ -146,10 +148,11 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
                 AppDestinations.LOGIN -> LoginScreen(
                     onLoginSuccess = {
                         scope.launch {
-                            kotlinx.coroutines.delay(200)
                             val stored = application.authStorage.getUserId()
-                            if (stored != null) {
+                            val token = application.authStorage.getAccessToken()
+                            if (stored != null && token != null) {
                                 userId = UUID.fromString(stored)
+                                tokenReady = true
                             }
                             currentDestination = AppDestinations.HOME
                         }
