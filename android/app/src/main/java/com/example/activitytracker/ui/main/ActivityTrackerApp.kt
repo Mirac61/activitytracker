@@ -67,6 +67,19 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     val addSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val closeAddSheet: () -> Unit = {
+        scope.launch { addSheetState.hide() }.invokeOnCompletion {
+            if (!addSheetState.isVisible) showBottomSheet = false
+        }
+    }
+    val closeEditSheet: () -> Unit = {
+        scope.launch { editSheetState.hide() }.invokeOnCompletion {
+            if (!editSheetState.isVisible) {
+                showEditBottomSheet = false
+                selectedActivity = null
+            }
+        }
+    }
 
     val trackingViewModel: TrackingViewModel = viewModel(
         factory = ActivityEntryModelFactory(
@@ -202,14 +215,14 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
 
     if (showBottomSheet) {
         ModalBottomSheet(
-            onDismissRequest = { },
+            onDismissRequest = closeAddSheet,
             sheetState = addSheetState
         ) {
             AddActivity(
-                onDismiss = { showBottomSheet = false},
+                onDismiss = closeAddSheet,
                 onSave = { activityName, activityDate ->
                     trackingViewModel.saveActivity(activityName, activityDate)
-                    showBottomSheet = false
+                    closeAddSheet()
                 },
                 activityNames = listOfActivityNames,
                 selectedDate = selectedDay
@@ -220,18 +233,15 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
     val currentActivity = selectedActivity
     if (showEditBottomSheet && currentActivity != null) {
         ModalBottomSheet(
-            onDismissRequest = {
-            },
+            onDismissRequest = closeEditSheet,
             sheetState = editSheetState
         ) {
             EditActivity(
                 activity = currentActivity,
-                onDismiss = {
-                    selectedActivity = null
-                },
+                onDismiss = closeEditSheet,
                 onSave = { updatedActivity ->
                     trackingViewModel.updateActivity(updatedActivity)
-                    selectedActivity = null
+                    closeEditSheet()
                 }
             )
         }
