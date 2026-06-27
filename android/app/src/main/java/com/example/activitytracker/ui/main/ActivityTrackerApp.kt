@@ -142,17 +142,7 @@ fun ActivityTrackerApp(openAddActivityRequestId: Int = 0) {
         Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (currentDestination) {
                 AppDestinations.SPLASH -> SplashWatcher(
-                    onNavigateToHome = {
-                        scope.launch {
-                            val stored = application.authStorage.getUserId()
-                            val token = application.authStorage.getAccessToken()
-                            if (stored != null && token != null) {
-                                userId = UUID.fromString(stored)
-                                tokenReady = true
-                            }
-                            currentDestination = AppDestinations.HOME
-                        }
-                    },
+                    onNavigateToHome = { currentDestination = AppDestinations.HOME },
                     onNavigateToLogin = { currentDestination = AppDestinations.LOGIN }
                 )
                 AppDestinations.LOGIN -> LoginScreen(

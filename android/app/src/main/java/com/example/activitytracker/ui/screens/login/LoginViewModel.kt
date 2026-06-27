@@ -74,7 +74,6 @@ class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
                         authStorage.saveUserId(loginResponse.userId)
                         authStorage.saveAccessToken(loginResponse.accessToken)
                         authStorage.saveRefreshToken(loginResponse.refreshToken)
-                        RetrofitClient.setToken(loginResponse.accessToken)
                         loginSuccess = true
                     } ?: run {
                         errorMessage = "Unerwarteter Fehler: Server-Antwort war leer."
@@ -159,7 +158,6 @@ class LoginViewModel(private val authStorage: AuthStorage) : ViewModel() {
                             authStorage.saveRefreshToken(googleResponse.refreshToken)
                             authStorage.saveUserId(googleResponse.userId)
                         }
-                        RetrofitClient.setToken(googleResponse.accessToken)
                         Log.d(tag, "Google authentication verified by backend. Session tokens securely saved.")
                         loginSuccess = true
                     } ?: run {
