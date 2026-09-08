@@ -1,6 +1,15 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/aJfDxjD8)
+# Activity Tracker
 
-## Setting up postgresql with docker:
+Offline-first activity tracker with an Android client and a Spring Boot backend.
+The client stores entries locally and reconciles them with the server through
+WorkManager, so the app stays usable without a network connection. Authentication
+runs through Keycloak. releases are built and signed by CI on tag.
+
+Mirror of a university team project (6 people, one semester). The original
+repository is private. My work was on the offline sync between local and remote
+database, the statistics feature, and the release pipeline.
+
+## Setup
 
 1. Install docker and log in
 2. Copy `.env.example` file and name it `.env`
